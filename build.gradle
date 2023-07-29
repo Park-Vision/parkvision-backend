@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.1.2'
+    id 'io.spring.dependency-management' version '1.1.2'
+    // id 'org.hibernate.orm' version '6.2.6.Final'
+    id 'org.graalvm.buildtools.native' version '0.9.23'
+}
+
+group = 'net.parkvision'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '17'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+    //implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    compileOnly 'org.projectlombok:lombok'
+    //developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+//
+//hibernate {
+//    enhancement {
+//        enableAssociationManagement = true
+//    }
+//}
+
