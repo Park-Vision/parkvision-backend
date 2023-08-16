@@ -8,6 +8,7 @@ class ParkvisionBackendApplicationTests {
 
     @Test
     void contextLoads() {
+        assert true;
     }
 
 }

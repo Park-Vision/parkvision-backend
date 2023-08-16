@@ -1,8 +1,6 @@
 package net.parkvision.parkvisionbackend;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,17 +26,18 @@ public class ParkVisionBackendApplication {
     public void triggerWhenStarts() throws Exception {
         System.out.println("Application started ... sending email");
 
-        // emailSenderService.sendEmail("@gmail.com", "TEST body <ul><li>jeden</li></ul>", "Test topic 2");
+        // emailSenderService.sendEmail("@gmail.com", "TEST body
+        // <ul><li>jeden</li></ul>", "Test topic 2");
 
+        // List<String> emails = new
+        // ArrayList<>(List.of("maciejmakarakontakt@gmail.com"));
 
-        List<String> emails = new ArrayList<>(List.of("maciejmakarakontakt@gmail.com"));
-
-        for (String email : emails) {
-            emailSenderService.sendMessageWithAttachment(email, "Powiadomienie z systemu ParkVision", "Twój pojazd " +
-                    "zostaje wyeskortowany z parkingu przez grupę wojskowych dronów.",
-                    "C:\\Users\\makar\\Desktop\\unnamed.png");
-        }
+        // for (String email : emails) {
+        // emailSenderService.sendMessageWithAttachment(email, "Powiadomienie z systemu
+        // ParkVision", "Twój pojazd " +
+        // "zostaje wyeskortowany z parkingu przez grupę wojskowych dronów.",
+        // "C:\\Users\\filip\\Documents\\Code\\parkvision-backend\\img.png");
+        // }
     }
-
 
 }
