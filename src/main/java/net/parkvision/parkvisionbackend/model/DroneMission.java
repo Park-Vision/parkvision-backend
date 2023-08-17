@@ -5,14 +5,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
-public class ParkingSpot {
+public class DroneMission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String spotNumber;
-    private boolean occupied;
+    private String missionName;
+    private String missionDescription;
+    private String missionStatus;
+    private Date missionStartDate;
+    private Date missionEndDate;
 
-    private Reservation reservation; // One-to-one relationship
     private Parking parking; // Many-to-one relationship
+    private Drone drone; // Many-to-one relationship
 }

@@ -14,4 +14,5 @@ public class Parking {
     private String openHours;
 
     private List<ParkingSpot> parkingSpots; // One-to-many relationship
+    private List<DroneMission> droneMissions; // One-to-many relationship
 }

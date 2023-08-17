@@ -6,13 +6,11 @@ import jakarta.persistence.Id;
 import lombok.Data;
 
 @Data
-public class ParkingSpot {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String spotNumber;
-    private boolean occupied;
-
-    private Reservation reservation; // One-to-one relationship
-    private Parking parking; // Many-to-one relationship
+    private String email;
+    private String password;
+    private String name;
 }
