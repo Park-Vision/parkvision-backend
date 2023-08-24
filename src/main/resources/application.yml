@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://ep-wandering-snow-036542.eu-central-1.aws.neon.tech/neondb
+    username: filipshelby
+    password: H2vCI4gEXrDk
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: parkvision.info@gmail.com
+    password: zzwbdafgndoappdy
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+
+#security:
+#  basic:
+#    enabled: false
+
+
