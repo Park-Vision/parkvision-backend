@@ -1,13 +1,18 @@
 package net.parkvision.parkvisionbackend.model;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
 public class DroneMission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +23,8 @@ public class DroneMission {
     private Date missionStartDate;
     private Date missionEndDate;
 
+    @ManyToOne
     private Parking parking; // Many-to-one relationship
+    @ManyToOne
     private Drone drone; // Many-to-one relationship
 }

@@ -1,5 +1,6 @@
 package net.parkvision.parkvisionbackend.model;
 
+import jakarta.persistence.OneToOne;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -8,5 +9,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ParkingModerator extends User{
-    private List<Parking> parkings; // One-to-many relationship
+    @OneToOne
+    private Parking parking; // One-to-one relationship
 }
