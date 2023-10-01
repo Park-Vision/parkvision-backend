@@ -31,7 +31,6 @@ public class DroneService {
         return _droneRepository.save(drone);
     }
 
-    //update drone
     public Drone updateDrone(Long id, Drone drone){
         if (_droneRepository.existsById(id)) {
             drone.setId(id);

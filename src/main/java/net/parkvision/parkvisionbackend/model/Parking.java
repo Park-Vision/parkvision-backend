@@ -23,6 +23,7 @@ public class Parking {
     private double costRate;
     private String openHours;
 
+    @OneToOne
     private ParkingModerator parkingModerator;
 
     @OneToMany

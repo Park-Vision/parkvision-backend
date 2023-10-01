@@ -3,6 +3,8 @@ package net.parkvision.parkvisionbackend;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.PostConstruct;
+import net.parkvision.parkvisionbackend.service.DataSeeder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,6 +22,9 @@ public class ParkVisionBackendApplication {
 
     @Autowired
     private EmailSenderService emailSenderService;
+
+    @Autowired
+    private DataSeeder dataSeeder;
 
     public static void main(String[] args) {
         SpringApplication.run(ParkVisionBackendApplication.class, args);
@@ -41,6 +46,11 @@ public class ParkVisionBackendApplication {
         // "zostaje wyeskortowany z parkingu przez grupę wojskowych dronów.",
         // "C:\\Users\\filip\\Documents\\Code\\parkvision-backend\\img.png");
         // }
+    }
+
+    @PostConstruct
+    public void seedData() {
+        dataSeeder.seedData();
     }
 
 }

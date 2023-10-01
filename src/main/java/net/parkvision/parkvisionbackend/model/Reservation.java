@@ -29,4 +29,5 @@ public class Reservation {
     private ParkingSpot parkingSpot; // Many-to-one relationship
     @OneToOne
     private Payment payment; // One-to-one relationship
+
 }

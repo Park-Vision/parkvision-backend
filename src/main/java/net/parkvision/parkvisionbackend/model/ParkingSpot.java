@@ -19,25 +19,14 @@ public class ParkingSpot {
     private Long id;
     private String spotNumber;
     private boolean occupied;
+    private boolean active;
     // each parking spot has 5 points that ara geographic coordinates store it as a list
     @OneToMany
     private List<Point> points;
 
-    @OneToOne
-    private Reservation reservation; // One-to-one relationship
+    @OneToMany
+    private List<Reservation> reservations; // One-to-many relationship
     @ManyToOne
     private Parking parking; // Many-to-one relationship
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Entity
-    private static class Point {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
-        private double latitude;
-        private double longitude;
-    }
 }
