@@ -11,13 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Car {
+public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String registrationNumber;
-    private String color;
-    private String brand;
+    private PaymentStatus status;
     @ManyToOne
-    private Client client;
+    private Reservation reservation;
 }

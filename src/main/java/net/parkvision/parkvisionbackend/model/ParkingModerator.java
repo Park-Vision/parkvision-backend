@@ -1,12 +1,14 @@
 package net.parkvision.parkvisionbackend.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.List;
-
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Entity
 public class ParkingModerator extends User{
-    private List<Parking> parkings; // One-to-many relationship
+    @ManyToOne
+    private Parking parking; // One-to-one relationship
 }
