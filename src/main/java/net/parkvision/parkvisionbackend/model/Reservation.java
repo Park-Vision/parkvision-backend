@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.model;
 
 import java.util.Date;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,7 @@ public class Reservation {
     private Car car; // Many-to-one relationship
     @ManyToOne
     private ParkingSpot parkingSpot; // Many-to-one relationship
-    @OneToOne
-    private Payment payment; // One-to-one relationship
+    @OneToMany
+    private List<Payment> payment; // One-to-many relationship
 
 }

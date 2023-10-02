@@ -23,8 +23,8 @@ public class Parking {
     private double costRate;
     private String openHours;
 
-    @OneToOne
-    private ParkingModerator parkingModerator;
+    @OneToMany
+    private List<ParkingModerator> parkingModerator;
 
     @OneToMany
     private List<ParkingSpot> parkingSpots; // One-to-many relationship
