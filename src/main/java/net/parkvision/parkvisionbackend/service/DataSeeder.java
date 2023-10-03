@@ -1,14 +1,9 @@
 package net.parkvision.parkvisionbackend.service;
 
 import net.parkvision.parkvisionbackend.model.*;
-import net.parkvision.parkvisionbackend.repository.DroneRepository;
-import net.parkvision.parkvisionbackend.repository.ParkingModeratorRepository;
-import net.parkvision.parkvisionbackend.repository.ParkingRepository;
-import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
+import net.parkvision.parkvisionbackend.repository.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class DataSeeder {
@@ -19,19 +14,23 @@ public class DataSeeder {
 
     private final ParkingModeratorRepository _parkingModeratorRepository;
 
+    private final PointRepository _pointRepository;
 
-    public DataSeeder(DroneRepository _droneRepository, ParkingRepository _parkingRepository, ParkingSpotRepository parkingSpotRepository, ParkingModeratorRepository parkingModeratorRepository) {
+
+    public DataSeeder(DroneRepository _droneRepository, ParkingRepository _parkingRepository, ParkingSpotRepository parkingSpotRepository, ParkingModeratorRepository parkingModeratorRepository, PointRepository pointRepository) {
         this._droneRepository = _droneRepository;
         this._parkingRepository = _parkingRepository;
         _parkingSpotRepository = parkingSpotRepository;
         _parkingModeratorRepository = parkingModeratorRepository;
+        _pointRepository = pointRepository;
     }
 
     public void seedData() {
         seedDroneData();
         seedParkingData();
         SeedParkingModeratorData();
-//        SeedParkingSpotData(); //todo add repository service and controller maybe...
+        SeedParkingSpotData();
+        SeedPoints();
     }
 
 
@@ -39,7 +38,7 @@ public class DataSeeder {
         long droneCount = _droneRepository.count();
 
         if (droneCount == 0) {
-            System.out.println("Seeding data...");
+            System.out.println("seedDroneData()");
 
             Drone drone1 = new Drone();
             drone1.setName("DJI Mavic Mini");
@@ -70,7 +69,7 @@ public class DataSeeder {
         long parkingCount = _parkingRepository.count();
 
         if (parkingCount == 0) {
-            System.out.println("Seeding data...");
+            System.out.println("seedParkingData()");
 
             Parking parking1 = new Parking();
             parking1.setName("Parking Magnolia");
@@ -102,7 +101,7 @@ public class DataSeeder {
         long parkingModeratorCount = _parkingModeratorRepository.count();
 
         if (parkingModeratorCount == 0) {
-            System.out.println("Seeding data...");
+            System.out.println("SeedParkingModeratorData()");
 
             ParkingModerator parkingModerator1 = new ParkingModerator();
             parkingModerator1.setFirstname("Jan");
@@ -110,7 +109,7 @@ public class DataSeeder {
             parkingModerator1.setEmail("jan.k@onet.pl");
             parkingModerator1.setPassword("123456");
             parkingModerator1.setParking(_parkingRepository.getReferenceById(1L));
-            parkingModerator1.setRole(Role.PARKING_MANAGER);
+            parkingModerator1.setRole(Role.USER);
             _parkingModeratorRepository.save(parkingModerator1);
 
             ParkingModerator parkingModerator2 = new ParkingModerator();
@@ -128,11 +127,12 @@ public class DataSeeder {
         }
     }
 
+
     public void SeedParkingSpotData() {
         long parkingSpotCount = _parkingSpotRepository.count();
 
         if (parkingSpotCount == 0) {
-            System.out.println("Seeding data...");
+            System.out.println("SeedParkingSpotData()");
 
             Parking parking1 = _parkingRepository.getReferenceById(1L);
 
@@ -141,15 +141,7 @@ public class DataSeeder {
             parkingSpot1.setActive(true);
             parkingSpot1.setOccupied(false);
             parkingSpot1.setParking(parking1);
-            List<Point> points = new ArrayList<>();
 
-
-            // For example, create some sample points for demonstration purposes
-            points.add(new Point(1L, 51.11004209878706, 17.059438251268123));
-            points.add(new Point(2L, 51.1100815908722, 17.059408051544636));
-            points.add(new Point(3L, 51.1100931271854, 17.059440904600674));
-            points.add(new Point(4L, 51.11005154402975, 17.05946944677171));
-            parkingSpot1.setPoints(points);
             _parkingSpotRepository.save(parkingSpot1);
 
             ParkingSpot parkingSpot2 = new ParkingSpot();
@@ -157,19 +149,72 @@ public class DataSeeder {
             parkingSpot2.setActive(true);
             parkingSpot2.setOccupied(false);
             parkingSpot2.setParking(parking1);
-            List<Point> points2 = new ArrayList<>();
 
-            points2.add(new Point(5L, 51.109954944636904, 17.059500184666277));
-            points2.add(new Point(6L, 51.10999477283431, 17.059470253075084));
-            points2.add(new Point(7L, 51.11000116835047, 17.059502890077006));
-            points2.add(new Point(8L, 51.10996302172416, 17.05953245609047));
-            parkingSpot2.setPoints(points2);
             _parkingSpotRepository.save(parkingSpot2);
 
         } else {
             System.out.println("Data already exists.");
         }
+    }
 
+    public void SeedPoints() {
+        long pointCount = _pointRepository.count();
 
+        if (pointCount == 0) {
+            System.out.println("SeedPoints()");
+
+            ParkingSpot parkingSpot1 = _parkingSpotRepository.getReferenceById(1L);
+
+            Point point1 = new Point();
+            point1.setLatitude(51.11004209878706);
+            point1.setLongitude(17.059438251268123);
+            point1.setParkingSpot(parkingSpot1);
+            _pointRepository.save(point1);
+
+            Point point2 = new Point();
+            point2.setLatitude(51.1100815908722);
+            point2.setLongitude(17.059408051544636);
+            point2.setParkingSpot(parkingSpot1);
+            _pointRepository.save(point2);
+
+            Point point3 = new Point();
+            point3.setLatitude(51.11008848686895);
+            point3.setLongitude(17.05944068854656);
+            point3.setParkingSpot(parkingSpot1);
+            _pointRepository.save(point3);
+
+            Point point4 = new Point();
+            point4.setLatitude(51.11005154402975);
+            point4.setLongitude(17.05946944677171);
+            _pointRepository.save(point4);
+
+            ParkingSpot parkingSpot2 = _parkingSpotRepository.getReferenceById(2L);
+
+            Point point5 = new Point();
+            point5.setLatitude(51.11004209878706);
+            point5.setLongitude(17.059438251268123);
+            point5.setParkingSpot(parkingSpot2);
+            _pointRepository.save(point5);
+
+            Point point6 = new Point();
+            point6.setLatitude(51.1100815908722);
+            point6.setLongitude(17.059408051544636);
+            point6.setParkingSpot(parkingSpot2);
+            _pointRepository.save(point6);
+
+            Point point7 = new Point();
+            point7.setLatitude(51.11008848686895);
+            point7.setLongitude(17.05944068854656);
+            point7.setParkingSpot(parkingSpot2);
+            _pointRepository.save(point7);
+
+            Point point8 = new Point();
+            point8.setLatitude(51.11005154402975);
+            point8.setLongitude(17.05946944677171);
+            point8.setParkingSpot(parkingSpot2);
+            _pointRepository.save(point8);
+        } else {
+            System.out.println("Data already exists.");
+        }
     }
 }

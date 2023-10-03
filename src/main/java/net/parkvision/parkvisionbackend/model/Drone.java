@@ -1,13 +1,12 @@
 package net.parkvision.parkvisionbackend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -21,4 +20,8 @@ public class Drone {
     private String name;
     private String model;
     private String serialNumber;
+    @ManyToOne
+    private Parking parking;
+    @OneToMany
+    private List<DroneMission> droneMission;
 }

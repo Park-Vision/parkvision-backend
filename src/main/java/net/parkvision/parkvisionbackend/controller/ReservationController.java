@@ -1,5 +1,6 @@
 package net.parkvision.parkvisionbackend.controller;
 
+import net.parkvision.parkvisionbackend.dto.ReservationDTO;
 import net.parkvision.parkvisionbackend.model.Reservation;
 import net.parkvision.parkvisionbackend.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,15 +36,15 @@ public class ReservationController {
     //todo znajdz rezerwacje danego parkingu po id i dacie
 
     @PostMapping
-    public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
-        Reservation createdReservation = _reservationService.createReservation(reservation);
+    public ResponseEntity<Reservation> createReservation(@RequestBody ReservationDTO reservationDto) {
+        Reservation createdReservation = _reservationService.createReservation(reservationDto);
         return ResponseEntity.ok(createdReservation);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Reservation> updateReservation(@PathVariable Long id, @RequestBody Reservation reservation) {
+    public ResponseEntity<Reservation> updateReservation(@PathVariable Long id, @RequestBody ReservationDTO reservationDto) {
         try {
-            Reservation updatedReservation = _reservationService.updateReservation(id, reservation);
+            Reservation updatedReservation = _reservationService.updateReservation(id, reservationDto);
             return ResponseEntity.ok(updatedReservation);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();

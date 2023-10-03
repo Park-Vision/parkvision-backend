@@ -1,5 +1,6 @@
 package net.parkvision.parkvisionbackend.controller;
 
+import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +34,15 @@ public class ParkingSpotController {
     }
 
     @PostMapping
-    public ResponseEntity<ParkingSpot> createParkingSpot(@RequestBody ParkingSpot parkingSpot) {
-        ParkingSpot createdParkingSpot = _parkingSpotService.createParkingSpot(parkingSpot);
+    public ResponseEntity<ParkingSpot> createParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
+        ParkingSpot createdParkingSpot = _parkingSpotService.createParkingSpot(parkingSpotDto);
         return ResponseEntity.ok(createdParkingSpot);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ParkingSpot> updateParkingSpot(@PathVariable Long id, @RequestBody ParkingSpot parkingSpot) {
+    public ResponseEntity<ParkingSpot> updateParkingSpot(@PathVariable Long id, @RequestBody ParkingSpotDTO parkingSpotDto) {
         try {
-            ParkingSpot updatedParkingSpot = _parkingSpotService.updateParkingSpot(id, parkingSpot);
+            ParkingSpot updatedParkingSpot = _parkingSpotService.updateParkingSpot(id, parkingSpotDto);
             return ResponseEntity.ok(updatedParkingSpot);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();

@@ -2,6 +2,7 @@ package net.parkvision.parkvisionbackend.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@JsonIgnoreProperties({"drones", "droneMissions", "parkingSpots", "parkingModerator"})
 public class Parking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
