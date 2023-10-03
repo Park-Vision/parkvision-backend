@@ -1,7 +1,11 @@
 package net.parkvision.parkvisionbackend.service;
 
+import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
+import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
+import net.parkvision.parkvisionbackend.repository.ParkingRepository;
 import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,13 +16,17 @@ import java.util.Optional;
 public class ParkingSpotService {
 
     private final ParkingSpotRepository _parkingSpotRepository;
+    // add ParkingRepository and ModelMapper
+    private final ParkingRepository _parkingRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository) {
+    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository, ModelMapper modelMapper) {
         this._parkingSpotRepository = parkingSpotRepository;
+        _parkingRepository = parkingRepository;
+        this.modelMapper = modelMapper;
     }
 
-    // generate all crud methods
 
     public List<ParkingSpot> getAllParkingSpots() {
         return _parkingSpotRepository.findAll();
@@ -28,17 +36,33 @@ public class ParkingSpotService {
         return _parkingSpotRepository.findById(id);
     }
 
-    public ParkingSpot createParkingSpot(ParkingSpot parkingSpot) {
+    public ParkingSpot createParkingSpot(ParkingSpotDTO parkingSpotDto) {
+        Parking parking = _parkingRepository.findById(parkingSpotDto.getParkingId()).orElseThrow(
+                () -> new IllegalArgumentException("Parking with ID " + parkingSpotDto.getParkingId() + " does not exist.")
+        );
+
+        ParkingSpot parkingSpot = modelMapper.map(parkingSpotDto, ParkingSpot.class);
+        parkingSpot.setParking(parking);
+
         return _parkingSpotRepository.save(parkingSpot);
     }
 
-    public ParkingSpot updateParkingSpot(Long id, ParkingSpot parkingSpot){
-        if (_parkingSpotRepository.existsById(id)) {
-            parkingSpot.setId(id);
-            return _parkingSpotRepository.save(parkingSpot);
-        } else {
-            throw new IllegalArgumentException("ParkingSpot with ID " + id + " does not exist.");
-        }
+    public ParkingSpot updateParkingSpot(Long id, ParkingSpotDTO parkingSpotDto){
+        ParkingSpot parkingSpot = _parkingSpotRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("ParkingSpot with ID " + id + " does not exist.")
+        );
+
+        Parking parking = _parkingRepository.findById(parkingSpotDto.getParkingId()).orElseThrow(
+                () -> new IllegalArgumentException("Parking with ID " + parkingSpotDto.getParkingId() + " does not exist.")
+        );
+
+        parkingSpot.setSpotNumber(parkingSpotDto.getSpotNumber());
+        parkingSpot.setOccupied(parkingSpotDto.isOccupied());
+        parkingSpot.setActive(parkingSpotDto.isActive());
+
+        parkingSpot.setParking(parking);
+
+        return _parkingSpotRepository.save(parkingSpot);
     }
 
     // so we will use soft delete instead of hard delete

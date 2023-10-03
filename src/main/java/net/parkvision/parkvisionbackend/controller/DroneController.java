@@ -1,5 +1,6 @@
 package net.parkvision.parkvisionbackend.controller;
 
+import net.parkvision.parkvisionbackend.dto.DroneDTO;
 import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.service.DroneService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +34,15 @@ public class DroneController {
     }
 
     @PostMapping
-    public ResponseEntity<Drone> createDrone(@RequestBody Drone drone) {
-        Drone createdDrone = droneService.createDrone(drone);
+    public ResponseEntity<Drone> createDrone(@RequestBody DroneDTO droneDto) {
+        Drone createdDrone = droneService.createDrone(droneDto);
         return ResponseEntity.ok(createdDrone);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Drone> updateDrone(@PathVariable Long id, @RequestBody Drone drone) {
+    public ResponseEntity<Drone> updateDrone(@PathVariable Long id, @RequestBody DroneDTO droneDto) {
         try {
-            Drone updatedDrone = droneService.updateDrone(id, drone);
+            Drone updatedDrone = droneService.updateDrone(id, droneDto);
             return ResponseEntity.ok(updatedDrone);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();

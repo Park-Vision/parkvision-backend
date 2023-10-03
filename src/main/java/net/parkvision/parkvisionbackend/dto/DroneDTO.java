@@ -2,12 +2,11 @@ package net.parkvision.parkvisionbackend.dto;
 
 import lombok.Data;
 
-
 @Data
-public class ParkingSpotDTO {
+public class DroneDTO {
     private Long id;
-    private String spotNumber;
-    private boolean occupied;
-    private boolean active;
+    private String name;
+    private String model;
+    private String serialNumber;
     private Long parkingId;
 }
