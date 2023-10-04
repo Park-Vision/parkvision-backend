@@ -8,5 +8,5 @@ public class CarDTO {
     private String registrationNumber;
     private String color;
     private String brand;
-    private Long clientId;
+    private UserDTO userDTO;
 }
