@@ -34,30 +34,22 @@ public class CarService {
         return _carRepository.findById(id);
     }
 
-    public Car createCar(CarDTO car) {
-        User user  = _userRepository.findById(car.getClientId()).orElseThrow(
-                () -> new IllegalArgumentException("User with ID " + car.getClientId() + " does not exist.")
+    public Car createCar(Car car) {
+        User user = _userRepository.findById(car.getUser().getId()).orElseThrow(
+                () -> new IllegalArgumentException("User with ID " + car.getUser().getId() + " does not exist.")
         );
-        Car newCar = modelMapper.map(car, Car.class);
-        newCar.setUser(user);
-        return _carRepository.save(newCar);
+        return _carRepository.save(car);
     }
 
     //update car
-    public Car updateCar(Long id, CarDTO carDto){
+    public Car updateCar(Car car) {
         // find car by id
-        Car car = _carRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("Car with ID " + id + " does not exist.")
-        );
-        // find user by id
-        User user = _userRepository.findById(carDto.getClientId()).orElseThrow(
-                () -> new IllegalArgumentException("User with ID " + carDto.getClientId() + " does not exist.")
-        );
-        // update car
-        car.setBrand(carDto.getBrand());
-        car.setColor(carDto.getColor());
-        car.setRegistrationNumber(carDto.getRegistrationNumber());
-        car.setUser(user);
+        if(_carRepository.existsById(car.getId()) && _userRepository.existsById(car.getUser().getId())){
+            car.setBrand(car.getBrand());
+            car.setColor(car.getColor());
+            car.setRegistrationNumber(car.getRegistrationNumber());
+            car.setUser(car.getUser());
+        }
         return _carRepository.save(car);
     }
 
