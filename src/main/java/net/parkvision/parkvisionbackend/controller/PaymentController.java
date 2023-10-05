@@ -31,19 +31,16 @@ public class PaymentController {
     }
 
     private Payment convertToEntity(PaymentDTO paymentDTO) {
-        Payment payment = _modelMapper.map(paymentDTO, Payment.class);
-        return payment;
+        return _modelMapper.map(paymentDTO, Payment.class);
     }
 
     @GetMapping
     public List<PaymentDTO> getAllPayments() {
-        List<PaymentDTO> payments = _paymentService.getAllPayments().stream().map(
+        return _paymentService.getAllPayments().stream().map(
                 this::convertToDto
         ).collect(Collectors.toList());
-        return payments;
     }
 
-    //todo get payment by id
     @GetMapping("/{id}")
     public ResponseEntity<PaymentDTO> getPaymentById(@PathVariable Long id) {
         Optional<Payment> payment = _paymentService.getPaymentById(id);
@@ -54,7 +51,6 @@ public class PaymentController {
         }
     }
 
-    //todo create payment
     @PostMapping
     public ResponseEntity<PaymentDTO> createPayment(@RequestBody PaymentDTO paymentDTO) {
         Payment createdPayment = _paymentService.createPayment(convertToEntity(paymentDTO));

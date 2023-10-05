@@ -1,11 +1,8 @@
 package net.parkvision.parkvisionbackend.service;
 
-import net.parkvision.parkvisionbackend.dto.PointDTO;
-import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.model.Point;
 import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
 import net.parkvision.parkvisionbackend.repository.PointRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,12 +13,10 @@ public class PointService {
 
     private final PointRepository _pointRepository;
     private final ParkingSpotRepository _parkingSpotRepository;
-    private final ModelMapper modelMapper;
 
-    public PointService(PointRepository pointRepository, ParkingSpotRepository parkingSpotRepository, ModelMapper modelMapper) {
+    public PointService(PointRepository pointRepository, ParkingSpotRepository parkingSpotRepository) {
         _pointRepository = pointRepository;
         _parkingSpotRepository = parkingSpotRepository;
-        this.modelMapper = modelMapper;
     }
 
     public List<Point> getAllPoints() {
