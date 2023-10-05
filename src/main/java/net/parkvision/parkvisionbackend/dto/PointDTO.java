@@ -7,5 +7,5 @@ public class PointDTO {
     private Long id;
     private double latitude;
     private double longitude;
-    private Long parkingSpotId;
+    private ParkingSpotDTO parkingSpotDTO;
 }

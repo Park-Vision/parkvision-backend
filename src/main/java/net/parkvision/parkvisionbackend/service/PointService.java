@@ -32,30 +32,26 @@ public class PointService {
         return _pointRepository.findById(id);
     }
 
-    public Point createPoint(PointDTO pointDto){
-
-        ParkingSpot parkingSpot = _parkingSpotRepository.findById(pointDto.getParkingSpotId()).orElseThrow(
-                () -> new IllegalArgumentException("ParkingSpot with ID " + pointDto.getParkingSpotId() + " does not exist.")
-        );
-
-        Point point = modelMapper.map(pointDto, Point.class);
-        point.setParkingSpot(parkingSpot);
+    public Point createPoint(Point point){
+        if(!_parkingSpotRepository.existsById(point.getParkingSpot().getId())){
+            throw new IllegalArgumentException("ParkingSpot with ID " + point.getParkingSpot().getId() + " does not exist.");
+        }
 
         return _pointRepository.save(point);
     }
 
-    public Point updatePoint(Long id, PointDTO pointDto){
-        Point point = _pointRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("Point with ID " + id + " does not exist.")
-        );
+    public Point updatePoint(Point point){
+        if(!_pointRepository.existsById(point.getId())){
+            throw new IllegalArgumentException("Point with ID " + point.getId() + " does not exist.");
+        }
 
-        ParkingSpot parkingSpot = _parkingSpotRepository.findById(pointDto.getParkingSpotId()).orElseThrow(
-                () -> new IllegalArgumentException("ParkingSpot with ID " + pointDto.getParkingSpotId() + " does not exist.")
-        );
+        if(!_parkingSpotRepository.existsById(point.getParkingSpot().getId())){
+            throw new IllegalArgumentException("ParkingSpot with ID " + point.getParkingSpot().getId() + " does not exist.");
+        }
 
-        point.setParkingSpot(parkingSpot);
-        point.setLatitude(pointDto.getLatitude());
-        point.setLongitude(pointDto.getLongitude());
+        point.setLatitude(point.getLatitude());
+        point.setLongitude(point.getLongitude());
+        point.setParkingSpot(point.getParkingSpot());
 
         return _pointRepository.save(point);
     }

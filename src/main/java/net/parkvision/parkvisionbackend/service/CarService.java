@@ -35,13 +35,13 @@ public class CarService {
     }
 
     public Car createCar(Car car) {
-        User user = _userRepository.findById(car.getUser().getId()).orElseThrow(
-                () -> new IllegalArgumentException("User with ID " + car.getUser().getId() + " does not exist.")
-        );
+        if (!_userRepository.existsById(car.getUser().getId())){
+            throw new IllegalArgumentException("User with ID " + car.getUser().getId() + " does not exist.");
+        }
+
         return _carRepository.save(car);
     }
 
-    //update car
     public Car updateCar(Car car) {
         // find car by id
         if(_carRepository.existsById(car.getId()) && _userRepository.existsById(car.getUser().getId())){

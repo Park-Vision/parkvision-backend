@@ -11,7 +11,7 @@ public class DroneMissionDTO {
     private String missionStatus;
     private Date missionStartDate;
     private Date missionEndDate;
-    private Long parkingId;
-    private Long droneId;
+    private ParkingDTO parkingDTO;
+    private DroneDTO droneDTO;
 }
 

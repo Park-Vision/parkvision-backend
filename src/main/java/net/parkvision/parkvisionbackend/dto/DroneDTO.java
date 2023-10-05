@@ -8,5 +8,5 @@ public class DroneDTO {
     private String name;
     private String model;
     private String serialNumber;
-    private Long parkingId;
+    private ParkingDTO parkingDTO;
 }

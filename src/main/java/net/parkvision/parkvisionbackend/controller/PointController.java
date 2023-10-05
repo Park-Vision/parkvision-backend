@@ -1,48 +1,70 @@
 package net.parkvision.parkvisionbackend.controller;
 
+import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
 import net.parkvision.parkvisionbackend.dto.PointDTO;
 import net.parkvision.parkvisionbackend.model.Point;
 import net.parkvision.parkvisionbackend.service.PointService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/points")
 public class PointController {
     private final PointService _pointService;
 
+    private final ModelMapper _modelMapper;
+
     @Autowired
-    public PointController(PointService pointService) {
+    public PointController(PointService pointService, ModelMapper modelMapper) {
         _pointService = pointService;
+        _modelMapper = modelMapper;
+    }
+
+    private PointDTO convertToDto(Point point) {
+        PointDTO pointDTO = _modelMapper.map(point, PointDTO.class);
+        pointDTO.setParkingSpotDTO(_modelMapper.map(point.getParkingSpot(), ParkingSpotDTO.class));
+        return pointDTO;
+    }
+
+    private final Point convertToEntity(PointDTO pointDTO) {
+        return _modelMapper.map(pointDTO, Point.class);
     }
 
     @GetMapping
-    public ResponseEntity<List<Point>> getAllPoints() {
-        List<Point> points = _pointService.getAllPoints();
+    public ResponseEntity<List<PointDTO>> getAllPoints() {
+        List<PointDTO> points = _pointService.getAllPoints().stream().map(
+                this::convertToDto
+        ).collect(Collectors.toList());
         return ResponseEntity.ok(points);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Point> getPointById(@PathVariable Long id) {
+    public ResponseEntity<PointDTO> getPointById(@PathVariable Long id) {
         Optional<Point> point = _pointService.getPointById(id);
-        return point.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if (point.isPresent()) {
+            return ResponseEntity.ok(convertToDto(point.get()));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Point> createPoint(@RequestBody PointDTO pointDto) {
-        Point createdPoint = _pointService.createPoint(pointDto);
-        return ResponseEntity.ok(createdPoint);
+    public ResponseEntity<PointDTO> createPoint(@RequestBody PointDTO pointDto) {
+        Point createdPoint = _pointService.createPoint(convertToEntity(pointDto));
+        return ResponseEntity.ok(convertToDto(createdPoint));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Point> updatePoint(@PathVariable Long id, @RequestBody PointDTO pointDto) {
+    @PutMapping
+    public ResponseEntity<PointDTO> updatePoint(@RequestBody PointDTO pointDto) {
         try {
-            Point updatedPoint = _pointService.updatePoint(id, pointDto);
-            return ResponseEntity.ok(updatedPoint);
+            Point updatedPoint = _pointService.updatePoint(convertToEntity(pointDto));
+            return ResponseEntity.ok(convertToDto(updatedPoint));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }

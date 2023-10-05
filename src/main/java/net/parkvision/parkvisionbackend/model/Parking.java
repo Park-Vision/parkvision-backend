@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@JsonIgnoreProperties({"drones", "droneMissions", "parkingSpots", "parkingModerator"})
 public class Parking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

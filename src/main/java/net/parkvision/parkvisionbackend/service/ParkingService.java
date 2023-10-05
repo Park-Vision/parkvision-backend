@@ -30,13 +30,12 @@ public class ParkingService {
         return _parkingRepository.save(parking);
     }
 
-    public Parking updateParking(Long id, Parking parking){
-        if (_parkingRepository.existsById(id)) {
-            parking.setId(id);
-            return _parkingRepository.save(parking);
-        } else {
-            throw new IllegalArgumentException("Parking with ID " + id + " does not exist.");
+    public Parking updateParking(Parking parking){
+        if(!_parkingRepository.existsById(parking.getId())){
+            throw new IllegalArgumentException("Parking with ID " + parking.getId() + " does not exist.");
         }
+
+        return _parkingRepository.save(parking);
     }
 
     public void deleteParking(Long id) {
