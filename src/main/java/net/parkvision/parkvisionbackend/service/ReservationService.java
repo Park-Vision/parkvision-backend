@@ -3,7 +3,6 @@ package net.parkvision.parkvisionbackend.service;
 import net.parkvision.parkvisionbackend.model.Car;
 import net.parkvision.parkvisionbackend.model.Reservation;
 import net.parkvision.parkvisionbackend.repository.*;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,15 +18,12 @@ public class ReservationService {
     private final CarRepository _carRepository;
     private final ParkingSpotRepository _parkingSpotRepository;
 
-    private final ModelMapper modelMapper;
-
     @Autowired
-    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository, CarRepository carRepository, ParkingSpotRepository parkingSpotRepository, ModelMapper modelMapper) {
+    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository, CarRepository carRepository, ParkingSpotRepository parkingSpotRepository) {
         _reservationRepository = reservationRepository;
         _userRepository = userRepository;
         _carRepository = carRepository;
         _parkingSpotRepository = parkingSpotRepository;
-        this.modelMapper = modelMapper;
     }
 
     public List<Reservation> getAllReservations() {
@@ -72,6 +68,7 @@ public class ReservationService {
         }
 
         if(reservation.getCar() != null) {
+            car = reservation.getCar();
             if(!_carRepository.existsById(reservation.getCar().getId())){
                 throw new IllegalArgumentException("Car with ID " + reservation.getCar().getId() + " does not exist.");
             }

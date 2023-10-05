@@ -1,13 +1,9 @@
 package net.parkvision.parkvisionbackend.service;
 
-import net.parkvision.parkvisionbackend.dto.DroneMissionDTO;
-import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.model.DroneMission;
-import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.repository.DroneMissionRepository;
 import net.parkvision.parkvisionbackend.repository.DroneRepository;
 import net.parkvision.parkvisionbackend.repository.ParkingRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,15 +16,13 @@ public class DroneMissionService {
     private final DroneMissionRepository _droneMissionRepository;
     private final ParkingRepository _parkingRepository;
     private final DroneRepository _droneRepository;
-    private final ModelMapper modelMapper;
 
 
     @Autowired
-    public DroneMissionService(DroneMissionRepository droneMissionRepository, ParkingRepository parkingRepository, DroneRepository droneRepository, ModelMapper modelMapper) {
+    public DroneMissionService(DroneMissionRepository droneMissionRepository, ParkingRepository parkingRepository, DroneRepository droneRepository) {
         this._droneMissionRepository = droneMissionRepository;
         _parkingRepository = parkingRepository;
         _droneRepository = droneRepository;
-        this.modelMapper = modelMapper;
     }
 
     public List<DroneMission> getAllDroneMissions() {

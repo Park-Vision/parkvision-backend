@@ -1,11 +1,8 @@
 package net.parkvision.parkvisionbackend.service;
 
-import net.parkvision.parkvisionbackend.dto.CarDTO;
 import net.parkvision.parkvisionbackend.model.Car;
-import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.CarRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +14,11 @@ public class CarService {
 
     private final UserRepository _userRepository;
     private final CarRepository _carRepository;
-    private final ModelMapper modelMapper;
 
     @Autowired
-    public CarService(UserRepository userRepository, CarRepository carRepository, ModelMapper modelMapper) {
+    public CarService(UserRepository userRepository, CarRepository carRepository) {
         _userRepository = userRepository;
         this._carRepository = carRepository;
-        this.modelMapper = modelMapper;
     }
 
     public List<Car> getAllCars() {

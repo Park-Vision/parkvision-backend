@@ -32,7 +32,7 @@ public class PointController {
         return pointDTO;
     }
 
-    private final Point convertToEntity(PointDTO pointDTO) {
+    private Point convertToEntity(PointDTO pointDTO) {
         return _modelMapper.map(pointDTO, Point.class);
     }
 

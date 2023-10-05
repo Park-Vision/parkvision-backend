@@ -2,7 +2,6 @@ package net.parkvision.parkvisionbackend.model;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,9 +27,9 @@ public class Parking {
     private List<ParkingModerator> parkingModerator;
 
     @OneToMany
-    private List<ParkingSpot> parkingSpots; // One-to-many relationship
+    private List<ParkingSpot> parkingSpots;
     @OneToMany
-    private List<DroneMission> droneMissions; // One-to-many relationship
+    private List<DroneMission> droneMissions;
     @OneToMany
-    private List<Drone> drones; // One-to-many relationship
+    private List<Drone> drones;
 }

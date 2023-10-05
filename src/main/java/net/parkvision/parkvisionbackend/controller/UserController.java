@@ -39,7 +39,6 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    //todo get user by id
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
@@ -49,7 +48,6 @@ public class UserController {
 
 
 
-    //todo update user
     @PutMapping
     public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO) {
         User user = convertToEntity(userDTO);
@@ -59,7 +57,6 @@ public class UserController {
 
 
 
-    //todo delete user
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         _userService.deleteUser(id);
