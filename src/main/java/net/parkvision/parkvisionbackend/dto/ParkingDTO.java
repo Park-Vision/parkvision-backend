@@ -11,8 +11,4 @@ public class ParkingDTO {
     private String address;
     private double costRate;
     private String openHours;
-    private List<Long> parkingModeratorIds;
-    private List<Long> parkingSpotIds;
-    private List<Long> droneMissionIds;
-    private List<Long> droneIds;
 }

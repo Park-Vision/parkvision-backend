@@ -23,7 +23,7 @@ public class Reservation {
     private String registrationNumber;
 
     @ManyToOne
-    private Client client; // Many-to-one relationship
+    private User user; // Many-to-one relationship
     @ManyToOne
     private Car car; // Many-to-one relationship
     @ManyToOne

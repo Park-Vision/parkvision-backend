@@ -39,42 +39,38 @@ public class DroneMissionService {
         return _droneMissionRepository.findById(id);
     }
 
-    public DroneMission createDroneMission(DroneMissionDTO droneMissionDto) {
-        Parking parking = _parkingRepository.findById(droneMissionDto.getParkingId()).orElseThrow(
-                () -> new IllegalArgumentException("Parking with ID " + droneMissionDto.getParkingId() + " does not exist.")
-        );
-        Drone drone = _droneRepository.findById(droneMissionDto.getDroneId()).orElseThrow(
-                () -> new IllegalArgumentException("Drone with ID " + droneMissionDto.getDroneId() + " does not exist.")
-        );
+    public DroneMission createDroneMission(DroneMission droneMission) {
+        if(!_parkingRepository.existsById(droneMission.getParking().getId())){
+            throw new IllegalArgumentException("Parking with ID " + droneMission.getParking().getId() + " does not exist.");
+        }
 
-        DroneMission droneMission = modelMapper.map(droneMissionDto, DroneMission.class);
-        droneMission.setParking(parking);
-        droneMission.setDrone(drone);
+        if(!_droneRepository.existsById(droneMission.getDrone().getId())){
+            throw new IllegalArgumentException("Drone with ID " + droneMission.getDrone().getId() + " does not exist.");
+        }
+
         return _droneMissionRepository.save(droneMission);
     }
 
-    public DroneMission updateDroneMission(Long id, DroneMissionDTO droneMissionDto){
-        DroneMission droneMission = _droneMissionRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("DroneMission with ID " + id + " does not exist.")
-        );
+    public DroneMission updateDroneMission(DroneMission droneMission){
 
-        Parking parking = _parkingRepository.findById(droneMissionDto.getParkingId()).orElseThrow(
-                () -> new IllegalArgumentException("Parking with ID " + droneMissionDto.getParkingId() + " does not exist.")
-        );
+        if(!_droneMissionRepository.existsById(droneMission.getId())){
+            throw new IllegalArgumentException("DroneMission with ID " + droneMission.getId() + " does not exist.");
+        }
 
-        Drone drone = _droneRepository.findById(droneMissionDto.getDroneId()).orElseThrow(
-                () -> new IllegalArgumentException("Drone with ID " + droneMissionDto.getDroneId() + " does not exist.")
-        );
+        if(!_parkingRepository.existsById(droneMission.getParking().getId())){
+            throw new IllegalArgumentException("Parking with ID " + droneMission.getParking().getId() + " does not exist.");
+        }
 
-        droneMission.setMissionName(droneMissionDto.getMissionName());
-        droneMission.setMissionDescription(droneMissionDto.getMissionDescription());
-        droneMission.setMissionStatus(droneMissionDto.getMissionStatus());
-        droneMission.setMissionStartDate(droneMissionDto.getMissionStartDate());
-        droneMission.setMissionEndDate(droneMissionDto.getMissionEndDate());
-        droneMission.setMissionStatus(droneMissionDto.getMissionStatus());
+        if(!_droneRepository.existsById(droneMission.getDrone().getId())){
+            throw new IllegalArgumentException("Drone with ID " + droneMission.getDrone().getId() + " does not exist.");
+        }
 
-        droneMission.setParking(parking);
-        droneMission.setDrone(drone);
+        droneMission.setMissionName(droneMission.getMissionName());
+        droneMission.setMissionDescription(droneMission.getMissionDescription());
+        droneMission.setMissionStatus(droneMission.getMissionStatus());
+        droneMission.setMissionStartDate(droneMission.getMissionStartDate());
+        droneMission.setMissionEndDate(droneMission.getMissionEndDate());
+        droneMission.setMissionStatus(droneMission.getMissionStatus());
 
         return _droneMissionRepository.save(droneMission);
     }

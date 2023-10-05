@@ -4,7 +4,6 @@ import net.parkvision.parkvisionbackend.dto.CarDTO;
 import net.parkvision.parkvisionbackend.dto.UserDTO;
 import net.parkvision.parkvisionbackend.model.Car;
 import net.parkvision.parkvisionbackend.service.CarService;
-import net.parkvision.parkvisionbackend.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +54,6 @@ public class CarController {
 
     @PostMapping
     public ResponseEntity<CarDTO> createCar(@RequestBody CarDTO carDTO) {
-
         Car carCreated = _carService.createCar(convertToEntity(carDTO));
         return ResponseEntity.ok(convertToDTO(carCreated));
     }

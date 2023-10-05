@@ -186,6 +186,7 @@ public class DataSeeder {
             Point point4 = new Point();
             point4.setLatitude(51.11005154402975);
             point4.setLongitude(17.05946944677171);
+            point4.setParkingSpot(parkingSpot1);
             _pointRepository.save(point4);
 
             ParkingSpot parkingSpot2 = _parkingSpotRepository.getReferenceById(2L);

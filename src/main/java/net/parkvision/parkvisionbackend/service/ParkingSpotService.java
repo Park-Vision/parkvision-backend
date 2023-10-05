@@ -1,11 +1,8 @@
 package net.parkvision.parkvisionbackend.service;
 
-import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
-import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.repository.ParkingRepository;
 import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +15,11 @@ public class ParkingSpotService {
     private final ParkingSpotRepository _parkingSpotRepository;
     // add ParkingRepository and ModelMapper
     private final ParkingRepository _parkingRepository;
-    private final ModelMapper modelMapper;
 
     @Autowired
-    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository, ModelMapper modelMapper) {
+    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository) {
         this._parkingSpotRepository = parkingSpotRepository;
         _parkingRepository = parkingRepository;
-        this.modelMapper = modelMapper;
     }
 
 
@@ -36,31 +31,27 @@ public class ParkingSpotService {
         return _parkingSpotRepository.findById(id);
     }
 
-    public ParkingSpot createParkingSpot(ParkingSpotDTO parkingSpotDto) {
-        Parking parking = _parkingRepository.findById(parkingSpotDto.getParkingId()).orElseThrow(
-                () -> new IllegalArgumentException("Parking with ID " + parkingSpotDto.getParkingId() + " does not exist.")
-        );
-
-        ParkingSpot parkingSpot = modelMapper.map(parkingSpotDto, ParkingSpot.class);
-        parkingSpot.setParking(parking);
+    public ParkingSpot createParkingSpot(ParkingSpot parkingSpot) {
+        if(!_parkingRepository.existsById(parkingSpot.getParking().getId())){
+            throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not exist.");
+        }
 
         return _parkingSpotRepository.save(parkingSpot);
     }
 
-    public ParkingSpot updateParkingSpot(Long id, ParkingSpotDTO parkingSpotDto){
-        ParkingSpot parkingSpot = _parkingSpotRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("ParkingSpot with ID " + id + " does not exist.")
-        );
+    public ParkingSpot updateParkingSpot(ParkingSpot parkingSpot){
+        if(!_parkingSpotRepository.existsById(parkingSpot.getId())){
+            throw new IllegalArgumentException("ParkingSpot with ID " + parkingSpot.getId() + " does not exist.");
+        }
 
-        Parking parking = _parkingRepository.findById(parkingSpotDto.getParkingId()).orElseThrow(
-                () -> new IllegalArgumentException("Parking with ID " + parkingSpotDto.getParkingId() + " does not exist.")
-        );
+        if(!_parkingRepository.existsById(parkingSpot.getParking().getId())){
+            throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not exist.");
+        }
 
-        parkingSpot.setSpotNumber(parkingSpotDto.getSpotNumber());
-        parkingSpot.setOccupied(parkingSpotDto.isOccupied());
-        parkingSpot.setActive(parkingSpotDto.isActive());
-
-        parkingSpot.setParking(parking);
+        parkingSpot.setSpotNumber(parkingSpot.getSpotNumber());
+        parkingSpot.setOccupied(parkingSpot.isOccupied());
+        parkingSpot.setActive(parkingSpot.isActive());
+        parkingSpot.setParking(parkingSpot.getParking());
 
         return _parkingSpotRepository.save(parkingSpot);
     }

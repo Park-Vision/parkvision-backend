@@ -11,7 +11,7 @@ public class ReservationDTO {
     private Date endDate;
     private String registrationNumber;
 
-    private Long clientId;
-    private Long carId;
-    private Long parkingSpotId;
+    private UserDTO userDTO;
+    private CarDTO carDTO;
+    private ParkingSpotDTO parkingSpotDTO;
 }

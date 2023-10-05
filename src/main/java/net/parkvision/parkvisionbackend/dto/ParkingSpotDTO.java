@@ -9,5 +9,5 @@ public class ParkingSpotDTO {
     private String spotNumber;
     private boolean occupied;
     private boolean active;
-    private Long parkingId;
+    private ParkingDTO parkingDTO;
 }

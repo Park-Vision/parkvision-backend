@@ -17,13 +17,11 @@ public class DroneService {
 
     private final DroneRepository _droneRepository;
     private final ParkingRepository _parkingRepository;
-    private final ModelMapper modelMapper;
 
     @Autowired
-    public DroneService(DroneRepository droneRepository, ParkingRepository parkingRepository, ModelMapper modelMapper) {
+    public DroneService(DroneRepository droneRepository, ParkingRepository parkingRepository) {
         this._droneRepository = droneRepository;
         _parkingRepository = parkingRepository;
-        this.modelMapper = modelMapper;
     }
 
     public List<Drone> getAllDrones() {
@@ -34,28 +32,26 @@ public class DroneService {
         return _droneRepository.findById(id);
     }
 
-    public Drone createDrone(DroneDTO droneDto) {
-        Parking parking = _parkingRepository.findById(droneDto.getParkingId()).orElseThrow(
-                () -> new IllegalArgumentException("Parking with ID " + droneDto.getParkingId() + " does not exist.")
-        );
-        Drone drone = modelMapper.map(droneDto, Drone.class);
-        drone.setParking(parking);
+    public Drone createDrone(Drone drone) {
+        if(!_parkingRepository.existsById(drone.getParking().getId())){
+            throw new IllegalArgumentException("Parking with ID " + drone.getParking().getId() + " does not exist.");
+        }
         return _droneRepository.save(drone);
     }
 
-    public Drone updateDrone(Long id, DroneDTO droneDto){
-        Drone drone = _droneRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("Drone with ID " + id + " does not exist.")
-        );
+    public Drone updateDrone(Drone drone){
+        if(!_droneRepository.existsById(drone.getId())){
+            throw new IllegalArgumentException("Drone with ID " + drone.getId() + " does not exist.");
+        }
 
-        Parking parking = _parkingRepository.findById(droneDto.getParkingId()).orElseThrow(
-                () -> new IllegalArgumentException("Parking with ID " + droneDto.getParkingId() + " does not exist.")
-        );
+        if(!_parkingRepository.existsById(drone.getParking().getId())){
+            throw new IllegalArgumentException("Parking with ID " + drone.getParking().getId() + " does not exist.");
+        }
 
-        drone.setName(droneDto.getName());
-        drone.setModel(droneDto.getModel());
-        drone.setSerialNumber(droneDto.getSerialNumber());
-        drone.setParking(parking);
+        drone.setName(drone.getName());
+        drone.setModel(drone.getModel());
+        drone.setSerialNumber(drone.getSerialNumber());
+        drone.setParking(drone.getParking());
 
         return _droneRepository.save(drone);
     }
