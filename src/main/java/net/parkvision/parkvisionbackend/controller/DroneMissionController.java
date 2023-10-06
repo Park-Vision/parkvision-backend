@@ -43,8 +43,8 @@ public class DroneMissionController {
     public ResponseEntity<List<DroneMissionDTO>> getAllDroneMissions() {
         List<DroneMissionDTO> droneMissions
                 = _droneMissionService.getAllDroneMissions().stream().map(
-                        this::convertToDTO
-                ).collect(Collectors.toList());
+                this::convertToDTO
+        ).collect(Collectors.toList());
         return ResponseEntity.ok(droneMissions);
     }
 
@@ -67,7 +67,8 @@ public class DroneMissionController {
     @PutMapping
     public ResponseEntity<DroneMissionDTO> updateDroneMission(@RequestBody DroneMissionDTO droneMissionDto) {
         try {
-            DroneMission updatedDroneMission = _droneMissionService.updateDroneMission(convertToEntity(droneMissionDto));
+            DroneMission updatedDroneMission =
+                    _droneMissionService.updateDroneMission(convertToEntity(droneMissionDto));
             return ResponseEntity.ok(convertToDTO(updatedDroneMission));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
@@ -79,5 +80,4 @@ public class DroneMissionController {
         _droneMissionService.deleteDroneMission(id);
         return ResponseEntity.noContent().build();
     }
-
 }

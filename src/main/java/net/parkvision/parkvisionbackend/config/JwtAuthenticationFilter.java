@@ -39,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void setSecurityContext(@NonNull HttpServletRequest request, String jwt){
+    private void setSecurityContext(@NonNull HttpServletRequest request, String jwt) {
 
         final String userEmail = jwtService.extractUsername(jwt);
 

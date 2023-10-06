@@ -13,7 +13,6 @@ import java.util.Optional;
 public class ParkingSpotService {
 
     private final ParkingSpotRepository _parkingSpotRepository;
-    // add ParkingRepository and ModelMapper
     private final ParkingRepository _parkingRepository;
 
     @Autowired
@@ -32,20 +31,22 @@ public class ParkingSpotService {
     }
 
     public ParkingSpot createParkingSpot(ParkingSpot parkingSpot) {
-        if(!_parkingRepository.existsById(parkingSpot.getParking().getId())){
-            throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not exist.");
+        if (!_parkingRepository.existsById(parkingSpot.getParking().getId())) {
+            throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not " +
+                    "exist.");
         }
 
         return _parkingSpotRepository.save(parkingSpot);
     }
 
-    public ParkingSpot updateParkingSpot(ParkingSpot parkingSpot){
-        if(!_parkingSpotRepository.existsById(parkingSpot.getId())){
+    public ParkingSpot updateParkingSpot(ParkingSpot parkingSpot) {
+        if (!_parkingSpotRepository.existsById(parkingSpot.getId())) {
             throw new IllegalArgumentException("ParkingSpot with ID " + parkingSpot.getId() + " does not exist.");
         }
 
-        if(!_parkingRepository.existsById(parkingSpot.getParking().getId())){
-            throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not exist.");
+        if (!_parkingRepository.existsById(parkingSpot.getParking().getId())) {
+            throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not " +
+                    "exist.");
         }
 
         parkingSpot.setSpotNumber(parkingSpot.getSpotNumber());

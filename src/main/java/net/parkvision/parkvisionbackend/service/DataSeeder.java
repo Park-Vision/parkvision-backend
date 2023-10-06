@@ -17,7 +17,9 @@ public class DataSeeder {
     private final PointRepository _pointRepository;
 
 
-    public DataSeeder(DroneRepository _droneRepository, ParkingRepository _parkingRepository, ParkingSpotRepository parkingSpotRepository, ParkingModeratorRepository parkingModeratorRepository, PointRepository pointRepository) {
+    public DataSeeder(DroneRepository _droneRepository, ParkingRepository _parkingRepository,
+                      ParkingSpotRepository parkingSpotRepository,
+                      ParkingModeratorRepository parkingModeratorRepository, PointRepository pointRepository) {
         this._droneRepository = _droneRepository;
         this._parkingRepository = _parkingRepository;
         _parkingSpotRepository = parkingSpotRepository;

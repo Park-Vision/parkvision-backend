@@ -47,7 +47,7 @@ public class DroneController {
     @GetMapping("/{id}")
     public ResponseEntity<DroneDTO> getDroneById(@PathVariable Long id) {
         Optional<Drone> drone = droneService.getDroneById(id);
-        if( drone.isPresent() ) {
+        if (drone.isPresent()) {
             return ResponseEntity.ok(convertToDTO(drone.get()));
         }
         return ResponseEntity.notFound().build();

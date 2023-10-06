@@ -30,7 +30,7 @@ public class CarService {
     }
 
     public Car createCar(Car car) {
-        if (!_userRepository.existsById(car.getUser().getId())){
+        if (!_userRepository.existsById(car.getUser().getId())) {
             throw new IllegalArgumentException("User with ID " + car.getUser().getId() + " does not exist.");
         }
 
@@ -39,7 +39,7 @@ public class CarService {
 
     public Car updateCar(Car car) {
         // find car by id
-        if(_carRepository.existsById(car.getId()) && _userRepository.existsById(car.getUser().getId())){
+        if (_carRepository.existsById(car.getId()) && _userRepository.existsById(car.getUser().getId())) {
             car.setBrand(car.getBrand());
             car.setColor(car.getColor());
             car.setRegistrationNumber(car.getRegistrationNumber());
