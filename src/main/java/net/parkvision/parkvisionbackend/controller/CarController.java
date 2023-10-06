@@ -4,9 +4,11 @@ import net.parkvision.parkvisionbackend.dto.CarDTO;
 import net.parkvision.parkvisionbackend.dto.UserDTO;
 import net.parkvision.parkvisionbackend.model.Car;
 import net.parkvision.parkvisionbackend.service.CarService;
+import org.apache.kafka.clients.admin.AdminClient;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +18,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/cars")
 public class CarController {
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+    @GetMapping("/send")
+    public void sendMessage() {
+
+        kafkaTemplate.send("drone-start","4", "123");
+    }
     private final CarService _carService;
     private final ModelMapper modelMapper;
 

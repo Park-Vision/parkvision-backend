@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import net.parkvision.parkvisionbackend.service.DataSeeder;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
+import org.springframework.kafka.core.KafkaTemplate;
 
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class ParkVisionBackendApplication {
@@ -49,9 +51,9 @@ public class ParkVisionBackendApplication {
         // }
     }
 
-    @PostConstruct
-    public void seedData() {
-        dataSeeder.seedData();
-    }
+//    @PostConstruct
+//    public void seedData() {
+//        dataSeeder.seedData();
+//    }
 
 }
