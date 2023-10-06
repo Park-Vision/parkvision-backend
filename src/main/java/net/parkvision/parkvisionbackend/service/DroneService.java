@@ -30,18 +30,18 @@ public class DroneService {
     }
 
     public Drone createDrone(Drone drone) {
-        if(!_parkingRepository.existsById(drone.getParking().getId())){
+        if (!_parkingRepository.existsById(drone.getParking().getId())) {
             throw new IllegalArgumentException("Parking with ID " + drone.getParking().getId() + " does not exist.");
         }
         return _droneRepository.save(drone);
     }
 
-    public Drone updateDrone(Drone drone){
-        if(!_droneRepository.existsById(drone.getId())){
+    public Drone updateDrone(Drone drone) {
+        if (!_droneRepository.existsById(drone.getId())) {
             throw new IllegalArgumentException("Drone with ID " + drone.getId() + " does not exist.");
         }
 
-        if(!_parkingRepository.existsById(drone.getParking().getId())){
+        if (!_parkingRepository.existsById(drone.getParking().getId())) {
             throw new IllegalArgumentException("Parking with ID " + drone.getParking().getId() + " does not exist.");
         }
 

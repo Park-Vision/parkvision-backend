@@ -18,22 +18,22 @@ import java.util.stream.Collectors;
 public class PointController {
     private final PointService _pointService;
 
-    private final ModelMapper _modelMapper;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public PointController(PointService pointService, ModelMapper modelMapper) {
         _pointService = pointService;
-        _modelMapper = modelMapper;
+        this.modelMapper = modelMapper;
     }
 
     private PointDTO convertToDto(Point point) {
-        PointDTO pointDTO = _modelMapper.map(point, PointDTO.class);
-        pointDTO.setParkingSpotDTO(_modelMapper.map(point.getParkingSpot(), ParkingSpotDTO.class));
+        PointDTO pointDTO = modelMapper.map(point, PointDTO.class);
+        pointDTO.setParkingSpotDTO(modelMapper.map(point.getParkingSpot(), ParkingSpotDTO.class));
         return pointDTO;
     }
 
     private Point convertToEntity(PointDTO pointDTO) {
-        return _modelMapper.map(pointDTO, Point.class);
+        return modelMapper.map(pointDTO, Point.class);
     }
 
     @GetMapping

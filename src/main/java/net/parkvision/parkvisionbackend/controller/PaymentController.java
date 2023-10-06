@@ -17,21 +17,21 @@ import java.util.stream.Collectors;
 public class PaymentController {
 
     private final PaymentService _paymentService;
-    private final ModelMapper _modelMapper;
+    private final ModelMapper modelMapper;
 
     public PaymentController(PaymentService paymentService, ModelMapper modelMapper) {
         _paymentService = paymentService;
-        _modelMapper = modelMapper;
+        this.modelMapper = modelMapper;
     }
 
     private PaymentDTO convertToDto(Payment payment) {
-        PaymentDTO paymentDTO = _modelMapper.map(payment, PaymentDTO.class);
-        paymentDTO.setReservation(_modelMapper.map(payment.getReservation(), ReservationDTO.class));
+        PaymentDTO paymentDTO = modelMapper.map(payment, PaymentDTO.class);
+        paymentDTO.setReservation(modelMapper.map(payment.getReservation(), ReservationDTO.class));
         return paymentDTO;
     }
 
     private Payment convertToEntity(PaymentDTO paymentDTO) {
-        return _modelMapper.map(paymentDTO, Payment.class);
+        return modelMapper.map(paymentDTO, Payment.class);
     }
 
     @GetMapping

@@ -15,20 +15,20 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/users")
 public class UserController {
     private final UserService _userService;
-    private final ModelMapper _modelMapper;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public UserController(UserService userService, ModelMapper modelMapper) {
         _userService = userService;
-        _modelMapper = modelMapper;
+        this.modelMapper = modelMapper;
     }
 
     private UserDTO convertToDto(User user) {
-        return _modelMapper.map(user, UserDTO.class);
+        return modelMapper.map(user, UserDTO.class);
     }
 
     private User convertToEntity(UserDTO userDTO) {
-        return _modelMapper.map(userDTO, User.class);
+        return modelMapper.map(userDTO, User.class);
     }
 
     @GetMapping
@@ -39,14 +39,11 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         User user = _userService.getUserById(id);
         return ResponseEntity.ok(convertToDto(user));
     }
-
-
 
     @PutMapping
     public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO) {
@@ -55,14 +52,9 @@ public class UserController {
         return ResponseEntity.ok(convertToDto(updatedUser));
     }
 
-
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         _userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
-
-
-
 }

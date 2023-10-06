@@ -19,7 +19,8 @@ public class ReservationService {
     private final ParkingSpotRepository _parkingSpotRepository;
 
     @Autowired
-    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository, CarRepository carRepository, ParkingSpotRepository parkingSpotRepository) {
+    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository,
+                              CarRepository carRepository, ParkingSpotRepository parkingSpotRepository) {
         _reservationRepository = reservationRepository;
         _userRepository = userRepository;
         _carRepository = carRepository;
@@ -35,16 +36,17 @@ public class ReservationService {
     }
 
     public Reservation createReservation(Reservation reservation) {
-        if(!_userRepository.existsById(reservation.getUser().getId())){
+        if (!_userRepository.existsById(reservation.getUser().getId())) {
             throw new IllegalArgumentException("Client with ID " + reservation.getUser().getId() + " does not exist.");
         }
 
-        if(!_parkingSpotRepository.existsById(reservation.getParkingSpot().getId())){
-            throw new IllegalArgumentException("ParkingSpot with ID " + reservation.getParkingSpot().getId() + " does not exist.");
+        if (!_parkingSpotRepository.existsById(reservation.getParkingSpot().getId())) {
+            throw new IllegalArgumentException("ParkingSpot with ID " + reservation.getParkingSpot().getId() + " does" +
+                    " not exist.");
         }
 
-        if(reservation.getCar() != null) {
-            if(!_carRepository.existsById(reservation.getCar().getId())){
+        if (reservation.getCar() != null) {
+            if (!_carRepository.existsById(reservation.getCar().getId())) {
                 throw new IllegalArgumentException("Car with ID " + reservation.getCar().getId() + " does not exist.");
             }
         }
@@ -52,24 +54,25 @@ public class ReservationService {
         return _reservationRepository.save(reservation);
     }
 
-    public Reservation updateReservation(Reservation reservation){
-        if(!_reservationRepository.existsById(reservation.getId())){
+    public Reservation updateReservation(Reservation reservation) {
+        if (!_reservationRepository.existsById(reservation.getId())) {
             throw new IllegalArgumentException("Reservation with ID " + reservation.getId() + " does not exist.");
         }
 
         Car car = null;
 
-        if(!_userRepository.existsById(reservation.getUser().getId())){
+        if (!_userRepository.existsById(reservation.getUser().getId())) {
             throw new IllegalArgumentException("Client with ID " + reservation.getUser().getId() + " does not exist.");
         }
 
-        if(!_parkingSpotRepository.existsById(reservation.getParkingSpot().getId())){
-            throw new IllegalArgumentException("ParkingSpot with ID " + reservation.getParkingSpot().getId() + " does not exist.");
+        if (!_parkingSpotRepository.existsById(reservation.getParkingSpot().getId())) {
+            throw new IllegalArgumentException("ParkingSpot with ID " + reservation.getParkingSpot().getId() + " does" +
+                    " not exist.");
         }
 
-        if(reservation.getCar() != null) {
+        if (reservation.getCar() != null) {
             car = reservation.getCar();
-            if(!_carRepository.existsById(reservation.getCar().getId())){
+            if (!_carRepository.existsById(reservation.getCar().getId())) {
                 throw new IllegalArgumentException("Car with ID " + reservation.getCar().getId() + " does not exist.");
             }
         }

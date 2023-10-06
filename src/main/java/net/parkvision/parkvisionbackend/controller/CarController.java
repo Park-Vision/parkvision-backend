@@ -30,6 +30,7 @@ public class CarController {
         carDTO.setUserDTO(modelMapper.map(car.getUser(), UserDTO.class));
         return carDTO;
     }
+
     private Car convertToEntity(CarDTO carDTO) {
         return modelMapper.map(carDTO, Car.class);
     }

@@ -27,21 +27,23 @@ public class PointService {
         return _pointRepository.findById(id);
     }
 
-    public Point createPoint(Point point){
-        if(!_parkingSpotRepository.existsById(point.getParkingSpot().getId())){
-            throw new IllegalArgumentException("ParkingSpot with ID " + point.getParkingSpot().getId() + " does not exist.");
+    public Point createPoint(Point point) {
+        if (!_parkingSpotRepository.existsById(point.getParkingSpot().getId())) {
+            throw new IllegalArgumentException("ParkingSpot with ID " + point.getParkingSpot().getId() + " does not " +
+                    "exist.");
         }
 
         return _pointRepository.save(point);
     }
 
-    public Point updatePoint(Point point){
-        if(!_pointRepository.existsById(point.getId())){
+    public Point updatePoint(Point point) {
+        if (!_pointRepository.existsById(point.getId())) {
             throw new IllegalArgumentException("Point with ID " + point.getId() + " does not exist.");
         }
 
-        if(!_parkingSpotRepository.existsById(point.getParkingSpot().getId())){
-            throw new IllegalArgumentException("ParkingSpot with ID " + point.getParkingSpot().getId() + " does not exist.");
+        if (!_parkingSpotRepository.existsById(point.getParkingSpot().getId())) {
+            throw new IllegalArgumentException("ParkingSpot with ID " + point.getParkingSpot().getId() + " does not " +
+                    "exist.");
         }
 
         point.setLatitude(point.getLatitude());
@@ -54,6 +56,5 @@ public class PointService {
     public void deletePoint(Long id) {
         _pointRepository.deleteById(id);
     }
-
 
 }

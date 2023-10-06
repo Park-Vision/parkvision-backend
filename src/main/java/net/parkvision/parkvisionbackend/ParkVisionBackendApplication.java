@@ -13,11 +13,11 @@ import org.springframework.context.event.EventListener;
 
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
 
-@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class ParkVisionBackendApplication {
 
     @Bean
-    public ModelMapper  modelMapper() {
+    public ModelMapper modelMapper() {
         return new ModelMapper();
     }
 

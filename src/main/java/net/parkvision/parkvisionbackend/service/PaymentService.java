@@ -32,13 +32,14 @@ public class PaymentService {
         return _paymentRepository.save(payment);
     }
 
-    public Payment updatePayment(Payment payment){
-        if(!_paymentRepository.existsById(payment.getId())){
+    public Payment updatePayment(Payment payment) {
+        if (!_paymentRepository.existsById(payment.getId())) {
             throw new IllegalArgumentException("Payment with ID " + payment.getId() + " does not exist.");
         }
 
-        if(!_reservationRepository.existsById(payment.getReservation().getId())){
-            throw new IllegalArgumentException("Reservation with ID " + payment.getReservation().getId() + " does not exist.");
+        if (!_reservationRepository.existsById(payment.getReservation().getId())) {
+            throw new IllegalArgumentException("Reservation with ID " + payment.getReservation().getId() + " does not" +
+                    " exist.");
         }
 
         payment.setStatus(payment.getStatus());

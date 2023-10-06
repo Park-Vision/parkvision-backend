@@ -13,28 +13,28 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping ("/api/reservations")
+@RequestMapping("/api/reservations")
 public class ReservationController {
     private final ReservationService _reservationService;
 
-    private final ModelMapper _modelMapper;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public ReservationController(ReservationService reservationService, ModelMapper modelMapper) {
         _reservationService = reservationService;
-        _modelMapper = modelMapper;
+        this.modelMapper = modelMapper;
     }
 
     private ReservationDTO convertToDto(Reservation reservation) {
-        ReservationDTO reservationDTO = _modelMapper.map(reservation, ReservationDTO.class);
-        reservationDTO.setCarDTO(_modelMapper.map(reservation.getCar(), CarDTO.class));
-        reservationDTO.setUserDTO(_modelMapper.map(reservation.getUser(), UserDTO.class));
-        reservationDTO.setParkingSpotDTO(_modelMapper.map(reservation.getParkingSpot(), ParkingSpotDTO.class));
+        ReservationDTO reservationDTO = modelMapper.map(reservation, ReservationDTO.class);
+        reservationDTO.setCarDTO(modelMapper.map(reservation.getCar(), CarDTO.class));
+        reservationDTO.setUserDTO(modelMapper.map(reservation.getUser(), UserDTO.class));
+        reservationDTO.setParkingSpotDTO(modelMapper.map(reservation.getParkingSpot(), ParkingSpotDTO.class));
         return reservationDTO;
     }
 
     private Reservation convertToEntity(ReservationDTO reservationDTO) {
-        return _modelMapper.map(reservationDTO, Reservation.class);
+        return modelMapper.map(reservationDTO, Reservation.class);
     }
 
     @GetMapping
@@ -45,7 +45,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservations);
     }
 
-    @GetMapping ("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ReservationDTO> getReservationById(@PathVariable Long id) {
         Optional<Reservation> reservation = _reservationService.getReservationById(id);
         if (reservation.isPresent()) {

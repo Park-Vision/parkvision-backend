@@ -19,22 +19,22 @@ public class ParkingSpotController {
 
     private final ParkingSpotService _parkingSpotService;
 
-    private final ModelMapper _modelMapper;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public ParkingSpotController(ParkingSpotService parkingSpotService, ModelMapper modelMapper) {
         _parkingSpotService = parkingSpotService;
-        _modelMapper = modelMapper;
+        this.modelMapper = modelMapper;
     }
 
     private ParkingSpotDTO convertToDto(ParkingSpot parkingSpot) {
-        ParkingSpotDTO parkingSpotDTO = _modelMapper.map(parkingSpot, ParkingSpotDTO.class);
-        parkingSpotDTO.setParkingDTO(_modelMapper.map(parkingSpot.getParking(), ParkingDTO.class));
+        ParkingSpotDTO parkingSpotDTO = modelMapper.map(parkingSpot, ParkingSpotDTO.class);
+        parkingSpotDTO.setParkingDTO(modelMapper.map(parkingSpot.getParking(), ParkingDTO.class));
         return parkingSpotDTO;
     }
 
     private ParkingSpot convertToEntity(ParkingSpotDTO parkingSpotDTO) {
-        return _modelMapper.map(parkingSpotDTO, ParkingSpot.class);
+        return modelMapper.map(parkingSpotDTO, ParkingSpot.class);
     }
 
     @GetMapping
@@ -83,5 +83,4 @@ public class ParkingSpotController {
         _parkingSpotService.hardDeleteParkingSpot(id);
         return ResponseEntity.noContent().build();
     }
-
 }
