@@ -13,7 +13,7 @@ import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class EmailSenderService {
-    
+
     @Autowired
     private JavaMailSender javaMailSender;
 
@@ -29,7 +29,7 @@ public class EmailSenderService {
     }
 
     public void sendMessageWithAttachment(
-    String to, String subject, String text, String pathToAttachment) throws Exception {
+            String to, String subject, String text, String pathToAttachment) throws Exception {
 
         MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -40,8 +40,8 @@ public class EmailSenderService {
         helper.setSubject(subject);
         helper.setText(text);
 
-        FileSystemResource file 
-        = new FileSystemResource(new File(pathToAttachment));
+        FileSystemResource file
+                = new FileSystemResource(new File(pathToAttachment));
         helper.addAttachment("parking.png", file);
 
         javaMailSender.send(message);

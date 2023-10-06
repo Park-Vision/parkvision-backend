@@ -19,5 +19,5 @@ public class Car {
     private String color;
     private String brand;
     @ManyToOne
-    private Client client;
+    private User user;
 }

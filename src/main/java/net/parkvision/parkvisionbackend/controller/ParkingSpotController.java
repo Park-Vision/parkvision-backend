@@ -1,13 +1,17 @@
 package net.parkvision.parkvisionbackend.controller;
 
+import net.parkvision.parkvisionbackend.dto.ParkingDTO;
+import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/parkingspots")
@@ -15,34 +19,54 @@ public class ParkingSpotController {
 
     private final ParkingSpotService _parkingSpotService;
 
+    private final ModelMapper modelMapper;
+
     @Autowired
-    public ParkingSpotController(ParkingSpotService parkingSpotService) {
+    public ParkingSpotController(ParkingSpotService parkingSpotService, ModelMapper modelMapper) {
         _parkingSpotService = parkingSpotService;
+        this.modelMapper = modelMapper;
+    }
+
+    private ParkingSpotDTO convertToDto(ParkingSpot parkingSpot) {
+        ParkingSpotDTO parkingSpotDTO = modelMapper.map(parkingSpot, ParkingSpotDTO.class);
+        parkingSpotDTO.setParkingDTO(modelMapper.map(parkingSpot.getParking(), ParkingDTO.class));
+        return parkingSpotDTO;
+    }
+
+    private ParkingSpot convertToEntity(ParkingSpotDTO parkingSpotDTO) {
+        return modelMapper.map(parkingSpotDTO, ParkingSpot.class);
     }
 
     @GetMapping
-    public ResponseEntity<List<ParkingSpot>> getAllParkingSpots() {
-        List<ParkingSpot> parkingSpots = _parkingSpotService.getAllParkingSpots();
+    public ResponseEntity<List<ParkingSpotDTO>> getAllParkingSpots() {
+        List<ParkingSpotDTO> parkingSpots
+                = _parkingSpotService.getAllParkingSpots().stream().map(
+                this::convertToDto
+        ).collect(Collectors.toList());
         return ResponseEntity.ok(parkingSpots);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ParkingSpot> getParkingSpotById(@PathVariable Long id) {
+    public ResponseEntity<ParkingSpotDTO> getParkingSpotById(@PathVariable Long id) {
         Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(id);
-        return parkingSpot.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if (parkingSpot.isPresent()) {
+            return ResponseEntity.ok(convertToDto(parkingSpot.get()));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
-    public ResponseEntity<ParkingSpot> createParkingSpot(@RequestBody ParkingSpot parkingSpot) {
-        ParkingSpot createdParkingSpot = _parkingSpotService.createParkingSpot(parkingSpot);
-        return ResponseEntity.ok(createdParkingSpot);
+    public ResponseEntity<ParkingSpotDTO> createParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
+        ParkingSpot createdParkingSpot = _parkingSpotService.createParkingSpot(convertToEntity(parkingSpotDto));
+        return ResponseEntity.ok(convertToDto(createdParkingSpot));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ParkingSpot> updateParkingSpot(@PathVariable Long id, @RequestBody ParkingSpot parkingSpot) {
+    @PutMapping
+    public ResponseEntity<ParkingSpotDTO> updateParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
         try {
-            ParkingSpot updatedParkingSpot = _parkingSpotService.updateParkingSpot(id, parkingSpot);
-            return ResponseEntity.ok(updatedParkingSpot);
+            ParkingSpot updatedParkingSpot = _parkingSpotService.updateParkingSpot(convertToEntity(parkingSpotDto));
+            return ResponseEntity.ok(convertToDto(updatedParkingSpot));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
@@ -59,5 +83,4 @@ public class ParkingSpotController {
         _parkingSpotService.hardDeleteParkingSpot(id);
         return ResponseEntity.noContent().build();
     }
-
 }

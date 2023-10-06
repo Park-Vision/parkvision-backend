@@ -2,6 +2,7 @@ package net.parkvision.parkvisionbackend.service;
 
 import net.parkvision.parkvisionbackend.model.Car;
 import net.parkvision.parkvisionbackend.repository.CarRepository;
+import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +12,12 @@ import java.util.Optional;
 @Service
 public class CarService {
 
+    private final UserRepository _userRepository;
     private final CarRepository _carRepository;
 
     @Autowired
-    public CarService(CarRepository carRepository) {
+    public CarService(UserRepository userRepository, CarRepository carRepository) {
+        _userRepository = userRepository;
         this._carRepository = carRepository;
     }
 
@@ -27,17 +30,22 @@ public class CarService {
     }
 
     public Car createCar(Car car) {
+        if (!_userRepository.existsById(car.getUser().getId())) {
+            throw new IllegalArgumentException("User with ID " + car.getUser().getId() + " does not exist.");
+        }
+
         return _carRepository.save(car);
     }
 
-    //update car
-    public Car updateCar(Long id, Car car){
-        if (_carRepository.existsById(id)) {
-            car.setId(id);
-            return _carRepository.save(car);
-        } else {
-            throw new IllegalArgumentException("Car with ID " + id + " does not exist.");
+    public Car updateCar(Car car) {
+        // find car by id
+        if (_carRepository.existsById(car.getId()) && _userRepository.existsById(car.getUser().getId())) {
+            car.setBrand(car.getBrand());
+            car.setColor(car.getColor());
+            car.setRegistrationNumber(car.getRegistrationNumber());
+            car.setUser(car.getUser());
         }
+        return _carRepository.save(car);
     }
 
     public void deleteCar(Long id) {

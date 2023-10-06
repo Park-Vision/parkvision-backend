@@ -1,7 +1,10 @@
 package net.parkvision.parkvisionbackend.controller;
 
+import net.parkvision.parkvisionbackend.dto.DroneDTO;
+import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.service.DroneService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,34 +18,52 @@ public class DroneController {
 
     private final DroneService droneService;
 
+    private final ModelMapper modelMapper;
+
     @Autowired
-    public DroneController(DroneService droneService) {
+    public DroneController(DroneService droneService, ModelMapper modelMapper) {
         this.droneService = droneService;
+        this.modelMapper = modelMapper;
+    }
+
+    private DroneDTO convertToDTO(Drone drone) {
+        DroneDTO droneDTO = modelMapper.map(drone, DroneDTO.class);
+        droneDTO.setParkingDTO(modelMapper.map(drone.getParking(), ParkingDTO.class));
+        return droneDTO;
+    }
+
+    private Drone convertToEntity(DroneDTO droneDTO) {
+        return modelMapper.map(droneDTO, Drone.class);
     }
 
     @GetMapping
-    public ResponseEntity<List<Drone>> getAllDrones() {
-        List<Drone> drones = droneService.getAllDrones();
+    public ResponseEntity<List<DroneDTO>> getAllDrones() {
+        List<DroneDTO> drones = droneService.getAllDrones().stream().map(
+                this::convertToDTO
+        ).collect(java.util.stream.Collectors.toList());
         return ResponseEntity.ok(drones);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Drone> getDroneById(@PathVariable Long id) {
+    public ResponseEntity<DroneDTO> getDroneById(@PathVariable Long id) {
         Optional<Drone> drone = droneService.getDroneById(id);
-        return drone.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if (drone.isPresent()) {
+            return ResponseEntity.ok(convertToDTO(drone.get()));
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public ResponseEntity<Drone> createDrone(@RequestBody Drone drone) {
-        Drone createdDrone = droneService.createDrone(drone);
-        return ResponseEntity.ok(createdDrone);
+    public ResponseEntity<DroneDTO> createDrone(@RequestBody DroneDTO droneDto) {
+        Drone createdDrone = droneService.createDrone(convertToEntity(droneDto));
+        return ResponseEntity.ok(convertToDTO(createdDrone));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Drone> updateDrone(@PathVariable Long id, @RequestBody Drone drone) {
+    @PutMapping()
+    public ResponseEntity<DroneDTO> updateDrone(@RequestBody DroneDTO droneDto) {
         try {
-            Drone updatedDrone = droneService.updateDrone(id, drone);
-            return ResponseEntity.ok(updatedDrone);
+            Drone updatedDrone = droneService.updateDrone(convertToEntity(droneDto));
+            return ResponseEntity.ok(convertToDTO(updatedDrone));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }

@@ -20,7 +20,7 @@ public class ParkingSpot {
     private String spotNumber;
     private boolean occupied;
     private boolean active;
-    // each parking spot has 5 points that ara geographic coordinates store it as a list
+
     @OneToMany
     private List<Point> points;
 
@@ -28,5 +28,4 @@ public class ParkingSpot {
     private List<Reservation> reservations; // One-to-many relationship
     @ManyToOne
     private Parking parking; // Many-to-one relationship
-
 }

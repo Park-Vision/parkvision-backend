@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.service;
 
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
+import net.parkvision.parkvisionbackend.repository.ParkingRepository;
 import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,13 +13,14 @@ import java.util.Optional;
 public class ParkingSpotService {
 
     private final ParkingSpotRepository _parkingSpotRepository;
+    private final ParkingRepository _parkingRepository;
 
     @Autowired
-    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository) {
+    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository) {
         this._parkingSpotRepository = parkingSpotRepository;
+        _parkingRepository = parkingRepository;
     }
 
-    // generate all crud methods
 
     public List<ParkingSpot> getAllParkingSpots() {
         return _parkingSpotRepository.findAll();
@@ -29,16 +31,30 @@ public class ParkingSpotService {
     }
 
     public ParkingSpot createParkingSpot(ParkingSpot parkingSpot) {
+        if (!_parkingRepository.existsById(parkingSpot.getParking().getId())) {
+            throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not " +
+                    "exist.");
+        }
+
         return _parkingSpotRepository.save(parkingSpot);
     }
 
-    public ParkingSpot updateParkingSpot(Long id, ParkingSpot parkingSpot){
-        if (_parkingSpotRepository.existsById(id)) {
-            parkingSpot.setId(id);
-            return _parkingSpotRepository.save(parkingSpot);
-        } else {
-            throw new IllegalArgumentException("ParkingSpot with ID " + id + " does not exist.");
+    public ParkingSpot updateParkingSpot(ParkingSpot parkingSpot) {
+        if (!_parkingSpotRepository.existsById(parkingSpot.getId())) {
+            throw new IllegalArgumentException("ParkingSpot with ID " + parkingSpot.getId() + " does not exist.");
         }
+
+        if (!_parkingRepository.existsById(parkingSpot.getParking().getId())) {
+            throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not " +
+                    "exist.");
+        }
+
+        parkingSpot.setSpotNumber(parkingSpot.getSpotNumber());
+        parkingSpot.setOccupied(parkingSpot.isOccupied());
+        parkingSpot.setActive(parkingSpot.isActive());
+        parkingSpot.setParking(parkingSpot.getParking());
+
+        return _parkingSpotRepository.save(parkingSpot);
     }
 
     // so we will use soft delete instead of hard delete
