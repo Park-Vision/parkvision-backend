@@ -14,7 +14,7 @@ values (true, false, 1, 1, 1),
        (true, false, 4, 1, 4),
        (true, false, 5, 2, 5);
 
-insert into public.point (latitude, longitude, id, parking_spot_id)
+insert into point (latitude, longitude, id, parking_spot_id)
 values (51.11004209878706, 17.059438251268123, 1, 1),
        (51.1100815908722, 17.059408051544636, 2, 1),
        (51.11008848686895, 17.05944068854656, 3, 1),

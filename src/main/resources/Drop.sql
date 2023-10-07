@@ -1,10 +1,37 @@
--- DROP ALL TABLES ALONG WITH CASCADE
-DROP TABLE IF EXISTS reservation CASCADE;
-DROP TABLE IF EXISTS payment CASCADE;
-DROP TABLE IF EXISTS point CASCADE;
-DROP TABLE IF EXISTS drone CASCADE;
-DROP TABLE IF EXISTS drone_mission CASCADE;
-DROP TABLE IF EXISTS car CASCADE;
-DROP TABLE IF EXISTS _user CASCADE;
-DROP TABLE IF EXISTS parking_spot CASCADE;
-DROP TABLE IF EXISTS parking CASCADE;
+drop table _user_cars cascade;
+
+drop table _user_reservations cascade;
+
+drop table parking_drone_missions cascade;
+
+drop table drone_mission cascade;
+
+drop table parking_drones cascade;
+
+drop table drone cascade;
+
+drop table parking_parking_moderator cascade;
+
+drop table parking_parking_spots cascade;
+
+drop table parking_spot_points cascade;
+
+drop table parking_spot_reservations cascade;
+
+drop table point cascade;
+
+drop table reservation_payment cascade;
+
+drop table payment cascade;
+
+drop table reservation cascade;
+
+drop table car cascade;
+
+drop table _user cascade;
+
+drop table parking_spot cascade;
+
+drop table parking cascade;
+
+drop sequence _user_seq;
