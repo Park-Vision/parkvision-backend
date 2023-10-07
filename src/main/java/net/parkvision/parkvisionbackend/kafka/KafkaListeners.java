@@ -11,5 +11,4 @@ public class KafkaListeners {
         System.out.println(key);
         System.out.println("Received Message in group foo: " + message);
     }
-
 }

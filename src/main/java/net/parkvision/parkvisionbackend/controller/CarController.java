@@ -18,13 +18,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/cars")
 public class CarController {
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
-    @GetMapping("/send")
-    public void sendMessage() {
-
-        kafkaTemplate.send("drone-start","4", "123");
-    }
     private final CarService _carService;
     private final ModelMapper modelMapper;
 

@@ -7,6 +7,7 @@ import net.parkvision.parkvisionbackend.service.DroneService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +21,24 @@ public class DroneController {
 
     private final ModelMapper modelMapper;
 
+    private final KafkaTemplate<String, String> kafkaTemplate;
+
     @Autowired
-    public DroneController(DroneService droneService, ModelMapper modelMapper) {
+    public DroneController(DroneService droneService, ModelMapper modelMapper, KafkaTemplate<String, String> kafkaTemplate) {
         this.droneService = droneService;
         this.modelMapper = modelMapper;
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
+    @PostMapping("/{id}/start")
+    public ResponseEntity<DroneDTO> startDrone(@PathVariable Long id) {
+        Optional<Drone> drone = droneService.getDroneById(id);
+        if (drone.isPresent()) {
+            kafkaTemplate.send("drone-start", String.valueOf(id), "Drone START - " + id);
+            return ResponseEntity.ok(convertToDTO(drone.get()));
+        }
+        return ResponseEntity.notFound().build();
+
     }
 
     private DroneDTO convertToDTO(Drone drone) {

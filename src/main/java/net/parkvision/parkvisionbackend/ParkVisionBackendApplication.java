@@ -51,9 +51,9 @@ public class ParkVisionBackendApplication {
         // }
     }
 
-//    @PostConstruct
-//    public void seedData() {
-//        dataSeeder.seedData();
-//    }
+    @PostConstruct
+    public void seedData() {
+        dataSeeder.seedData();
+    }
 
 }
