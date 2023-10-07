@@ -24,7 +24,8 @@ public class DroneController {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
-    public DroneController(DroneService droneService, ModelMapper modelMapper, KafkaTemplate<String, String> kafkaTemplate) {
+    public DroneController(DroneService droneService, ModelMapper modelMapper,
+                           KafkaTemplate<String, String> kafkaTemplate) {
         this.droneService = droneService;
         this.modelMapper = modelMapper;
         this.kafkaTemplate = kafkaTemplate;
