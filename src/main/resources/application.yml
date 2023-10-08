@@ -1,4 +1,6 @@
 spring:
+  kafka:
+    bootstrap-servers: localhost:9092
   datasource:
     url: jdbc:postgresql://ep-wandering-snow-036542.eu-central-1.aws.neon.tech/neondb
     username: filipshelby
@@ -23,6 +25,7 @@ spring:
         smtp:
           auth: true
           starttls.enable: true
+
 
 #security:
 #  basic:
