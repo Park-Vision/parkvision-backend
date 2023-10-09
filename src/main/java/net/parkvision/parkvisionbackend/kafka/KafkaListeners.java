@@ -5,7 +5,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.kafka.annotation.KafkaListener;
 
-@Component
+//@Component
 public class KafkaListeners {
     @KafkaListener(topics = "drone-start", groupId = "123")
     public void listenGroupFoo(String message, @Header(KafkaHeaders.RECEIVED_KEY) Integer key) {
