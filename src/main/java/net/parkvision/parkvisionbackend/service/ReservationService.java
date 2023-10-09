@@ -46,6 +46,11 @@ public class ReservationService {
                     " not exist.");
         }
 
+        if (!_parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId()).isActive()) {
+            throw new IllegalArgumentException("ParkingSpot with ID " + reservation.getParkingSpot().getId() +
+                    " is not active.");
+        }
+
         if (reservation.getCar() != null) {
             if (!_carRepository.existsById(reservation.getCar().getId())) {
                 throw new IllegalArgumentException("Car with ID " + reservation.getCar().getId() + " does not exist.");
@@ -54,11 +59,6 @@ public class ReservationService {
 
         List<Reservation> existingReservations =
                 _reservationRepository.findByParkingSpotId(reservation.getParkingSpot().getId());
-
-        for (Reservation r : existingReservations
-        ) {
-            System.out.println(r.getParkingSpot().getId());
-        }
 
         for (Reservation existingReservation : existingReservations) {
             if (isDateRangeOverlap(existingReservation, reservation)) {
