@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.*;
+import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
 import net.parkvision.parkvisionbackend.model.Reservation;
 import net.parkvision.parkvisionbackend.service.ReservationService;
 import org.modelmapper.ModelMapper;
@@ -59,7 +60,7 @@ public class ReservationController {
     //todo znajdz rezerwacje danego parkingu po id i dacie
 
     @PostMapping
-    public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) {
+    public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
         Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
         return ResponseEntity.ok(convertToDto(createdReservation));
     }

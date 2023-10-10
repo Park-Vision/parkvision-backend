@@ -1,5 +1,6 @@
 package net.parkvision.parkvisionbackend.service;
 
+import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
 import net.parkvision.parkvisionbackend.model.Car;
 import net.parkvision.parkvisionbackend.model.Reservation;
 import net.parkvision.parkvisionbackend.repository.*;
@@ -35,14 +36,19 @@ public class ReservationService {
         return _reservationRepository.findById(id);
     }
 
-    public Reservation createReservation(Reservation reservation) {
+    public Reservation createReservation(Reservation reservation) throws ReservationConflictException {
         if (!_userRepository.existsById(reservation.getUser().getId())) {
-            throw new IllegalArgumentException("Client with ID " + reservation.getUser().getId() + " does not exist.");
+            throw new IllegalArgumentException("User with ID " + reservation.getUser().getId() + " does not exist.");
         }
 
         if (!_parkingSpotRepository.existsById(reservation.getParkingSpot().getId())) {
             throw new IllegalArgumentException("ParkingSpot with ID " + reservation.getParkingSpot().getId() + " does" +
                     " not exist.");
+        }
+
+        if (!_parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId()).isActive()) {
+            throw new IllegalArgumentException("ParkingSpot with ID " + reservation.getParkingSpot().getId() +
+                    " is not active.");
         }
 
         if (reservation.getCar() != null) {
@@ -51,7 +57,21 @@ public class ReservationService {
             }
         }
 
+        List<Reservation> existingReservations =
+                _reservationRepository.findByParkingSpotId(reservation.getParkingSpot().getId());
+
+        for (Reservation existingReservation : existingReservations) {
+            if (isDateRangeOverlap(existingReservation, reservation)) {
+                throw new ReservationConflictException("Konflikt datowy z istniejącą rezerwacją.");
+            }
+        }
+
         return _reservationRepository.save(reservation);
+    }
+
+    private boolean isDateRangeOverlap(Reservation existingReservation, Reservation newReservation) {
+        return newReservation.getStartDate().before(existingReservation.getEndDate())
+                && newReservation.getEndDate().after(existingReservation.getStartDate());
     }
 
     public Reservation updateReservation(Reservation reservation) {

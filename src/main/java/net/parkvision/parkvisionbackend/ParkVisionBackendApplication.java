@@ -50,7 +50,7 @@ public class ParkVisionBackendApplication {
 
     @PostConstruct
     public void seedData() {
-        //dataSeeder.seedData();
+        dataSeeder.seedData();
     }
 
 }
