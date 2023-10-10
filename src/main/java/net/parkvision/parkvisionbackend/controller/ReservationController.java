@@ -28,7 +28,6 @@ public class ReservationController {
 
     private ReservationDTO convertToDto(Reservation reservation) {
         ReservationDTO reservationDTO = modelMapper.map(reservation, ReservationDTO.class);
-        reservationDTO.setCarDTO(modelMapper.map(reservation.getCar(), CarDTO.class));
         reservationDTO.setUserDTO(modelMapper.map(reservation.getUser(), UserDTO.class));
         reservationDTO.setParkingSpotDTO(modelMapper.map(reservation.getParkingSpot(), ParkingSpotDTO.class));
         return reservationDTO;
@@ -49,11 +48,7 @@ public class ReservationController {
     @GetMapping("/{id}")
     public ResponseEntity<ReservationDTO> getReservationById(@PathVariable Long id) {
         Optional<Reservation> reservation = _reservationService.getReservationById(id);
-        if (reservation.isPresent()) {
-            return ResponseEntity.ok(convertToDto(reservation.get()));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return reservation.map(value -> ResponseEntity.ok(convertToDto(value))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     //todo znajdz rezerwacje danego parkingu po id

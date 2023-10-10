@@ -58,12 +58,12 @@ insert into car (id, user_id, brand, color, registration_number)
 values (1, 1, 'LEXUS', 'GREY', 'DLU13999'),
        (2, 1, 'BMW', 'BLACK', 'DW12X912');
 
-insert into reservation (car_id, end_date, id, parking_spot_id, start_date, user_id, registration_number)
-values (2, '2023-10-06T20:31:34Z', 1, 1, '2023-10-06T20:20:34Z', 1, 'DW12X912'),
-       (1, '2023-10-06T20:31:34Z', 2, 2, '2023-10-06T20:20:34Z', 1, 'DLU13999'),
-       (2, '2023-10-06T20:31:34Z', 3, 3, '2023-10-06T20:20:34Z', 1, 'DW12X912'),
-       (1, '2023-10-06T20:31:34Z', 4, 4, '2023-10-06T20:20:34Z', 1, 'DLU13999'),
-       (2, '2023-10-06T20:31:34Z', 5, 5, '2023-10-06T20:20:34Z', 1, 'DW12X912');
+insert into reservation (end_date, id, parking_spot_id, start_date, user_id, registration_number)
+values ('2023-10-06T20:31:34Z', 1, 1, '2023-10-06T20:20:34Z', 1, 'DW12X912'),
+       ('2023-10-06T20:31:34Z', 2, 2, '2023-10-06T20:20:34Z', 1, 'DLU13999'),
+       ('2023-10-06T20:31:34Z', 3, 3, '2023-10-06T20:20:34Z', 1, 'DW12X912'),
+       ('2023-10-06T20:31:34Z', 4, 4, '2023-10-06T20:20:34Z', 1, 'DLU13999'),
+       ('2023-10-06T20:31:34Z', 5, 5, '2023-10-06T20:20:34Z', 1, 'DW12X912');
 
 insert into payment (status, id, reservation_id)
 values (1, 1, 1),

@@ -25,8 +25,6 @@ public class Reservation {
     @ManyToOne
     private User user; // Many-to-one relationship
     @ManyToOne
-    private Car car; // Many-to-one relationship
-    @ManyToOne
     private ParkingSpot parkingSpot; // Many-to-one relationship
     @OneToMany
     private List<Payment> payment; // One-to-many relationship
