@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
+import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.service.ParkingService;
 import org.modelmapper.ModelMapper;
@@ -8,8 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -17,12 +19,15 @@ import java.util.stream.Collectors;
 public class ParkingController {
 
     private final ParkingService _parkingService;
+    private final ParkingSpotController parkingSpotController;
 
     private final ModelMapper modelMapper;
 
     @Autowired
-    public ParkingController(ParkingService parkingService, ModelMapper modelMapper) {
+    public ParkingController(ParkingService parkingService, ParkingSpotController parkingSpotController,
+                             ModelMapper modelMapper) {
         _parkingService = parkingService;
+        this.parkingSpotController = parkingSpotController;
         this.modelMapper = modelMapper;
     }
 
@@ -73,5 +78,23 @@ public class ParkingController {
     public ResponseEntity<Void> deleteParking(@PathVariable Long id) {
         _parkingService.deleteParking(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/free/{startDate},{endDate}")
+    public ResponseEntity<List<ParkingSpotDTO>> getFreeSpotsByParkingId(@PathVariable Long id,
+                                                                        @PathVariable String startDate,
+                                                                        @PathVariable String endDate) throws ParseException {
+        Optional<Parking> parking = _parkingService.getParkingById(id);
+        if (parking.isPresent()) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-M-dd hh:mm:ss", Locale.GERMANY);
+
+            List<ParkingSpotDTO> freeParkingSpots
+                    = _parkingService.getFreeSpots(parking.get(), formatter.parse(startDate), formatter.parse(endDate)).stream().map(
+                    parkingSpotController::convertToDto
+            ).collect(Collectors.toList());
+            return ResponseEntity.ok(freeParkingSpots);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

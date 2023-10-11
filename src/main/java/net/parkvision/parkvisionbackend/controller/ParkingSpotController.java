@@ -27,7 +27,7 @@ public class ParkingSpotController {
         this.modelMapper = modelMapper;
     }
 
-    private ParkingSpotDTO convertToDto(ParkingSpot parkingSpot) {
+    public ParkingSpotDTO convertToDto(ParkingSpot parkingSpot) {
         ParkingSpotDTO parkingSpotDTO = modelMapper.map(parkingSpot, ParkingSpotDTO.class);
         parkingSpotDTO.setParkingDTO(modelMapper.map(parkingSpot.getParking(), ParkingDTO.class));
         return parkingSpotDTO;

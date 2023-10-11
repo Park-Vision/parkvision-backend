@@ -56,17 +56,22 @@ public class ReservationService {
                 throw new IllegalArgumentException("Car with ID " + reservation.getCar().getId() + " does not exist.");
             }
         }
-
-        List<Reservation> existingReservations =
-                _reservationRepository.findByParkingSpotId(reservation.getParkingSpot().getId());
-
-        for (Reservation existingReservation : existingReservations) {
-            if (isDateRangeOverlap(existingReservation, reservation)) {
-                throw new ReservationConflictException("Konflikt datowy z istniejącą rezerwacją.");
-            }
+        if (!isParkingSpotFree(reservation)){
+            throw new ReservationConflictException("Konflikt datowy z istniejącą rezerwacją.");
         }
 
         return _reservationRepository.save(reservation);
+    }
+
+    public boolean isParkingSpotFree(Reservation reservation){
+        List<Reservation> existingReservations =
+                _reservationRepository.findByParkingSpotId(reservation.getParkingSpot().getId());
+        for (Reservation existingReservation : existingReservations) {
+            if (isDateRangeOverlap(existingReservation, reservation)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean isDateRangeOverlap(Reservation existingReservation, Reservation newReservation) {
