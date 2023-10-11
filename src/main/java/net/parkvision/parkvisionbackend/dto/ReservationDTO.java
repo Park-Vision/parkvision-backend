@@ -11,6 +11,5 @@ public class ReservationDTO {
     private Date endDate;
     private String registrationNumber;
     private UserDTO userDTO;
-    private CarDTO carDTO;
     private ParkingSpotDTO parkingSpotDTO;
 }
