@@ -1,7 +1,7 @@
 package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.CarDTO;
-import net.parkvision.parkvisionbackend.dto.UserDTO;
+import net.parkvision.parkvisionbackend.dto.ClientDTO;
 import net.parkvision.parkvisionbackend.model.Car;
 import net.parkvision.parkvisionbackend.service.CarService;
 import org.modelmapper.ModelMapper;
@@ -27,7 +27,7 @@ public class CarController {
 
     private CarDTO convertToDTO(Car car) {
         CarDTO carDTO = modelMapper.map(car, CarDTO.class);
-        carDTO.setUserDTO(modelMapper.map(car.getUser(), UserDTO.class));
+        carDTO.setClientDTO(modelMapper.map(car.getClient(), ClientDTO.class));
         return carDTO;
     }
 

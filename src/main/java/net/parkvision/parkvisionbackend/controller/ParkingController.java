@@ -17,12 +17,15 @@ import java.util.stream.Collectors;
 public class ParkingController {
 
     private final ParkingService _parkingService;
+    private final ParkingSpotController parkingSpotController;
 
     private final ModelMapper modelMapper;
 
     @Autowired
-    public ParkingController(ParkingService parkingService, ModelMapper modelMapper) {
+    public ParkingController(ParkingService parkingService, ParkingSpotController parkingSpotController,
+                             ModelMapper modelMapper) {
         _parkingService = parkingService;
+        this.parkingSpotController = parkingSpotController;
         this.modelMapper = modelMapper;
     }
 

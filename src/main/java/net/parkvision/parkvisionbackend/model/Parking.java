@@ -22,6 +22,8 @@ public class Parking {
     private String address;
     private double costRate;
     private String openHours;
+    private double latitude;
+    private double longitude;
 
     @OneToMany
     private List<ParkingModerator> parkingModerator;
