@@ -86,8 +86,8 @@ public class ParkingController {
                                                                         @PathVariable String endDate) throws ParseException {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-M-dd hh:mm:ss", Locale.GERMANY);
-
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-M-dd hh:mm:ss", Locale.ENGLISH);
+            formatter.setTimeZone(TimeZone.getTimeZone("Poland/Warsaw"));
             List<ParkingSpotDTO> freeParkingSpots
                     = _parkingService.getFreeSpots(parking.get(), formatter.parse(startDate), formatter.parse(endDate)).stream().map(
                     parkingSpotController::convertToDto

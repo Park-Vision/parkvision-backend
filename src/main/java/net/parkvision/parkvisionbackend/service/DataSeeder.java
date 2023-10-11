@@ -87,7 +87,7 @@ public class DataSeeder {
             drone2.setName("DJI Mavic PRO 2");
             drone2.setModel("Mavic PRO 2");
             drone2.setSerialNumber("987654321");
-            drone1.setParking(parking2);
+            drone2.setParking(parking2);
             _droneRepository.save(drone2);
 
             System.out.println("Data seeded.");
@@ -224,7 +224,7 @@ public class DataSeeder {
 
             car1.setBrand("123");
             car1.setColor("blue");
-            car1.setUser(client);
+            car1.setClient(client);
             car1.setRegistrationNumber("345");
 
             _carRepository.save(car1);
@@ -232,7 +232,7 @@ public class DataSeeder {
 
             car2.setBrand("123");
             car2.setColor("blue");
-            car2.setUser(client);
+            car2.setClient(client);
             car2.setRegistrationNumber("567");
 
             _carRepository.save(car2);
@@ -251,7 +251,6 @@ public class DataSeeder {
 
             System.out.println("seedReservationData()");
 
-            reservation.setCar(car1);
             reservation.setParkingSpot(parkingSpot1);
             reservation.setStartDate(new Date());
             reservation.setEndDate(new Date());
@@ -259,7 +258,6 @@ public class DataSeeder {
             reservation.setRegistrationNumber("123");
             _reservationRepository.save(reservation);
 
-            reservation1.setCar(car2);
             reservation1.setParkingSpot(parkingSpot2);
             reservation1.setStartDate(new Date());
             reservation1.setEndDate(new Date());

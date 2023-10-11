@@ -51,11 +51,6 @@ public class ReservationService {
                     " is not active.");
         }
 
-        if (reservation.getCar() != null) {
-            if (!_carRepository.existsById(reservation.getCar().getId())) {
-                throw new IllegalArgumentException("Car with ID " + reservation.getCar().getId() + " does not exist.");
-            }
-        }
         if (!isParkingSpotFree(reservation)){
             throw new ReservationConflictException("Konflikt datowy z istniejącą rezerwacją.");
         }
@@ -95,21 +90,11 @@ public class ReservationService {
                     " not exist.");
         }
 
-        if (reservation.getCar() != null) {
-            car = reservation.getCar();
-            if (!_carRepository.existsById(reservation.getCar().getId())) {
-                throw new IllegalArgumentException("Car with ID " + reservation.getCar().getId() + " does not exist.");
-            }
-        }
-
         reservation.setStartDate(reservation.getStartDate());
         reservation.setEndDate(reservation.getEndDate());
         reservation.setRegistrationNumber(reservation.getRegistrationNumber());
         reservation.setUser(reservation.getUser());
         reservation.setParkingSpot(reservation.getParkingSpot());
-        if (car != null) {
-            reservation.setCar(reservation.getCar());
-        }
 
         return _reservationRepository.save(reservation);
     }
