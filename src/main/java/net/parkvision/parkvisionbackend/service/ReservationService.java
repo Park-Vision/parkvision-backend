@@ -51,12 +51,6 @@ public class ReservationService {
                     " is not active.");
         }
 
-        if (reservation.getCar() != null) {
-            if (!_carRepository.existsById(reservation.getCar().getId())) {
-                throw new IllegalArgumentException("Car with ID " + reservation.getCar().getId() + " does not exist.");
-            }
-        }
-
         List<Reservation> existingReservations =
                 _reservationRepository.findByParkingSpotId(reservation.getParkingSpot().getId());
 
@@ -79,8 +73,6 @@ public class ReservationService {
             throw new IllegalArgumentException("Reservation with ID " + reservation.getId() + " does not exist.");
         }
 
-        Car car = null;
-
         if (!_userRepository.existsById(reservation.getUser().getId())) {
             throw new IllegalArgumentException("Client with ID " + reservation.getUser().getId() + " does not exist.");
         }
@@ -90,21 +82,11 @@ public class ReservationService {
                     " not exist.");
         }
 
-        if (reservation.getCar() != null) {
-            car = reservation.getCar();
-            if (!_carRepository.existsById(reservation.getCar().getId())) {
-                throw new IllegalArgumentException("Car with ID " + reservation.getCar().getId() + " does not exist.");
-            }
-        }
-
         reservation.setStartDate(reservation.getStartDate());
         reservation.setEndDate(reservation.getEndDate());
         reservation.setRegistrationNumber(reservation.getRegistrationNumber());
         reservation.setUser(reservation.getUser());
         reservation.setParkingSpot(reservation.getParkingSpot());
-        if (car != null) {
-            reservation.setCar(reservation.getCar());
-        }
 
         return _reservationRepository.save(reservation);
     }
