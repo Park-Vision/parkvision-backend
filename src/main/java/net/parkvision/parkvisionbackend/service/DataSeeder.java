@@ -4,6 +4,8 @@ import net.parkvision.parkvisionbackend.model.*;
 import net.parkvision.parkvisionbackend.repository.*;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 
 @Service
 public class DataSeeder {
@@ -15,65 +17,34 @@ public class DataSeeder {
     private final ParkingModeratorRepository _parkingModeratorRepository;
 
     private final PointRepository _pointRepository;
+    private final ClientRepository _clientRepository;
+    private final CarRepository _carRepository;
+    private final ReservationRepository _reservationRepository;
 
 
     public DataSeeder(DroneRepository _droneRepository, ParkingRepository _parkingRepository,
                       ParkingSpotRepository parkingSpotRepository,
-                      ParkingModeratorRepository parkingModeratorRepository, PointRepository pointRepository) {
+                      ParkingModeratorRepository parkingModeratorRepository, PointRepository pointRepository,
+                      ClientRepository clientRepository, CarRepository carRepository, ReservationRepository reservationRepository) {
         this._droneRepository = _droneRepository;
         this._parkingRepository = _parkingRepository;
         _parkingSpotRepository = parkingSpotRepository;
         _parkingModeratorRepository = parkingModeratorRepository;
         _pointRepository = pointRepository;
+        _clientRepository = clientRepository;
+        _carRepository = carRepository;
+        _reservationRepository = reservationRepository;
     }
 
     public void seedData() {
-        seedDroneData();
-        seedParkingData();
-        SeedParkingModeratorData();
-        SeedParkingSpotData();
-        SeedPoints();
-    }
-
-
-    public void seedDroneData() {
-        long droneCount = _droneRepository.count();
-
-        if (droneCount == 0) {
-            System.out.println("seedDroneData()");
-
-            Drone drone1 = new Drone();
-            drone1.setName("DJI Mavic Mini");
-            drone1.setModel("Mavic Mini");
-            drone1.setSerialNumber("123456789");
-            _droneRepository.save(drone1);
-
-            Drone drone2 = new Drone();
-            drone2.setName("DJI Mavic PRO 2");
-            drone2.setModel("Mavic PRO 2");
-            drone2.setSerialNumber("987654321");
-            _droneRepository.save(drone2);
-
-            Drone drone3 = new Drone();
-            drone3.setName("DJI Mavic Air 2");
-            drone3.setModel("Mavic Air 2");
-            drone3.setSerialNumber("123123123");
-            _droneRepository.save(drone3);
-
-            System.out.println("Data seeded.");
-        } else {
-            System.out.println("Data already exists.");
-        }
-    }
-
-    public void seedParkingData() {
-
+        Parking parking1 = new Parking();
+        Parking parking2 = new Parking();
         long parkingCount = _parkingRepository.count();
 
         if (parkingCount == 0) {
             System.out.println("seedParkingData()");
 
-            Parking parking1 = new Parking();
+
             parking1.setName("Parking Magnolia");
             parking1.setAddress("ul. Magnoliowa 1, 00-000 Wrocław");
             parking1.setDescription("Parking Magnolia to parking znajdujący się w centrum Wrocławia. " +
@@ -83,7 +54,7 @@ public class DataSeeder {
             parking1.setCostRate(2.5);
             _parkingRepository.save(parking1);
 
-            Parking parking2 = new Parking();
+
             parking2.setName("Parking Rondo");
             parking2.setAddress("ul. Rondo 1, 00-000 Wrocław");
             parking2.setDescription("Parking Rondo to parking znajdujący się w centrum Wrocławia. " +
@@ -97,29 +68,44 @@ public class DataSeeder {
         } else {
             System.out.println("Data already exists.");
         }
-    }
 
-    public void SeedParkingModeratorData() {
+
+        long droneCount = _droneRepository.count();
+
+        if (droneCount == 0) {
+
+            System.out.println("seedDroneData()");
+
+            Drone drone1 = new Drone();
+            drone1.setName("DJI Mavic Mini");
+            drone1.setModel("Mavic Mini");
+            drone1.setSerialNumber("123456789");
+            drone1.setParking(parking1);
+            _droneRepository.save(drone1);
+
+            Drone drone2 = new Drone();
+            drone2.setName("DJI Mavic PRO 2");
+            drone2.setModel("Mavic PRO 2");
+            drone2.setSerialNumber("987654321");
+            drone1.setParking(parking2);
+            _droneRepository.save(drone2);
+
+            System.out.println("Data seeded.");
+        } else {
+            System.out.println("Data already exists.");
+        }
+
+        ParkingModerator parkingModerator2 = new ParkingModerator();
         long parkingModeratorCount = _parkingModeratorRepository.count();
 
         if (parkingModeratorCount == 0) {
             System.out.println("SeedParkingModeratorData()");
 
-            ParkingModerator parkingModerator1 = new ParkingModerator();
-            parkingModerator1.setFirstname("Jan");
-            parkingModerator1.setLastname("Kowalski");
-            parkingModerator1.setEmail("jan.k@onet.pl");
-            parkingModerator1.setPassword("123456");
-            parkingModerator1.setParking(_parkingRepository.getReferenceById(1L));
-            parkingModerator1.setRole(Role.USER);
-            _parkingModeratorRepository.save(parkingModerator1);
-
-            ParkingModerator parkingModerator2 = new ParkingModerator();
             parkingModerator2.setFirstname("Anna");
             parkingModerator2.setLastname("Nowak");
             parkingModerator2.setEmail("anna.n@onet.pl");
             parkingModerator2.setPassword("123456");
-            parkingModerator2.setParking(_parkingRepository.getReferenceById(2L));
+            parkingModerator2.setParking(_parkingRepository.getReferenceById(1L));
             parkingModerator2.setRole(Role.PARKING_MANAGER);
             _parkingModeratorRepository.save(parkingModerator2);
 
@@ -127,18 +113,32 @@ public class DataSeeder {
         } else {
             System.out.println("Data already exists.");
         }
-    }
 
+        Client client = new Client();
+        long clientCount = _clientRepository.count();
 
-    public void SeedParkingSpotData() {
+        if (clientCount == 0) {
+            System.out.println("SeedClientData()");
+
+            client.setFirstname("Annaa");
+            client.setLastname("Nowaka");
+            client.setEmail("anna.n@onet.pl");
+            client.setPassword("123456");
+            client.setRole(Role.USER);
+            _clientRepository.save(client);
+
+            System.out.println("Data seeded.");
+        } else {
+            System.out.println("Data already exists.");
+        }
+
         long parkingSpotCount = _parkingSpotRepository.count();
+        ParkingSpot parkingSpot1 = new ParkingSpot();
+        ParkingSpot parkingSpot2 = new ParkingSpot();
 
         if (parkingSpotCount == 0) {
             System.out.println("SeedParkingSpotData()");
 
-            Parking parking1 = _parkingRepository.getReferenceById(1L);
-
-            ParkingSpot parkingSpot1 = new ParkingSpot();
             parkingSpot1.setSpotNumber("1");
             parkingSpot1.setActive(true);
             parkingSpot1.setOccupied(false);
@@ -146,7 +146,7 @@ public class DataSeeder {
 
             _parkingSpotRepository.save(parkingSpot1);
 
-            ParkingSpot parkingSpot2 = new ParkingSpot();
+
             parkingSpot2.setSpotNumber("2");
             parkingSpot2.setActive(true);
             parkingSpot2.setOccupied(false);
@@ -157,15 +157,10 @@ public class DataSeeder {
         } else {
             System.out.println("Data already exists.");
         }
-    }
-
-    public void SeedPoints() {
         long pointCount = _pointRepository.count();
 
         if (pointCount == 0) {
             System.out.println("SeedPoints()");
-
-            ParkingSpot parkingSpot1 = _parkingSpotRepository.getReferenceById(1L);
 
             Point point1 = new Point();
             point1.setLatitude(51.11004209878706);
@@ -191,8 +186,6 @@ public class DataSeeder {
             point4.setParkingSpot(parkingSpot1);
             _pointRepository.save(point4);
 
-            ParkingSpot parkingSpot2 = _parkingSpotRepository.getReferenceById(2L);
-
             Point point5 = new Point();
             point5.setLatitude(51.11004209878706);
             point5.setLongitude(17.059438251268123);
@@ -216,6 +209,65 @@ public class DataSeeder {
             point8.setLongitude(17.05946944677171);
             point8.setParkingSpot(parkingSpot2);
             _pointRepository.save(point8);
+        } else {
+            System.out.println("Data already exists.");
+        }
+
+        long carCount = _carRepository.count();
+
+        Car car1 = new Car();
+        Car car2 = new Car();
+        if (carCount == 0) {
+
+            System.out.println("seedCarData()");
+
+
+            car1.setBrand("123");
+            car1.setColor("blue");
+            car1.setUser(client);
+            car1.setRegistrationNumber("345");
+
+            _carRepository.save(car1);
+
+
+            car2.setBrand("123");
+            car2.setColor("blue");
+            car2.setUser(client);
+            car2.setRegistrationNumber("567");
+
+            _carRepository.save(car2);
+
+            System.out.println("Data seeded.");
+        } else {
+            System.out.println("Data already exists.");
+        }
+
+        long reservationCount = _reservationRepository.count();
+
+        Reservation reservation = new Reservation();
+        Reservation reservation1 = new Reservation();
+
+        if (reservationCount == 0) {
+
+            System.out.println("seedReservationData()");
+
+            reservation.setCar(car1);
+            reservation.setParkingSpot(parkingSpot1);
+            reservation.setStartDate(new Date());
+            reservation.setEndDate(new Date());
+            reservation.setUser(client);
+            reservation.setRegistrationNumber("123");
+            _reservationRepository.save(reservation);
+
+            reservation1.setCar(car2);
+            reservation1.setParkingSpot(parkingSpot2);
+            reservation1.setStartDate(new Date());
+            reservation1.setEndDate(new Date());
+            reservation1.setUser(client);
+            reservation1.setRegistrationNumber("123");
+            _reservationRepository.save(reservation1);
+
+            System.out.println("Data seeded.");
         } else {
             System.out.println("Data already exists.");
         }
