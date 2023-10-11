@@ -93,10 +93,10 @@ public class ParkingSpotController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/parking/{id}/free/{startDate},{endDate}")
+    @GetMapping("/parking/{id}/free")
     public ResponseEntity<List<ParkingSpotDTO>> getFreeSpotsByParkingId(@PathVariable Long id,
-                                                                        @PathVariable String startDate,
-                                                                        @PathVariable String endDate) throws ParseException {
+                                                                        @RequestParam String startDate,
+                                                                        @RequestParam String endDate) throws ParseException {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-M-dd hh:mm:ss", Locale.ENGLISH);
@@ -107,6 +107,20 @@ public class ParkingSpotController {
                     this::convertToDto
             ).collect(Collectors.toList());
             return ResponseEntity.ok(freeParkingSpots);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/parking/{id}")
+    public ResponseEntity<List<ParkingSpotDTO>> getFreeSpotsByParkingId(@PathVariable Long id) {
+        Optional<Parking> parking = _parkingService.getParkingById(id);
+        if (parking.isPresent()) {
+            List<ParkingSpotDTO> parkingSpots
+                    = _parkingSpotService.getParkingSpots(parking.get()).stream().map(
+                    this::convertToDto
+            ).collect(Collectors.toList());
+            return ResponseEntity.ok(parkingSpots);
         } else {
             return ResponseEntity.notFound().build();
         }

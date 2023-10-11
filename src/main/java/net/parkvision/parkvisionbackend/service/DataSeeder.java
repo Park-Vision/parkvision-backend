@@ -2,6 +2,7 @@ package net.parkvision.parkvisionbackend.service;
 
 import net.parkvision.parkvisionbackend.model.*;
 import net.parkvision.parkvisionbackend.repository.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -52,6 +53,8 @@ public class DataSeeder {
                     "Parking jest monitorowany przez 24 godziny na dobę.");
             parking1.setOpenHours("6:00 - 22:00");
             parking1.setCostRate(2.5);
+            parking1.setLongitude(50.615788);
+            parking1.setLatitude(19.532069);
             _parkingRepository.save(parking1);
 
 
@@ -62,6 +65,8 @@ public class DataSeeder {
                     "Parking jest monitorowany przez 24 godziny na dobę.");
             parking2.setOpenHours("4:30 - 23:00");
             parking2.setCostRate(3.0);
+            parking1.setLongitude(50.615788);
+            parking1.setLatitude(19.552069);
             _parkingRepository.save(parking2);
 
             System.out.println("Data seeded.");
@@ -104,7 +109,7 @@ public class DataSeeder {
             parkingModerator2.setFirstname("Anna");
             parkingModerator2.setLastname("Nowak");
             parkingModerator2.setEmail("anna.n@onet.pl");
-            parkingModerator2.setPassword("123456");
+            parkingModerator2.setPassword(new BCryptPasswordEncoder().encode("123456"));
             parkingModerator2.setParking(_parkingRepository.getReferenceById(1L));
             parkingModerator2.setRole(Role.PARKING_MANAGER);
             _parkingModeratorRepository.save(parkingModerator2);
@@ -123,7 +128,7 @@ public class DataSeeder {
             client.setFirstname("Annaa");
             client.setLastname("Nowaka");
             client.setEmail("anna.n@onet.pl");
-            client.setPassword("123456");
+            client.setPassword(new BCryptPasswordEncoder().encode("123456"));
             client.setRole(Role.USER);
             _clientRepository.save(client);
 

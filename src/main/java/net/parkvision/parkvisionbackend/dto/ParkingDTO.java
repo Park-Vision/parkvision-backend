@@ -10,4 +10,6 @@ public class ParkingDTO {
     private String address;
     private double costRate;
     private String openHours;
+    private double latitude;
+    private double longitude;
 }

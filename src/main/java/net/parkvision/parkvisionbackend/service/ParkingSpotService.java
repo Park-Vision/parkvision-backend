@@ -91,4 +91,7 @@ public class ParkingSpotService {
         return freeParkingSpots;
     }
 
+    public List<ParkingSpot> getParkingSpots(Parking parking) {
+        return new ArrayList<>(_parkingSpotRepository.findByParkingId(parking.getId()));
+    }
 }

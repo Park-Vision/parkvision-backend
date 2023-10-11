@@ -79,8 +79,6 @@ public class ReservationService {
             throw new IllegalArgumentException("Reservation with ID " + reservation.getId() + " does not exist.");
         }
 
-        Car car = null;
-
         if (!_userRepository.existsById(reservation.getUser().getId())) {
             throw new IllegalArgumentException("Client with ID " + reservation.getUser().getId() + " does not exist.");
         }
