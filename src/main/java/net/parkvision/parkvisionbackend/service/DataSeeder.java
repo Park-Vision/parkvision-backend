@@ -53,8 +53,8 @@ public class DataSeeder {
                     "Parking jest monitorowany przez 24 godziny na dobę.");
             parking1.setOpenHours("6:00 - 22:00");
             parking1.setCostRate(2.5);
-            parking1.setLongitude(50.615788);
-            parking1.setLatitude(19.532069);
+            parking1.setLongitude(16.990429400497433);
+            parking1.setLatitude(51.11818354620572);
             _parkingRepository.save(parking1);
 
 
@@ -65,8 +65,8 @@ public class DataSeeder {
                     "Parking jest monitorowany przez 24 godziny na dobę.");
             parking2.setOpenHours("4:30 - 23:00");
             parking2.setCostRate(3.0);
-            parking1.setLongitude(50.615788);
-            parking1.setLatitude(19.552069);
+            parking2.setLongitude(17.08785648136442);
+            parking2.setLatitude(1.14149342309597);
             _parkingRepository.save(parking2);
 
             System.out.println("Data seeded.");
@@ -108,8 +108,8 @@ public class DataSeeder {
 
             parkingModerator2.setFirstname("Anna");
             parkingModerator2.setLastname("Nowak");
-            parkingModerator2.setEmail("anna.n@onet.pl");
-            parkingModerator2.setPassword(new BCryptPasswordEncoder().encode("123456"));
+            parkingModerator2.setEmail("Pmod@pv.pl");
+            parkingModerator2.setPassword(new BCryptPasswordEncoder().encode("Pmod!1"));
             parkingModerator2.setParking(_parkingRepository.getReferenceById(1L));
             parkingModerator2.setRole(Role.PARKING_MANAGER);
             _parkingModeratorRepository.save(parkingModerator2);
@@ -127,7 +127,7 @@ public class DataSeeder {
 
             client.setFirstname("Annaa");
             client.setLastname("Nowaka");
-            client.setEmail("anna.n@onet.pl");
+            client.setEmail("anna@onet.pl");
             client.setPassword(new BCryptPasswordEncoder().encode("123456"));
             client.setRole(Role.USER);
             _clientRepository.save(client);
@@ -168,50 +168,50 @@ public class DataSeeder {
             System.out.println("SeedPoints()");
 
             Point point1 = new Point();
-            point1.setLatitude(51.11004209878706);
-            point1.setLongitude(17.059438251268123);
+            point1.setLatitude(51.1186521304551);
+            point1.setLongitude(16.990243087061152);
             point1.setParkingSpot(parkingSpot1);
             _pointRepository.save(point1);
 
             Point point2 = new Point();
-            point2.setLatitude(51.1100815908722);
-            point2.setLongitude(17.059408051544636);
+            point2.setLatitude(51.118680641612244);
+            point2.setLongitude(16.99028263711841);
             point2.setParkingSpot(parkingSpot1);
             _pointRepository.save(point2);
 
             Point point3 = new Point();
-            point3.setLatitude(51.11008848686895);
-            point3.setLongitude(17.05944068854656);
+            point3.setLatitude(51.11866831521476);
+            point3.setLongitude(16.99030332627968);
             point3.setParkingSpot(parkingSpot1);
             _pointRepository.save(point3);
 
             Point point4 = new Point();
-            point4.setLatitude(51.11005154402975);
-            point4.setLongitude(17.05946944677171);
+            point4.setLatitude(51.118643381038375);
+            point4.setLongitude(16.99026614904272);
             point4.setParkingSpot(parkingSpot1);
             _pointRepository.save(point4);
 
             Point point5 = new Point();
-            point5.setLatitude(51.11004209878706);
-            point5.setLongitude(17.059438251268123);
+            point5.setLatitude(51.11861171066726);
+            point5.setLongitude(16.99032095102528);
             point5.setParkingSpot(parkingSpot2);
             _pointRepository.save(point5);
 
             Point point6 = new Point();
-            point6.setLatitude(51.1100815908722);
-            point6.setLongitude(17.059408051544636);
+            point6.setLatitude(51.118633203523125);
+            point6.setLongitude(16.990356220713984);
             point6.setParkingSpot(parkingSpot2);
             _pointRepository.save(point6);
 
             Point point7 = new Point();
-            point7.setLatitude(51.11008848686895);
-            point7.setLongitude(17.05944068854656);
+            point7.setLatitude(51.11862002873555);
+            point7.setLongitude(16.99038103386446);
             point7.setParkingSpot(parkingSpot2);
             _pointRepository.save(point7);
 
             Point point8 = new Point();
-            point8.setLatitude(51.11005154402975);
-            point8.setLongitude(17.05946944677171);
+            point8.setLatitude(51.1185928473759);
+            point8.setLongitude(16.99034544418599);
             point8.setParkingSpot(parkingSpot2);
             _pointRepository.save(point8);
         } else {
