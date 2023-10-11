@@ -2,15 +2,21 @@ package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
+import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
+import net.parkvision.parkvisionbackend.service.ParkingService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @RestController
@@ -20,11 +26,14 @@ public class ParkingSpotController {
     private final ParkingSpotService _parkingSpotService;
 
     private final ModelMapper modelMapper;
+    private final ParkingService _parkingService;
 
     @Autowired
-    public ParkingSpotController(ParkingSpotService parkingSpotService, ModelMapper modelMapper) {
+    public ParkingSpotController(ParkingSpotService parkingSpotService, ModelMapper modelMapper,
+                                 ParkingService parkingService) {
         _parkingSpotService = parkingSpotService;
         this.modelMapper = modelMapper;
+        _parkingService = parkingService;
     }
 
     public ParkingSpotDTO convertToDto(ParkingSpot parkingSpot) {
@@ -82,5 +91,24 @@ public class ParkingSpotController {
     public ResponseEntity<Void> hardDeleteParkingSpot(@PathVariable Long id) {
         _parkingSpotService.hardDeleteParkingSpot(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/parking/{id}/free/{startDate},{endDate}")
+    public ResponseEntity<List<ParkingSpotDTO>> getFreeSpotsByParkingId(@PathVariable Long id,
+                                                                        @PathVariable String startDate,
+                                                                        @PathVariable String endDate) throws ParseException {
+        Optional<Parking> parking = _parkingService.getParkingById(id);
+        if (parking.isPresent()) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-M-dd hh:mm:ss", Locale.ENGLISH);
+            formatter.setTimeZone(TimeZone.getTimeZone("Poland/Warsaw"));
+            List<ParkingSpotDTO> freeParkingSpots
+                    = _parkingSpotService.getFreeSpots(parking.get(), formatter.parse(startDate),
+                    formatter.parse(endDate)).stream().map(
+                    this::convertToDto
+            ).collect(Collectors.toList());
+            return ResponseEntity.ok(freeParkingSpots);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

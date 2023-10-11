@@ -1,11 +1,15 @@
 package net.parkvision.parkvisionbackend.service;
 
+import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
+import net.parkvision.parkvisionbackend.model.Reservation;
 import net.parkvision.parkvisionbackend.repository.ParkingRepository;
 import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,11 +18,13 @@ public class ParkingSpotService {
 
     private final ParkingSpotRepository _parkingSpotRepository;
     private final ParkingRepository _parkingRepository;
+    private final ReservationService _reservationService;
 
     @Autowired
-    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository) {
+    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository, ReservationService reservationService) {
         this._parkingSpotRepository = parkingSpotRepository;
         _parkingRepository = parkingRepository;
+        _reservationService = reservationService;
     }
 
 
@@ -67,6 +73,22 @@ public class ParkingSpotService {
 
     public void hardDeleteParkingSpot(Long id) {
         _parkingSpotRepository.deleteById(id);
+    }
+
+    public List<ParkingSpot> getFreeSpots(Parking parking, Date startDate, Date endDate) {
+        List<ParkingSpot> freeParkingSpots = new ArrayList<>();
+
+        for(ParkingSpot parkingSpot: _parkingSpotRepository.findByParkingId(parking.getId())){
+            Reservation reservation = new Reservation();
+            reservation.setStartDate(startDate);
+            reservation.setEndDate(endDate);
+            reservation.setParkingSpot(parkingSpot);
+            if(_reservationService.isParkingSpotFree(reservation)){
+                freeParkingSpots.add(parkingSpot);
+            }
+        }
+
+        return freeParkingSpots;
     }
 
 }
