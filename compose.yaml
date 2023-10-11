@@ -1,14 +1,22 @@
 version: '3'
 services:
-  zookeeper:
-    image: wurstmeister/zookeeper
+  db:
+    image: 'postgres'
+    container_name: postgresql
     ports:
-      - "2181:2181"
-  kafka:
-    image: wurstmeister/kafka
-    ports:
-      - "9092:9092"
+      - "5432:5432"
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+#  zookeeper:
+#    image: wurstmeister/zookeeper
+#    ports:
+#      - "2181:2181"
+#  kafka:
+#    image: wurstmeister/kafka
+#    ports:
+#      - "9092:9092"
+#    environment:
+#      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
