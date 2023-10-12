@@ -27,18 +27,25 @@ public class ParkingSpotController {
 
     private final ModelMapper modelMapper;
     private final ParkingService _parkingService;
+    private final PointController _pointController;
 
     @Autowired
     public ParkingSpotController(ParkingSpotService parkingSpotService, ModelMapper modelMapper,
-                                 ParkingService parkingService) {
+                                 ParkingService parkingService, PointController pointController) {
         _parkingSpotService = parkingSpotService;
         this.modelMapper = modelMapper;
         _parkingService = parkingService;
+        _pointController = pointController;
     }
 
     public ParkingSpotDTO convertToDto(ParkingSpot parkingSpot) {
         ParkingSpotDTO parkingSpotDTO = modelMapper.map(parkingSpot, ParkingSpotDTO.class);
         parkingSpotDTO.setParkingDTO(modelMapper.map(parkingSpot.getParking(), ParkingDTO.class));
+        if (!parkingSpot.getPoints().isEmpty()) {
+            parkingSpotDTO.setPointsDTO(parkingSpot.getPoints().stream().map(
+                    _pointController::convertToDto
+            ).collect(Collectors.toList()));
+        }
         return parkingSpotDTO;
     }
 
@@ -120,6 +127,20 @@ public class ParkingSpotController {
                     = _parkingSpotService.getParkingSpots(parking.get()).stream().map(
                     this::convertToDto
             ).collect(Collectors.toList());
+            return ResponseEntity.ok(parkingSpots);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/parking/{id}/model/create")
+    public ResponseEntity<List<ParkingSpotDTO>> createParkingModel(@PathVariable Long id,
+                                                                   @RequestBody List<ParkingSpotDTO> parkingSpotDTOList) {
+        Optional<Parking> parking = _parkingService.getParkingById(id);
+        if (parking.isPresent()) {
+            List<ParkingSpotDTO> parkingSpots = _parkingSpotService.createParkingSpots(
+                    parkingSpotDTOList.stream().map(this::convertToEntity).collect(Collectors.toList())
+            ).stream().map(this::convertToDto).collect(Collectors.toList());
             return ResponseEntity.ok(parkingSpots);
         } else {
             return ResponseEntity.notFound().build();

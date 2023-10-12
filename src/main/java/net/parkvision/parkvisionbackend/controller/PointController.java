@@ -26,7 +26,7 @@ public class PointController {
         this.modelMapper = modelMapper;
     }
 
-    private PointDTO convertToDto(Point point) {
+    public PointDTO convertToDto(Point point) {
         PointDTO pointDTO = modelMapper.map(point, PointDTO.class);
         pointDTO.setParkingSpotDTO(modelMapper.map(point.getParkingSpot(), ParkingSpotDTO.class));
         return pointDTO;

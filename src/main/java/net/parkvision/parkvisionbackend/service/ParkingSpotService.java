@@ -2,6 +2,7 @@ package net.parkvision.parkvisionbackend.service;
 
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
+import net.parkvision.parkvisionbackend.model.Point;
 import net.parkvision.parkvisionbackend.model.Reservation;
 import net.parkvision.parkvisionbackend.repository.ParkingRepository;
 import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class ParkingSpotService {
@@ -21,7 +23,8 @@ public class ParkingSpotService {
     private final ReservationService _reservationService;
 
     @Autowired
-    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository, ReservationService reservationService) {
+    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository,
+                              ReservationService reservationService) {
         this._parkingSpotRepository = parkingSpotRepository;
         _parkingRepository = parkingRepository;
         _reservationService = reservationService;
@@ -41,7 +44,11 @@ public class ParkingSpotService {
             throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not " +
                     "exist.");
         }
-
+        if (!parkingSpot.getPoints().isEmpty()) {
+            for (int i = 0; i < parkingSpot.getPoints().size(); i++) {
+                parkingSpot.getPoints().get(i).setParkingSpot(parkingSpot);
+            }
+        }
         return _parkingSpotRepository.save(parkingSpot);
     }
 
@@ -78,12 +85,12 @@ public class ParkingSpotService {
     public List<ParkingSpot> getFreeSpots(Parking parking, Date startDate, Date endDate) {
         List<ParkingSpot> freeParkingSpots = new ArrayList<>();
 
-        for(ParkingSpot parkingSpot: _parkingSpotRepository.findByParkingId(parking.getId())){
+        for (ParkingSpot parkingSpot : _parkingSpotRepository.findByParkingId(parking.getId())) {
             Reservation reservation = new Reservation();
             reservation.setStartDate(startDate);
             reservation.setEndDate(endDate);
             reservation.setParkingSpot(parkingSpot);
-            if(_reservationService.isParkingSpotFree(reservation)){
+            if (_reservationService.isParkingSpotFree(reservation)) {
                 freeParkingSpots.add(parkingSpot);
             }
         }
@@ -93,5 +100,15 @@ public class ParkingSpotService {
 
     public List<ParkingSpot> getParkingSpots(Parking parking) {
         return new ArrayList<>(_parkingSpotRepository.findByParkingId(parking.getId()));
+    }
+
+    public List<ParkingSpot> createParkingSpots(List<ParkingSpot> parkingSpotList) {
+        List<ParkingSpot> parkingSpotsResponse = new ArrayList<>();
+        if (!parkingSpotList.isEmpty()) {
+            for (ParkingSpot parkingSpot : parkingSpotList) {
+                parkingSpotsResponse.add(createParkingSpot(parkingSpot));
+            }
+        }
+        return parkingSpotsResponse;
     }
 }
