@@ -6,6 +6,7 @@ import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.service.ParkingService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
+import net.parkvision.parkvisionbackend.service.PointService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,18 +28,28 @@ public class ParkingSpotController {
 
     private final ModelMapper modelMapper;
     private final ParkingService _parkingService;
+    private final PointController _pointController;
+
+    private final PointService _pointService;
 
     @Autowired
     public ParkingSpotController(ParkingSpotService parkingSpotService, ModelMapper modelMapper,
-                                 ParkingService parkingService) {
+                                 ParkingService parkingService, PointController pointController, PointService pointService) {
         _parkingSpotService = parkingSpotService;
         this.modelMapper = modelMapper;
         _parkingService = parkingService;
+        _pointController = pointController;
+        _pointService = pointService;
     }
 
     public ParkingSpotDTO convertToDto(ParkingSpot parkingSpot) {
         ParkingSpotDTO parkingSpotDTO = modelMapper.map(parkingSpot, ParkingSpotDTO.class);
         parkingSpotDTO.setParkingDTO(modelMapper.map(parkingSpot.getParking(), ParkingDTO.class));
+        if (!parkingSpot.getPoints().isEmpty()) {
+            parkingSpotDTO.setPointsDTO(parkingSpot.getPoints().stream().map(
+                    _pointController::convertToDto
+            ).collect(Collectors.toList()));
+        }
         return parkingSpotDTO;
     }
 
@@ -117,9 +128,25 @@ public class ParkingSpotController {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
             List<ParkingSpotDTO> parkingSpots
-                    = _parkingSpotService.getParkingSpots(parking.get()).stream().map(
-                    this::convertToDto
+                    = _parkingSpotService.getParkingSpots(parking.get()).stream().map(parkingSpot -> {
+                        parkingSpot.setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.getId()));
+                        return this.convertToDto(parkingSpot);
+                    }
             ).collect(Collectors.toList());
+            return ResponseEntity.ok(parkingSpots);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/parking/{id}/model/create")
+    public ResponseEntity<List<ParkingSpotDTO>> createParkingModel(@PathVariable Long id,
+                                                                   @RequestBody List<ParkingSpotDTO> parkingSpotDTOList) {
+        Optional<Parking> parking = _parkingService.getParkingById(id);
+        if (parking.isPresent()) {
+            List<ParkingSpotDTO> parkingSpots = _parkingSpotService.createParkingSpots(
+                    parkingSpotDTOList.stream().map(this::convertToEntity).collect(Collectors.toList())
+            ).stream().map(this::convertToDto).collect(Collectors.toList());
             return ResponseEntity.ok(parkingSpots);
         } else {
             return ResponseEntity.notFound().build();

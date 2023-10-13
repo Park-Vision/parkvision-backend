@@ -2,6 +2,8 @@ package net.parkvision.parkvisionbackend.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 
 @Data
 public class ParkingSpotDTO {
@@ -10,4 +12,5 @@ public class ParkingSpotDTO {
     private boolean occupied;
     private boolean active;
     private ParkingDTO parkingDTO;
+    private List<PointDTO> pointsDTO;
 }

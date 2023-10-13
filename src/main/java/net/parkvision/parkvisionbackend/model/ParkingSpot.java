@@ -21,7 +21,7 @@ public class ParkingSpot {
     private boolean occupied;
     private boolean active;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Point> points;
 
     @OneToMany
