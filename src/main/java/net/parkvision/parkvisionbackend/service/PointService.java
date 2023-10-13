@@ -27,6 +27,10 @@ public class PointService {
         return _pointRepository.findById(id);
     }
 
+    public List<Point> getPointsByParkingSpotId(Long parkingSpotId) {
+        return _pointRepository.findByParkingSpotId(parkingSpotId);
+    }
+
     public Point createPoint(Point point) {
         if (!_parkingSpotRepository.existsById(point.getParkingSpot().getId())) {
             throw new IllegalArgumentException("ParkingSpot with ID " + point.getParkingSpot().getId() + " does not " +

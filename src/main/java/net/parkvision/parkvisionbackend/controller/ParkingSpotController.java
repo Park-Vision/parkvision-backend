@@ -6,6 +6,7 @@ import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.service.ParkingService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
+import net.parkvision.parkvisionbackend.service.PointService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,13 +30,16 @@ public class ParkingSpotController {
     private final ParkingService _parkingService;
     private final PointController _pointController;
 
+    private final PointService _pointService;
+
     @Autowired
     public ParkingSpotController(ParkingSpotService parkingSpotService, ModelMapper modelMapper,
-                                 ParkingService parkingService, PointController pointController) {
+                                 ParkingService parkingService, PointController pointController, PointService pointService) {
         _parkingSpotService = parkingSpotService;
         this.modelMapper = modelMapper;
         _parkingService = parkingService;
         _pointController = pointController;
+        _pointService = pointService;
     }
 
     public ParkingSpotDTO convertToDto(ParkingSpot parkingSpot) {
@@ -124,8 +128,10 @@ public class ParkingSpotController {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
             List<ParkingSpotDTO> parkingSpots
-                    = _parkingSpotService.getParkingSpots(parking.get()).stream().map(
-                    this::convertToDto
+                    = _parkingSpotService.getParkingSpots(parking.get()).stream().map(parkingSpot -> {
+                        parkingSpot.setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.getId()));
+                        return this.convertToDto(parkingSpot);
+                    }
             ).collect(Collectors.toList());
             return ResponseEntity.ok(parkingSpots);
         } else {
