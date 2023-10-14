@@ -13,11 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @RestController
@@ -110,10 +109,12 @@ public class ParkingSpotController {
                                                                         @RequestParam String endDate) throws ParseException {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
             List<ParkingSpotDTO> freeParkingSpots
-                    = _parkingSpotService.getFreeSpots(parking.get(), formatter.parse(startDate),
-                    formatter.parse(endDate)).stream().map(parkingSpot -> {
+                    = _parkingSpotService.getFreeSpots(parking.get(),
+                    ZonedDateTime.parse(startDate, formatter),
+                    ZonedDateTime.parse(endDate, formatter)
+            ).stream().map(parkingSpot -> {
                         parkingSpot.setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.getId()));
                         return this.convertToDto(parkingSpot);
                     }

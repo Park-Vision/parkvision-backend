@@ -19,7 +19,9 @@ public class Parking {
     private Long id;
     private String name;
     private String description;
-    private String address;
+    private String city;
+    private String street;
+    private String zipCode;
     private double costRate;
     private String openHours;
     private double latitude;
