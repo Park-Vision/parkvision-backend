@@ -5,6 +5,7 @@ import net.parkvision.parkvisionbackend.repository.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 
@@ -46,9 +47,11 @@ public class DataSeeder {
             System.out.println("seedParkingData()");
 
 
-            parking1.setName("Parking Magnolia");
-            parking1.setAddress("ul. Magnoliowa 1, 00-000 Wrocław");
-            parking1.setDescription("Parking Magnolia to parking znajdujący się w centrum Wrocławia. " +
+            parking1.setName("Magnolia Park");
+            parking1.setCity("Wrocław");
+            parking1.setStreet("Legnicka 58");
+            parking1.setZipCode("54-204");
+            parking1.setDescription("Parking Magnolia Park to parking znajdujący się w centrum Wrocławia. " +
                     "Posiada 100 miejsc parkingowych, w tym 5 miejsc dla osób niepełnosprawnych. " +
                     "Parking jest monitorowany przez 24 godziny na dobę.");
             parking1.setOpenHours("6:00 - 22:00");
@@ -58,15 +61,17 @@ public class DataSeeder {
             _parkingRepository.save(parking1);
 
 
-            parking2.setName("Parking Rondo");
-            parking2.setAddress("ul. Rondo 1, 00-000 Wrocław");
-            parking2.setDescription("Parking Rondo to parking znajdujący się w centrum Wrocławia. " +
+            parking2.setName("D20 - Politechnika Wrocławska");
+            parking2.setCity("Wrocław");
+            parking2.setStreet("Janiszewskiego 8");
+            parking2.setZipCode("50-372");
+            parking2.setDescription("Parking D20 to parking dla studentów i pracowników Politehcniki Wrocławskiej. " +
                     "Posiada 50 miejsc parkingowych, w tym 2 miejsca dla osób niepełnosprawnych. " +
                     "Parking jest monitorowany przez 24 godziny na dobę.");
             parking2.setOpenHours("4:30 - 23:00");
             parking2.setCostRate(3.0);
-            parking2.setLongitude(17.08785648136442);
-            parking2.setLatitude(1.14149342309597);
+            parking2.setLongitude(51.10975855141324);
+            parking2.setLatitude(17.059114686292222);
             _parkingRepository.save(parking2);
 
             System.out.println("Data seeded.");
@@ -257,15 +262,15 @@ public class DataSeeder {
             System.out.println("seedReservationData()");
 
             reservation.setParkingSpot(parkingSpot1);
-            reservation.setStartDate(new Date());
-            reservation.setEndDate(new Date());
+            reservation.setStartDate(ZonedDateTime.now());
+            reservation.setEndDate(ZonedDateTime.now().plusHours(1));
             reservation.setUser(client);
             reservation.setRegistrationNumber("123");
             _reservationRepository.save(reservation);
 
             reservation1.setParkingSpot(parkingSpot2);
-            reservation1.setStartDate(new Date());
-            reservation1.setEndDate(new Date());
+            reservation1.setStartDate(ZonedDateTime.now());
+            reservation1.setEndDate(ZonedDateTime.now().plusHours(1));
             reservation1.setUser(client);
             reservation1.setRegistrationNumber("123");
             _reservationRepository.save(reservation1);

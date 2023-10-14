@@ -7,8 +7,10 @@ import net.parkvision.parkvisionbackend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.TimeZone;
 
 @Service
 public class ReservationService {
@@ -70,8 +72,9 @@ public class ReservationService {
     }
 
     private boolean isDateRangeOverlap(Reservation existingReservation, Reservation newReservation) {
-        return newReservation.getStartDate().before(existingReservation.getEndDate())
-                && newReservation.getEndDate().after(existingReservation.getStartDate());
+
+        return newReservation.getStartDate().isBefore(existingReservation.getEndDate())
+                && newReservation.getEndDate().isAfter(existingReservation.getStartDate());
     }
 
     public Reservation updateReservation(Reservation reservation) {

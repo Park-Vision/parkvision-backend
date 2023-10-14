@@ -1,7 +1,9 @@
 package net.parkvision.parkvisionbackend.model;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -18,8 +20,8 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Date startDate;
-    private Date endDate;
+    private ZonedDateTime startDate;
+    private ZonedDateTime endDate;
     private String registrationNumber;
 
     @ManyToOne
@@ -28,5 +30,4 @@ public class Reservation {
     private ParkingSpot parkingSpot; // Many-to-one relationship
     @OneToMany
     private List<Payment> payment; // One-to-many relationship
-
 }
