@@ -3,10 +3,12 @@ package net.parkvision.parkvisionbackend.controller;
 import net.parkvision.parkvisionbackend.dto.CarDTO;
 import net.parkvision.parkvisionbackend.dto.ClientDTO;
 import net.parkvision.parkvisionbackend.model.Car;
+import net.parkvision.parkvisionbackend.model.Client;
 import net.parkvision.parkvisionbackend.service.CarService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,6 +37,7 @@ public class CarController {
         return modelMapper.map(carDTO, Car.class);
     }
 
+    //api/cars
     @GetMapping
     public ResponseEntity<List<CarDTO>> getAllCars() {
         List<CarDTO> cars =
@@ -42,6 +45,21 @@ public class CarController {
                         this::convertToDTO
                 ).collect(Collectors.toList());
         return ResponseEntity.ok(cars);
+    }
+
+    @GetMapping("/client")
+    public ResponseEntity<List<CarDTO>> getAllCarsByClientId() {
+        Object user = SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        if(user instanceof Client) {
+            Client client = (Client) user;
+            List<CarDTO> cars =
+                    _carService.getAllCarsByClientId(client.getId()).stream().map(
+                            this::convertToDTO
+                    ).collect(Collectors.toList());
+            return ResponseEntity.ok(cars);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{id}")

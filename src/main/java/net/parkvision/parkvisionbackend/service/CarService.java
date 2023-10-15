@@ -51,4 +51,8 @@ public class CarService {
     public void deleteCar(Long id) {
         _carRepository.deleteById(id);
     }
+
+    public List<Car> getAllCarsByClientId(Long id) {
+        return _carRepository.findAllByClientId(id);
+    }
 }
