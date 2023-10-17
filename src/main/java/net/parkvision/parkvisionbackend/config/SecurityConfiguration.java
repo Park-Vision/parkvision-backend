@@ -3,6 +3,7 @@ package net.parkvision.parkvisionbackend.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -41,7 +42,10 @@ public class SecurityConfiguration {
                         "/v2/api-docs/**",
                         "/swagger-ui/**"
                 ).permitAll()
-                .requestMatchers( "/**").hasRole("ADMIN")
+                .and()
+                .authorizeHttpRequests()
+                .requestMatchers(HttpMethod.GET, "/api/parkings/**").permitAll()
+//                .requestMatchers( "/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

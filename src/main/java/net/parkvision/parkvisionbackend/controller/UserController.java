@@ -6,6 +6,7 @@ import net.parkvision.parkvisionbackend.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,13 +39,14 @@ public class UserController {
         ).collect(Collectors.toList());
         return ResponseEntity.ok(users);
     }
-
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         User user = _userService.getUserById(id);
         return ResponseEntity.ok(convertToDto(user));
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO) {
         User user = convertToEntity(userDTO);

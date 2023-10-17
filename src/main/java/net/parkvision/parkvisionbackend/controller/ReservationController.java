@@ -39,6 +39,7 @@ public class ReservationController {
     }
 
 
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @GetMapping
     public ResponseEntity<List<ReservationDTO>> getAllReservations() {
         List<ReservationDTO> reservations = _reservationService.getAllReservations().stream().map(
@@ -47,6 +48,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservations);
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<ReservationDTO> getReservationById(@PathVariable Long id) {
         Optional<Reservation> reservation = _reservationService.getReservationById(id);
