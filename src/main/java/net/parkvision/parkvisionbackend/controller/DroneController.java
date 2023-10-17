@@ -3,14 +3,18 @@ package net.parkvision.parkvisionbackend.controller;
 import net.parkvision.parkvisionbackend.dto.DroneDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.model.Drone;
+import net.parkvision.parkvisionbackend.model.ParkingModerator;
 import net.parkvision.parkvisionbackend.service.DroneService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -31,6 +35,7 @@ public class DroneController {
         this.kafkaTemplate = kafkaTemplate;
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @PostMapping("/{id}/start")
     public ResponseEntity<DroneDTO> startDrone(@PathVariable Long id) {
         Optional<Drone> drone = droneService.getDroneById(id);
@@ -52,6 +57,7 @@ public class DroneController {
         return modelMapper.map(droneDTO, Drone.class);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<DroneDTO>> getAllDrones() {
         List<DroneDTO> drones = droneService.getAllDrones().stream().map(
@@ -60,23 +66,52 @@ public class DroneController {
         return ResponseEntity.ok(drones);
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @GetMapping("/parking/{id}")
+    public ResponseEntity<List<DroneDTO>> getAllDronesByParkingId(@PathVariable Long id) {
+        ParkingModerator parkingModerator = getParkingModeratorFromRequest();
+        if(!Objects.equals(parkingModerator.getParking().getId(), id)){
+            return ResponseEntity.badRequest().build();
+        }
+        List<DroneDTO> drones = droneService.getAllDronesByParkingId(id).stream().map(
+                this::convertToDTO
+        ).collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(drones);
+    }
+
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<DroneDTO> getDroneById(@PathVariable Long id) {
+        ParkingModerator parkingModerator = getParkingModeratorFromRequest();
+        if(parkingModerator == null){
+            return ResponseEntity.badRequest().build();
+        }
+
         Optional<Drone> drone = droneService.getDroneById(id);
         if (drone.isPresent()) {
+            if(!Objects.equals(parkingModerator.getParking().getId(), drone.get().getParking().getId())){
+                return ResponseEntity.badRequest().build();
+            }
             return ResponseEntity.ok(convertToDTO(drone.get()));
         }
         return ResponseEntity.notFound().build();
     }
-
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<DroneDTO> createDrone(@RequestBody DroneDTO droneDto) {
+        ParkingModerator parkingModerator = getParkingModeratorFromRequest();
+        if(!Objects.equals(parkingModerator.getParking().getId(), droneDto.getParkingDTO().getId())){
+            return ResponseEntity.badRequest().build();
+        }
+
         Drone createdDrone = droneService.createDrone(convertToEntity(droneDto));
         return ResponseEntity.ok(convertToDTO(createdDrone));
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @PutMapping()
     public ResponseEntity<DroneDTO> updateDrone(@RequestBody DroneDTO droneDto) {
+        // TODO: can parking manager change parking of a drone?? - noooo!
         try {
             Drone updatedDrone = droneService.updateDrone(convertToEntity(droneDto));
             return ResponseEntity.ok(convertToDTO(updatedDrone));
@@ -85,9 +120,30 @@ public class DroneController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDrone(@PathVariable Long id) {
+        ParkingModerator parkingModerator = getParkingModeratorFromRequest();
+        if(parkingModerator == null){
+            return ResponseEntity.badRequest().build();
+        }
+
+        Optional<Drone> drone = droneService.getDroneById(id);
+        if(!Objects.equals(parkingModerator.getParking().getId(), drone.get().getParking().getId())){
+            return ResponseEntity.badRequest().build();
+        }
+
+
         droneService.deleteDrone(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private ParkingModerator getParkingModeratorFromRequest(){
+        Object user = SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        if(user instanceof ParkingModerator) {
+            return (ParkingModerator) user;
+        }
+        return null;
     }
 }

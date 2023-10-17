@@ -8,6 +8,7 @@ import net.parkvision.parkvisionbackend.service.DroneMissionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,6 +40,7 @@ public class DroneMissionController {
         return modelMapper.map(droneMissionDTO, DroneMission.class);
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @GetMapping
     public ResponseEntity<List<DroneMissionDTO>> getAllDroneMissions() {
         List<DroneMissionDTO> droneMissions
@@ -48,6 +50,7 @@ public class DroneMissionController {
         return ResponseEntity.ok(droneMissions);
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<DroneMissionDTO> getDroneMissionById(@PathVariable Long id) {
         Optional<DroneMission> droneMission = _droneMissionService.getDroneMissionById(id);
@@ -58,12 +61,14 @@ public class DroneMissionController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<DroneMissionDTO> createDroneMission(@RequestBody DroneMissionDTO droneMissionDto) {
         DroneMission createdDroneMission = _droneMissionService.createDroneMission(convertToEntity(droneMissionDto));
         return ResponseEntity.ok(convertToDTO(createdDroneMission));
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @PutMapping
     public ResponseEntity<DroneMissionDTO> updateDroneMission(@RequestBody DroneMissionDTO droneMissionDto) {
         try {
@@ -75,6 +80,7 @@ public class DroneMissionController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDroneMission(@PathVariable Long id) {
         _droneMissionService.deleteDroneMission(id);

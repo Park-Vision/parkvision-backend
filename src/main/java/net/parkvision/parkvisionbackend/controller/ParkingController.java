@@ -6,6 +6,7 @@ import net.parkvision.parkvisionbackend.service.ParkingService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +38,7 @@ public class ParkingController {
         return modelMapper.map(parkingDTO, Parking.class);
     }
 
+
     @GetMapping
     public ResponseEntity<List<ParkingDTO>> getAllParkings() {
         List<ParkingDTO> parkings
@@ -56,12 +58,14 @@ public class ParkingController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<ParkingDTO> createParking(@RequestBody ParkingDTO parkingDTO) {
         Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
         return ResponseEntity.ok(convertToDTO(createdParking));
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @PutMapping
     public ResponseEntity<ParkingDTO> updateParking(@RequestBody ParkingDTO parkingDTO) {
         try {
@@ -72,6 +76,8 @@ public class ParkingController {
         }
     }
 
+
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteParking(@PathVariable Long id) {
         _parkingService.deleteParking(id);

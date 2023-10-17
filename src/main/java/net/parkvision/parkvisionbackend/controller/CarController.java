@@ -62,23 +62,48 @@ public class CarController {
         return ResponseEntity.notFound().build();
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<CarDTO> getCarById(@PathVariable Long id) {
+        Client client = getClientFromRequest();
         Optional<Car> car = _carService.getCarById(id);
-        if (car.isPresent()) {
+        if (car.isPresent() && client.getId().equals(car.get().getClient().getId())) {
             return ResponseEntity.ok(convertToDTO(car.get()));
         }
         return ResponseEntity.notFound().build();
     }
 
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<CarDTO> createCar(@RequestBody CarDTO carDTO) {
+        Client client = getClientFromRequest();
+        if(!client.getId().equals(carDTO.getClientDTO().getId())){
+            return ResponseEntity.badRequest().build();
+        }
+
         Car carCreated = _carService.createCar(convertToEntity(carDTO));
         return ResponseEntity.ok(convertToDTO(carCreated));
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PutMapping
     public ResponseEntity<CarDTO> updateCar(@RequestBody CarDTO carDTO) {
+
+        Client client = getClientFromRequest();
+        if(client == null){
+            return ResponseEntity.badRequest().build();
+        }
+
+        Optional<Car> car = _carService.getCarById(carDTO.getId());
+        if(!car.isPresent()){
+            return ResponseEntity.notFound().build();
+        } else {
+            if(!car.get().getClient().getId().equals(client.getId())){
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
         try {
             Car carUpdated = _carService.updateCar(convertToEntity(carDTO));
             return ResponseEntity.ok(convertToDTO(carUpdated));
@@ -87,9 +112,34 @@ public class CarController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
+
+        Client client = getClientFromRequest();
+        if(client == null){
+            return ResponseEntity.badRequest().build();
+        }
+
+        Optional<Car> car = _carService.getCarById(id);
+        if(!car.isPresent()){
+            return ResponseEntity.notFound().build();
+        } else {
+            if(!car.get().getClient().getId().equals(client.getId())){
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
         _carService.deleteCar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private Client getClientFromRequest(){
+        Object user = SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        if(user instanceof Client) {
+            return (Client) user;
+        }
+        return null;
     }
 }
