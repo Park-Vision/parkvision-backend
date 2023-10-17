@@ -56,14 +56,14 @@ public class ReservationController {
     //todo znajdz rezerwacje danego parkingu po id
     //todo znajdz rezerwacje danego parkingu po id i dacie
 
-    @PreAuthorize("hasAnyRole('USER','PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
         Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
         return ResponseEntity.ok(convertToDto(createdReservation));
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<ReservationDTO> updateReservation(@RequestBody ReservationDTO reservationDto) {
         try {
@@ -74,7 +74,7 @@ public class ReservationController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         _reservationService.deleteReservation(id);

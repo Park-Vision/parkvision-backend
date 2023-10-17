@@ -35,7 +35,7 @@ public class DroneController {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping("/{id}/start")
     public ResponseEntity<DroneDTO> startDrone(@PathVariable Long id) {
         Optional<Drone> drone = droneService.getDroneById(id);
@@ -57,7 +57,6 @@ public class DroneController {
         return modelMapper.map(droneDTO, Drone.class);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<DroneDTO>> getAllDrones() {
         List<DroneDTO> drones = droneService.getAllDrones().stream().map(
@@ -66,7 +65,7 @@ public class DroneController {
         return ResponseEntity.ok(drones);
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @GetMapping("/parking/{id}")
     public ResponseEntity<List<DroneDTO>> getAllDronesByParkingId(@PathVariable Long id) {
         ParkingModerator parkingModerator = getParkingModeratorFromRequest();
@@ -79,7 +78,7 @@ public class DroneController {
         return ResponseEntity.ok(drones);
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<DroneDTO> getDroneById(@PathVariable Long id) {
         ParkingModerator parkingModerator = getParkingModeratorFromRequest();
@@ -96,7 +95,7 @@ public class DroneController {
         }
         return ResponseEntity.notFound().build();
     }
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<DroneDTO> createDrone(@RequestBody DroneDTO droneDto) {
         ParkingModerator parkingModerator = getParkingModeratorFromRequest();
@@ -108,7 +107,7 @@ public class DroneController {
         return ResponseEntity.ok(convertToDTO(createdDrone));
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PutMapping()
     public ResponseEntity<DroneDTO> updateDrone(@RequestBody DroneDTO droneDto) {
         // TODO: can parking manager change parking of a drone?? - noooo!
@@ -120,7 +119,7 @@ public class DroneController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDrone(@PathVariable Long id) {
         ParkingModerator parkingModerator = getParkingModeratorFromRequest();

@@ -57,7 +57,6 @@ public class ParkingSpotController {
         return modelMapper.map(parkingSpotDTO, ParkingSpot.class);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<ParkingSpotDTO>> getAllParkingSpots() {
         List<ParkingSpotDTO> parkingSpots
@@ -67,7 +66,6 @@ public class ParkingSpotController {
         return ResponseEntity.ok(parkingSpots);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ParkingSpotDTO> getParkingSpotById(@PathVariable Long id) {
         Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(id);
@@ -78,14 +76,14 @@ public class ParkingSpotController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ParkingSpotDTO> createParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
         ParkingSpot createdParkingSpot = _parkingSpotService.createParkingSpot(convertToEntity(parkingSpotDto));
         return ResponseEntity.ok(convertToDto(createdParkingSpot));
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<ParkingSpotDTO> updateParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
         try {
@@ -96,14 +94,14 @@ public class ParkingSpotController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @DeleteMapping("/soft/{id}")
     public ResponseEntity<Void> softDeleteParkingSpot(@PathVariable Long id) {
         _parkingSpotService.softDeleteParkingSpot(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @DeleteMapping("/hard/{id}")
     public ResponseEntity<Void> hardDeleteParkingSpot(@PathVariable Long id) {
         _parkingSpotService.hardDeleteParkingSpot(id);
@@ -149,7 +147,7 @@ public class ParkingSpotController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping("/parking/{id}/model/create")
     public ResponseEntity<List<ParkingSpotDTO>> createParkingModel(@PathVariable Long id,
                                                                    @RequestBody List<ParkingSpotDTO> parkingSpotDTOList) {

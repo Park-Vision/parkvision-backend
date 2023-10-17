@@ -58,14 +58,14 @@ public class ParkingController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ParkingDTO> createParking(@RequestBody ParkingDTO parkingDTO) {
         Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
         return ResponseEntity.ok(convertToDTO(createdParking));
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<ParkingDTO> updateParking(@RequestBody ParkingDTO parkingDTO) {
         try {
@@ -77,7 +77,7 @@ public class ParkingController {
     }
 
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteParking(@PathVariable Long id) {
         _parkingService.deleteParking(id);

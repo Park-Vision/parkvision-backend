@@ -38,7 +38,6 @@ public class CarController {
         return modelMapper.map(carDTO, Car.class);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<CarDTO>> getAllCars() {
         List<CarDTO> cars =
@@ -47,7 +46,7 @@ public class CarController {
                 ).collect(Collectors.toList());
         return ResponseEntity.ok(cars);
     }
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER')")
     @GetMapping("/client")
     public ResponseEntity<List<CarDTO>> getAllCarsByClientId() {
         Client client = getClientFromRequest();
@@ -61,7 +60,7 @@ public class CarController {
         return ResponseEntity.ok(cars);
     }
 
-    @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<CarDTO> getCarById(@PathVariable Long id) {
         Client client = getClientFromRequest();
@@ -73,7 +72,7 @@ public class CarController {
     }
 
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER')")
     @PostMapping
     public ResponseEntity<CarDTO> createCar(@RequestBody CarDTO carDTO) {
         Client client = getClientFromRequest();
@@ -85,7 +84,7 @@ public class CarController {
         return ResponseEntity.ok(convertToDTO(carCreated));
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER')")
     @PutMapping
     public ResponseEntity<CarDTO> updateCar(@RequestBody CarDTO carDTO) {
 
@@ -111,7 +110,7 @@ public class CarController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
 

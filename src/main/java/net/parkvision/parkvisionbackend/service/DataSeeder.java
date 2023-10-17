@@ -126,6 +126,7 @@ public class DataSeeder {
 
         Client client = new Client();
         Client client2 = new Client();
+        Client client3 = new Client();
 
         long clientCount = _clientRepository.count();
 
@@ -145,6 +146,13 @@ public class DataSeeder {
             client2.setPassword(new BCryptPasswordEncoder().encode("654321"));
             client2.setRole(Role.USER);
             _clientRepository.save(client2);
+
+            client3.setFirstname("admin");
+            client3.setLastname("admin");
+            client3.setEmail("admin");
+            client3.setPassword(new BCryptPasswordEncoder().encode("admin"));
+            client3.setRole(Role.ADMIN);
+            _clientRepository.save(client3);
 
 
             System.out.println("Data seeded.");

@@ -41,6 +41,7 @@ public class SecurityConfiguration {
                         "/v2/api-docs/**",
                         "/swagger-ui/**"
                 ).permitAll()
+                .requestMatchers( "/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
@@ -48,37 +49,6 @@ public class SecurityConfiguration {
                 .and()
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-//        http
-//                .cors()
-//                .and()
-//                .csrf()
-//                .disable()
-//                .authorizeHttpRequests()
-//                .requestMatchers("/api/auth/**", "/swagger-ui.html", "/v3/api-docs",
-//                        "/swagger-resources/**","/v3/api-docs/swagger-config", "/v2/api-docs/**", "/swagger-ui/**")// add more that should be
-//                // permitted
-//                .permitAll()
-//                .requestMatchers( "/api/cars", "/api/parkingspots" , "").hasRole("USER")
-//                .requestMatchers(
-//                        "/api/cars",
-//                        "/api/parkings",
-//                        "/api/drones",
-//                        "/api/drone-missions",
-//                        "/api" +
-//                        "/parkingspots",
-//                        "/api" + "/payments",
-//                        "/api/points",
-//                        "/api/reservations"
-//                ).hasRole("PARKING_MANAGER")
-//                .requestMatchers( "/**").hasRole("ADMIN")
-//                .anyRequest()
-//                .authenticated()
-//                .and()
-//                .sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .authenticationProvider(authenticationProvider)
-//                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
