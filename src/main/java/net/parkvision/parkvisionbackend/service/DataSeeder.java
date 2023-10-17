@@ -125,6 +125,8 @@ public class DataSeeder {
         }
 
         Client client = new Client();
+        Client client2 = new Client();
+
         long clientCount = _clientRepository.count();
 
         if (clientCount == 0) {
@@ -136,6 +138,14 @@ public class DataSeeder {
             client.setPassword(new BCryptPasswordEncoder().encode("123456"));
             client.setRole(Role.USER);
             _clientRepository.save(client);
+
+            client2.setFirstname("Jan");
+            client2.setLastname("Kowalski");
+            client2.setEmail("jan@pv.pl:");
+            client2.setPassword(new BCryptPasswordEncoder().encode("654321"));
+            client2.setRole(Role.USER);
+            _clientRepository.save(client2);
+
 
             System.out.println("Data seeded.");
         } else {
@@ -196,6 +206,7 @@ public class DataSeeder {
             point4.setParkingSpot(parkingSpot1);
             _pointRepository.save(point4);
 
+
             Point point5 = new Point();
             point5.setLatitude(51.11861171066726);
             point5.setLongitude(16.99032095102528);
@@ -242,7 +253,7 @@ public class DataSeeder {
 
             car2.setBrand("123");
             car2.setColor("blue");
-            car2.setClient(client);
+            car2.setClient(client2);
             car2.setRegistrationNumber("567");
 
             _carRepository.save(car2);
