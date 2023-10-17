@@ -25,6 +25,10 @@ public class DroneService {
         return _droneRepository.findAll();
     }
 
+    public List<Drone> getAllDronesByParkingId(Long parkingId) {
+        return _droneRepository.findAllByParkingId(parkingId);
+    }
+
     public Optional<Drone> getDroneById(Long id) {
         return _droneRepository.findById(id);
     }
@@ -48,7 +52,7 @@ public class DroneService {
         drone.setName(drone.getName());
         drone.setModel(drone.getModel());
         drone.setSerialNumber(drone.getSerialNumber());
-        drone.setParking(drone.getParking());
+//        drone.setParking(drone.getParking());
 
         return _droneRepository.save(drone);
     }

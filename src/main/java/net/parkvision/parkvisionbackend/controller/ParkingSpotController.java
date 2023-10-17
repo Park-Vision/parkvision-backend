@@ -10,6 +10,7 @@ import net.parkvision.parkvisionbackend.service.PointService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -75,12 +76,14 @@ public class ParkingSpotController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ParkingSpotDTO> createParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
         ParkingSpot createdParkingSpot = _parkingSpotService.createParkingSpot(convertToEntity(parkingSpotDto));
         return ResponseEntity.ok(convertToDto(createdParkingSpot));
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<ParkingSpotDTO> updateParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
         try {
@@ -91,17 +94,20 @@ public class ParkingSpotController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @DeleteMapping("/soft/{id}")
     public ResponseEntity<Void> softDeleteParkingSpot(@PathVariable Long id) {
         _parkingSpotService.softDeleteParkingSpot(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @DeleteMapping("/hard/{id}")
     public ResponseEntity<Void> hardDeleteParkingSpot(@PathVariable Long id) {
         _parkingSpotService.hardDeleteParkingSpot(id);
         return ResponseEntity.noContent().build();
     }
+
 
     @GetMapping("/parking/{id}/free")
     public ResponseEntity<List<ParkingSpotDTO>> getFreeSpotsByParkingId(@PathVariable Long id,
@@ -141,6 +147,7 @@ public class ParkingSpotController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping("/parking/{id}/model/create")
     public ResponseEntity<List<ParkingSpotDTO>> createParkingModel(@PathVariable Long id,
                                                                    @RequestBody List<ParkingSpotDTO> parkingSpotDTOList) {

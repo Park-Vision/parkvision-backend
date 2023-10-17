@@ -7,6 +7,7 @@ import net.parkvision.parkvisionbackend.service.ReservationService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +38,7 @@ public class ReservationController {
         return modelMapper.map(reservationDTO, Reservation.class);
     }
 
+
     @GetMapping
     public ResponseEntity<List<ReservationDTO>> getAllReservations() {
         List<ReservationDTO> reservations = _reservationService.getAllReservations().stream().map(
@@ -54,12 +56,14 @@ public class ReservationController {
     //todo znajdz rezerwacje danego parkingu po id
     //todo znajdz rezerwacje danego parkingu po id i dacie
 
+    @PreAuthorize("hasAnyRole('USER','PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
         Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
         return ResponseEntity.ok(convertToDto(createdReservation));
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<ReservationDTO> updateReservation(@RequestBody ReservationDTO reservationDto) {
         try {
@@ -70,6 +74,7 @@ public class ReservationController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         _reservationService.deleteReservation(id);
