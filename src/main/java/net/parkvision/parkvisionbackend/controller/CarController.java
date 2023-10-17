@@ -8,6 +8,7 @@ import net.parkvision.parkvisionbackend.service.CarService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +38,7 @@ public class CarController {
         return modelMapper.map(carDTO, Car.class);
     }
 
-    //api/cars
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<CarDTO>> getAllCars() {
         List<CarDTO> cars =
@@ -46,20 +47,18 @@ public class CarController {
                 ).collect(Collectors.toList());
         return ResponseEntity.ok(cars);
     }
-
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/client")
     public ResponseEntity<List<CarDTO>> getAllCarsByClientId() {
-        Object user = SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-        if(user instanceof Client) {
-            Client client = (Client) user;
-            List<CarDTO> cars =
-                    _carService.getAllCarsByClientId(client.getId()).stream().map(
-                            this::convertToDTO
-                    ).collect(Collectors.toList());
-            return ResponseEntity.ok(cars);
+        Client client = getClientFromRequest();
+        if(client == null){
+            return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.notFound().build();
+        List<CarDTO> cars =
+                _carService.getAllCarsByClientId(client.getId()).stream().map(
+                        this::convertToDTO
+                ).collect(Collectors.toList());
+        return ResponseEntity.ok(cars);
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'ADMIN')")
