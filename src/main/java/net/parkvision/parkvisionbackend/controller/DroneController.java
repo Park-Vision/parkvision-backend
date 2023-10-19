@@ -45,6 +45,7 @@ public class DroneController {
     public ResponseEntity<DroneDTO> startDrone(@PathVariable Long id, @PathVariable String command) {
         Optional<Drone> drone = droneService.getDroneById(id);
         if (drone.isPresent()) {
+            System.out.println("drone-" + id);
             kafkaTemplate.send("drone-" + id, command);
             return ResponseEntity.ok(convertToDTO(drone.get()));
         }
