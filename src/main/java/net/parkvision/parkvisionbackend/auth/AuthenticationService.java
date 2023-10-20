@@ -1,5 +1,7 @@
 package net.parkvision.parkvisionbackend.auth;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import net.parkvision.parkvisionbackend.config.JwtService;
 import net.parkvision.parkvisionbackend.model.User;
@@ -39,8 +41,11 @@ public class AuthenticationService {
     }
 
     private AuthenticationResponse buildAuthenticationResponse(User user) {
+        Claims claims = Jwts.claims().setSubject(user.getUsername());
+        claims.put("userId", user.getId() + "");
+        claims.put("role", user.getRole());
         return AuthenticationResponse.builder()
-                .token(jwtService.generateToken(user))
+                .token(jwtService.generateToken(claims,user))
                 .build();
     }
 }

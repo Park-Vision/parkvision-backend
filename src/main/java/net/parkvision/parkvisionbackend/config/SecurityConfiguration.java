@@ -44,7 +44,7 @@ public class SecurityConfiguration {
                 ).permitAll()
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers(HttpMethod.GET, "/api/parkings/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/parkings/**", "api/parkingspots/parking/**").permitAll()
 //                .requestMatchers( "/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
