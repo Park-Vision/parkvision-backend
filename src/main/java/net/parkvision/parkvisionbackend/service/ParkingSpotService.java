@@ -2,7 +2,6 @@ package net.parkvision.parkvisionbackend.service;
 
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
-import net.parkvision.parkvisionbackend.model.Point;
 import net.parkvision.parkvisionbackend.model.Reservation;
 import net.parkvision.parkvisionbackend.repository.ParkingRepository;
 import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
@@ -10,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ParkingSpotService {
@@ -109,5 +106,15 @@ public class ParkingSpotService {
             }
         }
         return parkingSpotsResponse;
+    }
+
+    public Map<Long, ZonedDateTime> getSpotsFreeTime(Parking parking, ZonedDateTime date) {
+        Map<Long, ZonedDateTime> parkingSpotsWhenFree = new HashMap<>();
+
+        for (ParkingSpot parkingSpot : _parkingSpotRepository.findByParkingId(parking.getId())) {
+            parkingSpotsWhenFree.put(parkingSpot.getId(),
+                    _reservationService.getEarliestAvailableTime(parkingSpot, date));
+        }
+        return parkingSpotsWhenFree;
     }
 }

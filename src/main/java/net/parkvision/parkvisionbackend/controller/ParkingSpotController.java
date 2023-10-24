@@ -13,10 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -34,7 +34,8 @@ public class ParkingSpotController {
 
     @Autowired
     public ParkingSpotController(ParkingSpotService parkingSpotService, ModelMapper modelMapper,
-                                 ParkingService parkingService, PointController pointController, PointService pointService) {
+                                 ParkingService parkingService, PointController pointController,
+                                 PointService pointService) {
         _parkingSpotService = parkingSpotService;
         this.modelMapper = modelMapper;
         _parkingService = parkingService;
@@ -112,7 +113,7 @@ public class ParkingSpotController {
     @GetMapping("/parking/{id}/free")
     public ResponseEntity<List<ParkingSpotDTO>> getFreeSpotsByParkingId(@PathVariable Long id,
                                                                         @RequestParam String startDate,
-                                                                        @RequestParam String endDate) throws ParseException {
+                                                                        @RequestParam String endDate) {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
             DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
@@ -132,7 +133,7 @@ public class ParkingSpotController {
     }
 
     @GetMapping("/parking/{id}")
-    public ResponseEntity<List<ParkingSpotDTO>> getFreeSpotsByParkingId(@PathVariable Long id) {
+    public ResponseEntity<List<ParkingSpotDTO>> getSpotsByParkingId(@PathVariable Long id) {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
             List<ParkingSpotDTO> parkingSpots
@@ -157,6 +158,21 @@ public class ParkingSpotController {
                     parkingSpotDTOList.stream().map(this::convertToEntity).collect(Collectors.toList())
             ).stream().map(this::convertToDto).collect(Collectors.toList());
             return ResponseEntity.ok(parkingSpots);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/parking/{id}/free-time")
+    public ResponseEntity<Map<Long, ZonedDateTime>> getSpotsFreeTimeByParkingId(@PathVariable Long id,
+                                                                                @RequestParam String startDate) {
+        Optional<Parking> parking = _parkingService.getParkingById(id);
+        if (parking.isPresent()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+            Map<Long, ZonedDateTime> parkingSpotsWithFreeTime
+                    = _parkingSpotService.getSpotsFreeTime(parking.get(), ZonedDateTime.parse(startDate, formatter)
+            );
+            return ResponseEntity.ok(parkingSpotsWithFreeTime);
         } else {
             return ResponseEntity.notFound().build();
         }
