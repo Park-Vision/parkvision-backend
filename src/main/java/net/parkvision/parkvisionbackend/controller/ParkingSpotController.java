@@ -2,8 +2,10 @@ package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
+import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
+import net.parkvision.parkvisionbackend.service.DroneService;
 import net.parkvision.parkvisionbackend.service.ParkingService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
 import net.parkvision.parkvisionbackend.service.PointService;
@@ -31,16 +33,18 @@ public class ParkingSpotController {
     private final PointController _pointController;
 
     private final PointService _pointService;
+    private final DroneService _droneService;
 
     @Autowired
     public ParkingSpotController(ParkingSpotService parkingSpotService, ModelMapper modelMapper,
                                  ParkingService parkingService, PointController pointController,
-                                 PointService pointService) {
+                                 PointService pointService, DroneService droneService) {
         _parkingSpotService = parkingSpotService;
         this.modelMapper = modelMapper;
         _parkingService = parkingService;
         _pointController = pointController;
         _pointService = pointService;
+        _droneService = droneService;
     }
 
     public ParkingSpotDTO convertToDto(ParkingSpot parkingSpot) {
@@ -173,6 +177,22 @@ public class ParkingSpotController {
                     = _parkingSpotService.getSpotsFreeTime(parking.get(), ZonedDateTime.parse(startDate, formatter)
             );
             return ResponseEntity.ok(parkingSpotsWithFreeTime);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/drone/{id}")
+    public ResponseEntity<List<ParkingSpotDTO>> getSpotsByDroneId(@PathVariable Long id) {
+        Optional<Drone> drone = _droneService.getDroneById(id);
+        if (drone.isPresent()) {
+            List<ParkingSpotDTO> parkingSpots
+                    = _parkingSpotService.getParkingSpots(drone.get()).stream().map(parkingSpot -> {
+                        parkingSpot.setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.getId()));
+                        return this.convertToDto(parkingSpot);
+                    }
+            ).collect(Collectors.toList());
+            return ResponseEntity.ok(parkingSpots);
         } else {
             return ResponseEntity.notFound().build();
         }
