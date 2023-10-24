@@ -108,18 +108,33 @@ public class ReservationService {
         List<Reservation> reservations = _reservationRepository.findByParkingSpotId(parkingSpot.getId())
                 .stream()
                 .filter(reservation -> reservation.getEndDate().isAfter(date))
+                .filter(reservation -> reservation.getEndDate().getDayOfMonth() == date.getDayOfMonth())
+                .filter(reservation -> reservation.getEndDate().getMonth() == date.getMonth())
+                .filter(reservation -> reservation.getEndDate().getYear() == date.getYear())
                 .sorted(Comparator.comparing(Reservation::getEndDate)).toList();
 
+        ZonedDateTime parkingEndTime = parkingSpot.getParking().getEndTime().toLocalTime()
+                .atDate(date.toLocalDate())
+                .atZone(date.getZone());
+
+        ZonedDateTime parkingStartTime = parkingSpot.getParking().getStartTime().toLocalTime()
+                .atDate(date.toLocalDate())
+                .atZone(date.getZone());
+
         ZonedDateTime earliestAvailableTime = date;
+        if (earliestAvailableTime.isBefore(parkingStartTime)) {
+            earliestAvailableTime = parkingStartTime;
+        }
+
         for (Reservation reservation : reservations) {
-            ZonedDateTime potentialAvailableTime = reservation.getStartDate();
-            if (earliestAvailableTime.isBefore(potentialAvailableTime)
-                    && earliestAvailableTime.plusMinutes(30).isBefore(potentialAvailableTime)) {
+            if (earliestAvailableTime.plusMinutes(30).isBefore(reservation.getStartDate())) {
                 return earliestAvailableTime;
             }
             earliestAvailableTime = reservation.getEndDate();
         }
-        return earliestAvailableTime;
-
+        if (earliestAvailableTime.plusMinutes(30).isBefore(parkingEndTime)) {
+            return earliestAvailableTime;
+        }
+        return null;
     }
 }
