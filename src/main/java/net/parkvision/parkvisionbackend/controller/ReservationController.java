@@ -88,12 +88,12 @@ public class ReservationController {
                         user.getLastname(),
                         user.getEmail(),
                         parkingSpot1.getParking(),
-                        createdReservation, "Rezerwacja miejsca parkingowego ParkVision");
+                        createdReservation, "ParkVision reservation confirmation");
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
+        System.out.println("return ok");
         return ResponseEntity.ok(convertToDto(createdReservation));
     }
 

@@ -10,6 +10,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
@@ -60,6 +61,7 @@ public class EmailSenderService {
         System.out.println("Email sent to " + to);
     }
 
+    @Async("emailTaskExecutor")
     public void sendHtmlEmail(
             String firstName,
             String lastName,
@@ -68,8 +70,8 @@ public class EmailSenderService {
             Reservation reservation,
             String topic) throws Exception {
         Context context = new Context();
-        context.setVariable("title", "Potwierdzenie rezerwacji");
-        context.setVariable("description", "Oto potwierdzenie rezerwacji jaką dokonałeś w naszym systemie:");
+        context.setVariable("title", "Reservation confirmation");
+        context.setVariable("description", "Here is the confirmation of the reservation you made in our system:");
         context.setVariable("name", firstName + " " + lastName);
         String htmlTable = generateHTMLTable(reservation, parking);
         context.setVariable("body", htmlTable);
@@ -94,22 +96,22 @@ public class EmailSenderService {
 
         // Create rows for Reservation fields
         htmlTable.append("<tr>");
-        htmlTable.append("<th>Numer rezerwacji</th>");
+        htmlTable.append("<th>Reservation number</th>");
         htmlTable.append("<td>").append(reservation.getId()).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
-        htmlTable.append("<th>Data rozpoczęcia</th>");
+        htmlTable.append("<th>Start date</th>");
         htmlTable.append("<td>").append(reservation.getStartDate()).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
-        htmlTable.append("<th>Data zakończenia</th>");
+        htmlTable.append("<th>End date</th>");
         htmlTable.append("<td>").append(reservation.getEndDate()).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
-        htmlTable.append("<th>Numer rejestracyjny</th>");
+        htmlTable.append("<th>Registration number</th>");
         htmlTable.append("<td>").append(reservation.getRegistrationNumber()).append("</td>");
         htmlTable.append("</tr>");
 
@@ -119,7 +121,7 @@ public class EmailSenderService {
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
-        htmlTable.append("<th>Numer miejsca postojowego</th>");
+        htmlTable.append("<th>Parking spot number</th>");
         htmlTable.append("<td>").append(reservation.getParkingSpot().getId()).append("</td>");
         htmlTable.append("</tr>");
 
