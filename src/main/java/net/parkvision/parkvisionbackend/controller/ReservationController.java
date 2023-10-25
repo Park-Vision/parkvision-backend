@@ -77,17 +77,16 @@ public class ReservationController {
         Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
         Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(createdReservation.getParkingSpot().getId());
         if (parkingSpot.isPresent()) {
-            ParkingSpot parkingSpot1 = parkingSpot.get();
             User user = getUserFromRequest();
             if (user == null) {
                 return ResponseEntity.badRequest().build();
             }
             try {
-                emailSenderService.sendHtmlEmail(
+                emailSenderService.sendHtmlEmailReservationCreated(
                         user.getFirstname(),
                         user.getLastname(),
                         user.getEmail(),
-                        parkingSpot1.getParking(),
+                        parkingSpot.get().getParking(),
                         createdReservation, "ParkVision reservation confirmation");
             } catch (Exception e) {
                 e.printStackTrace();

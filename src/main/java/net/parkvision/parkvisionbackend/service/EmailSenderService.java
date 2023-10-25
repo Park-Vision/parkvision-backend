@@ -62,7 +62,7 @@ public class EmailSenderService {
     }
 
     @Async("emailTaskExecutor")
-    public void sendHtmlEmail(
+    public void sendHtmlEmailReservationCreated(
             String firstName,
             String lastName,
             String to,

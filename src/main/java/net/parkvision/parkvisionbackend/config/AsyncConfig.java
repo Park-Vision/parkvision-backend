@@ -1,4 +1,4 @@
-package net.parkvision.parkvisionbackend.service;
+package net.parkvision.parkvisionbackend.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
