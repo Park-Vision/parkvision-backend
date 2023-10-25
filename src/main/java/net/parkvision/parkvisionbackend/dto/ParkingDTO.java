@@ -2,6 +2,8 @@ package net.parkvision.parkvisionbackend.dto;
 
 import lombok.Data;
 
+import java.sql.Time;
+
 @Data
 public class ParkingDTO {
     private Long id;
@@ -11,7 +13,8 @@ public class ParkingDTO {
     private String street;
     private String zipCode;
     private double costRate;
-    private String openHours;
+    private Time startTime;
+    private Time endTime;
     private double latitude;
     private double longitude;
 }

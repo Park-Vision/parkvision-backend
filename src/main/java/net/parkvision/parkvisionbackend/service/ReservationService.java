@@ -1,16 +1,18 @@
 package net.parkvision.parkvisionbackend.service;
 
 import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
-import net.parkvision.parkvisionbackend.model.Car;
+import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.model.Reservation;
-import net.parkvision.parkvisionbackend.repository.*;
+import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
+import net.parkvision.parkvisionbackend.repository.ReservationRepository;
+import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.TimeZone;
 
 @Service
 public class ReservationService {
@@ -18,15 +20,13 @@ public class ReservationService {
     private final ReservationRepository _reservationRepository;
 
     private final UserRepository _userRepository;
-    private final CarRepository _carRepository;
     private final ParkingSpotRepository _parkingSpotRepository;
 
     @Autowired
     public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository,
-                              CarRepository carRepository, ParkingSpotRepository parkingSpotRepository) {
+                              ParkingSpotRepository parkingSpotRepository) {
         _reservationRepository = reservationRepository;
         _userRepository = userRepository;
-        _carRepository = carRepository;
         _parkingSpotRepository = parkingSpotRepository;
     }
 
@@ -53,14 +53,14 @@ public class ReservationService {
                     " is not active.");
         }
 
-        if (!isParkingSpotFree(reservation)){
+        if (!isParkingSpotFree(reservation)) {
             throw new ReservationConflictException("Konflikt datowy z istniejącą rezerwacją.");
         }
 
         return _reservationRepository.save(reservation);
     }
 
-    public boolean isParkingSpotFree(Reservation reservation){
+    public boolean isParkingSpotFree(Reservation reservation) {
         List<Reservation> existingReservations =
                 _reservationRepository.findByParkingSpotId(reservation.getParkingSpot().getId());
         for (Reservation existingReservation : existingReservations) {
@@ -102,5 +102,39 @@ public class ReservationService {
 
     public void deleteReservation(Long id) {
         _reservationRepository.deleteById(id);
+    }
+
+    public ZonedDateTime getEarliestAvailableTime(ParkingSpot parkingSpot, ZonedDateTime date) {
+        List<Reservation> reservations = _reservationRepository.findByParkingSpotId(parkingSpot.getId())
+                .stream()
+                .filter(reservation -> reservation.getEndDate().isAfter(date))
+                .filter(reservation -> reservation.getEndDate().getDayOfMonth() == date.getDayOfMonth())
+                .filter(reservation -> reservation.getEndDate().getMonth() == date.getMonth())
+                .filter(reservation -> reservation.getEndDate().getYear() == date.getYear())
+                .sorted(Comparator.comparing(Reservation::getEndDate)).toList();
+
+        ZonedDateTime parkingEndTime = parkingSpot.getParking().getEndTime().toLocalTime()
+                .atDate(date.toLocalDate())
+                .atZone(date.getZone());
+
+        ZonedDateTime parkingStartTime = parkingSpot.getParking().getStartTime().toLocalTime()
+                .atDate(date.toLocalDate())
+                .atZone(date.getZone());
+
+        ZonedDateTime earliestAvailableTime = date;
+        if (earliestAvailableTime.isBefore(parkingStartTime)) {
+            earliestAvailableTime = parkingStartTime;
+        }
+
+        for (Reservation reservation : reservations) {
+            if (earliestAvailableTime.plusMinutes(30).isBefore(reservation.getStartDate())) {
+                return earliestAvailableTime;
+            }
+            earliestAvailableTime = reservation.getEndDate();
+        }
+        if (earliestAvailableTime.plusMinutes(30).isBefore(parkingEndTime)) {
+            return earliestAvailableTime;
+        }
+        return null;
     }
 }
