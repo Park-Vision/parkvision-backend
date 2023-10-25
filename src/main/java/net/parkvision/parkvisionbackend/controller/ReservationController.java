@@ -3,14 +3,18 @@ package net.parkvision.parkvisionbackend.controller;
 import net.parkvision.parkvisionbackend.dto.*;
 import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
 import net.parkvision.parkvisionbackend.model.Reservation;
+import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.service.ReservationService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,6 +35,8 @@ public class ReservationController {
         ReservationDTO reservationDTO = modelMapper.map(reservation, ReservationDTO.class);
         reservationDTO.setUserDTO(modelMapper.map(reservation.getUser(), UserDTO.class));
         reservationDTO.setParkingSpotDTO(modelMapper.map(reservation.getParkingSpot(), ParkingSpotDTO.class));
+        reservationDTO.getParkingSpotDTO().setParkingDTO(modelMapper.map(reservation.getParkingSpot().getParking(),
+                ParkingDTO.class));
         return reservationDTO;
     }
 
@@ -81,5 +87,37 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         _reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private User getClientFromRequest() {
+        Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (user instanceof User) {
+
+            return (User) user;
+        }
+        return null;
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/client")
+    public ResponseEntity<Map<String, List<ReservationDTO>>> getClientReservations() {
+
+        User client = getClientFromRequest();
+        if (client == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Map<String, List<Reservation>> clientReservations = _reservationService.getSortedReservationsByClient(client);
+
+        Map<String, List<ReservationDTO>> clientReservationsResponse = new HashMap<>();
+
+        for (String category : clientReservations.keySet()) {
+            clientReservationsResponse.put(category, clientReservations.get(category).stream()
+                    .map(this::convertToDto)
+                    .toList());
+        }
+
+        return ResponseEntity.ok(clientReservationsResponse);
     }
 }

@@ -3,6 +3,7 @@ package net.parkvision.parkvisionbackend.service;
 import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.model.Reservation;
+import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
 import net.parkvision.parkvisionbackend.repository.ReservationRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
@@ -10,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ReservationService {
@@ -136,5 +135,25 @@ public class ReservationService {
             return earliestAvailableTime;
         }
         return null;
+    }
+
+    public Map<String, List<Reservation>> getSortedReservationsByClient(User client) {
+        List<Reservation> clientReservations = _reservationRepository.findByUserId(client.getId());
+        Map<String, List<Reservation>> clientSortedReservations = new HashMap<>();
+        clientSortedReservations.put("Pending", new ArrayList<>());
+        clientSortedReservations.put("Archived", new ArrayList<>());
+
+        ZonedDateTime actualTime = ZonedDateTime.now();
+
+        for (Reservation reservation : clientReservations) {
+            String category = reservation.getEndDate().isAfter(actualTime) ? "Pending" : "Archived";
+            clientSortedReservations.get(category).add(reservation);
+        }
+
+        clientSortedReservations.get("Pending").sort(Comparator.comparing(Reservation::getEndDate));
+
+        clientSortedReservations.get("Archived").sort(Comparator.comparing(Reservation::getEndDate).reversed());
+
+        return clientSortedReservations;
     }
 }
