@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.auth;
 
 import lombok.RequiredArgsConstructor;
+import net.parkvision.parkvisionbackend.service.EmailSenderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,12 +14,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
+    private final EmailSenderService emailSenderService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
             @RequestBody RegisterRequest request
     ) {
-        return ResponseEntity.ok(authenticationService.register(request));
+        AuthenticationResponse register = authenticationService.register(request);
+        try {
+            emailSenderService.sendHtmlEmailRegistrationCreated(
+                    request.getFirstName(),
+                    request.getLastName(),
+                    request.getEmail(),
+                    "ParkVision registration confirmation");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(register);
     }
 
     @PostMapping("/authenticate")
