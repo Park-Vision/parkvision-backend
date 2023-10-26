@@ -31,8 +31,8 @@ public class ParkingSpotController {
     private final ModelMapper modelMapper;
     private final ParkingService _parkingService;
     private final PointController _pointController;
-
     private final PointService _pointService;
+    private final DroneService _droneService;
 
     @Autowired
     public ParkingSpotController(ParkingSpotService parkingSpotService, ModelMapper modelMapper,
@@ -43,6 +43,7 @@ public class ParkingSpotController {
         _parkingService = parkingService;
         _pointController = pointController;
         _pointService = pointService;
+        _droneService = droneService;
     }
 
     public ParkingSpotDTO convertToDto(ParkingSpot parkingSpot) {
