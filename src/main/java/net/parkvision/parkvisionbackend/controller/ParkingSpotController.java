@@ -31,7 +31,6 @@ public class ParkingSpotController {
     private final ModelMapper modelMapper;
     private final ParkingService _parkingService;
     private final PointController _pointController;
-
     private final PointService _pointService;
     private final DroneService _droneService;
 
