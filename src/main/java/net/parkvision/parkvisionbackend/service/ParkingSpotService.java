@@ -1,5 +1,6 @@
 package net.parkvision.parkvisionbackend.service;
 
+import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.model.Reservation;
@@ -116,5 +117,9 @@ public class ParkingSpotService {
                     _reservationService.getEarliestAvailableTime(parkingSpot, date));
         }
         return parkingSpotsWhenFree;
+    }
+
+    public List<ParkingSpot> getParkingSpots(Drone drone) {
+        return new ArrayList<>(_parkingSpotRepository.findByParkingId(drone.getParking().getId()));
     }
 }
