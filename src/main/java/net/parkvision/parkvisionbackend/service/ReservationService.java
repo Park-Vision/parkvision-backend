@@ -1,8 +1,11 @@
 package net.parkvision.parkvisionbackend.service;
 
 import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
+import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.model.Reservation;
+import net.parkvision.parkvisionbackend.model.User;
+import net.parkvision.parkvisionbackend.repository.ParkingRepository;
 import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
 import net.parkvision.parkvisionbackend.repository.ReservationRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
@@ -13,21 +16,25 @@ import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ReservationService {
 
     private final ReservationRepository _reservationRepository;
 
+    private final ParkingRepository _parkingRepository;
+
     private final UserRepository _userRepository;
     private final ParkingSpotRepository _parkingSpotRepository;
 
     @Autowired
     public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository,
-                              ParkingSpotRepository parkingSpotRepository) {
+                              ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository) {
         _reservationRepository = reservationRepository;
         _userRepository = userRepository;
         _parkingSpotRepository = parkingSpotRepository;
+        _parkingRepository = parkingRepository;
     }
 
     public List<Reservation> getAllReservations() {
@@ -57,7 +64,13 @@ public class ReservationService {
             throw new ReservationConflictException("Konflikt datowy z istniejącą rezerwacją.");
         }
 
-        return _reservationRepository.save(reservation);
+        ParkingSpot parkingSpot = _parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId());
+
+        Parking parking = _parkingRepository.getReferenceById(parkingSpot.getParking().getId());
+
+        Reservation createdReservation = _reservationRepository.save(reservation);
+        createdReservation.getParkingSpot().setParking(parking);
+        return createdReservation;
     }
 
     public boolean isParkingSpotFree(Reservation reservation) {
@@ -136,5 +149,25 @@ public class ReservationService {
             return earliestAvailableTime;
         }
         return null;
+    }
+
+    public Map<String, List<Reservation>> getSortedReservationsByClient(User client) {
+        List<Reservation> clientReservations = _reservationRepository.findByUserId(client.getId());
+        Map<String, List<Reservation>> clientSortedReservations = new HashMap<>();
+        clientSortedReservations.put("Pending", new ArrayList<>());
+        clientSortedReservations.put("Archived", new ArrayList<>());
+
+        ZonedDateTime actualTime = ZonedDateTime.now();
+
+        for (Reservation reservation : clientReservations) {
+            String category = reservation.getEndDate().isAfter(actualTime) ? "Pending" : "Archived";
+            clientSortedReservations.get(category).add(reservation);
+        }
+
+        clientSortedReservations.get("Pending").sort(Comparator.comparing(Reservation::getEndDate));
+
+        clientSortedReservations.get("Archived").sort(Comparator.comparing(Reservation::getEndDate).reversed());
+
+        return clientSortedReservations;
     }
 }
