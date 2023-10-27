@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.*;
 
 @Service
@@ -117,7 +115,7 @@ public class ReservationService {
         _reservationRepository.deleteById(id);
     }
 
-    public ZonedDateTime getEarliestAvailableTime(ParkingSpot parkingSpot, ZonedDateTime date) {
+    public Map<String, ZonedDateTime> getEarliestAvailableTime(ParkingSpot parkingSpot, ZonedDateTime date) {
         List<Reservation> reservations = _reservationRepository.findByParkingSpotId(parkingSpot.getId())
                 .stream()
                 .filter(reservation -> reservation.getEndDate().isAfter(date))
@@ -140,13 +138,19 @@ public class ReservationService {
         }
 
         for (Reservation reservation : reservations) {
-            if (earliestAvailableTime.plusMinutes(30).isBefore(reservation.getStartDate())) {
-                return earliestAvailableTime;
+            if (earliestAvailableTime.isBefore(reservation.getStartDate())) {
+                Map<String, ZonedDateTime> map = new HashMap<>();
+                map.put("earliestStart", earliestAvailableTime);
+                map.put("earliestEnd", reservation.getStartDate());
+                return map;
             }
             earliestAvailableTime = reservation.getEndDate();
         }
-        if (earliestAvailableTime.plusMinutes(30).isBefore(parkingEndTime)) {
-            return earliestAvailableTime;
+        if (earliestAvailableTime.isBefore(parkingEndTime)) {
+            Map<String, ZonedDateTime> map = new HashMap<>();
+            map.put("earliestStart", earliestAvailableTime);
+            map.put("earliestEnd", parkingEndTime);
+            return map;
         }
         return null;
     }
