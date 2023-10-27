@@ -167,12 +167,12 @@ public class ParkingSpotController {
     }
 
     @GetMapping("/parking/{id}/free-time")
-    public ResponseEntity<Map<Long, ZonedDateTime>> getSpotsFreeTimeByParkingId(@PathVariable Long id,
-                                                                                @RequestParam String startDate) {
+    public ResponseEntity<Map<Long, Map<String, ZonedDateTime>>> getSpotsFreeTimeByParkingId(@PathVariable Long id,
+                                                                                             @RequestParam String startDate) {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
             DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
-            Map<Long, ZonedDateTime> parkingSpotsWithFreeTime
+            Map<Long, Map<String, ZonedDateTime>> parkingSpotsWithFreeTime
                     = _parkingSpotService.getSpotsFreeTime(parking.get(), ZonedDateTime.parse(startDate, formatter)
             );
             return ResponseEntity.ok(parkingSpotsWithFreeTime);

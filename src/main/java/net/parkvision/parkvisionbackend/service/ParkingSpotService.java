@@ -109,8 +109,8 @@ public class ParkingSpotService {
         return parkingSpotsResponse;
     }
 
-    public Map<Long, ZonedDateTime> getSpotsFreeTime(Parking parking, ZonedDateTime date) {
-        Map<Long, ZonedDateTime> parkingSpotsWhenFree = new HashMap<>();
+    public Map<Long, Map<String, ZonedDateTime>> getSpotsFreeTime(Parking parking, ZonedDateTime date) {
+        Map<Long, Map<String, ZonedDateTime>> parkingSpotsWhenFree = new HashMap<>();
 
         for (ParkingSpot parkingSpot : _parkingSpotRepository.findByParkingId(parking.getId())) {
             parkingSpotsWhenFree.put(parkingSpot.getId(),
