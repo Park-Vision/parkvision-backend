@@ -2,13 +2,17 @@ package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.model.Parking;
+import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.service.ParkingService;
+import net.parkvision.parkvisionbackend.service.ParkingSpotService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,15 +22,15 @@ import java.util.stream.Collectors;
 public class ParkingController {
 
     private final ParkingService _parkingService;
-    private final ParkingSpotController parkingSpotController;
+    private final ParkingSpotService _parkingSpotService;
 
     private final ModelMapper modelMapper;
 
     @Autowired
-    public ParkingController(ParkingService parkingService, ParkingSpotController parkingSpotController,
+    public ParkingController(ParkingService parkingService, ParkingSpotService parkingSpotService,
                              ModelMapper modelMapper) {
         _parkingService = parkingService;
-        this.parkingSpotController = parkingSpotController;
+        this._parkingSpotService = parkingSpotService;
         this.modelMapper = modelMapper;
     }
 
@@ -53,6 +57,33 @@ public class ParkingController {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
             return ResponseEntity.ok(convertToDTO(parking.get()));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{id}/spots-number")
+    public ResponseEntity<Integer> getParkingSpotsNumber(@PathVariable Long id) {
+        Optional<Parking> parking = _parkingService.getParkingById(id);
+        if (parking.isPresent()) {
+            List<ParkingSpot> parkingSpots = _parkingSpotService.getParkingSpots(parking.get());
+            return ResponseEntity.ok(parkingSpots.size());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{id}/free-spots-number")
+    public ResponseEntity<Integer> getFreeParkingSpotsNumber(@PathVariable Long id, @RequestParam String startDate) {
+        Optional<Parking> parking = _parkingService.getParkingById(id);
+        if (parking.isPresent()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+            List<ParkingSpot> freeParkingSpots
+                    = _parkingSpotService.getFreeSpots(parking.get(),
+                    ZonedDateTime.parse(startDate, formatter),
+                    ZonedDateTime.parse(startDate, formatter).plusMinutes(15)
+            );
+            return ResponseEntity.ok(freeParkingSpots.size());
         } else {
             return ResponseEntity.notFound().build();
         }
