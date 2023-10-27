@@ -1,10 +1,12 @@
 package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
+import net.parkvision.parkvisionbackend.dto.ParkingSpotCoordinatesDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
 import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
+import net.parkvision.parkvisionbackend.model.Point;
 import net.parkvision.parkvisionbackend.service.DroneService;
 import net.parkvision.parkvisionbackend.service.ParkingService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -182,18 +185,43 @@ public class ParkingSpotController {
     }
 
     @GetMapping("/drone/{id}")
-    public ResponseEntity<List<ParkingSpotDTO>> getSpotsByDroneId(@PathVariable Long id) {
+    public ResponseEntity<List<ParkingSpotCoordinatesDTO>> getSpotCoordinatesByDroneId(@PathVariable Long id) {
         Optional<Drone> drone = _droneService.getDroneById(id);
         if (drone.isPresent()) {
-            List<ParkingSpotDTO> parkingSpots
-                    = _parkingSpotService.getParkingSpots(drone.get()).stream().map(parkingSpot -> {
-                        parkingSpot.setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.getId()));
-                        return this.convertToDto(parkingSpot);
-                    }
-            ).collect(Collectors.toList());
-            return ResponseEntity.ok(parkingSpots);
+            List<ParkingSpotCoordinatesDTO> parkingSpotCoordinatesList = new ArrayList<>();
+
+            List<ParkingSpot> parkingSpots = _parkingSpotService.getParkingSpots(drone.get());
+            for (ParkingSpot parkingSpot : parkingSpots) {
+                List<Point> points = _pointService.getPointsByParkingSpotId(parkingSpot.getId());
+                if (!points.isEmpty()) {
+                    ParkingSpotCoordinatesDTO parkingSpotCoordinatesDTO = getParkingSpotCoordinatesDTO(parkingSpot, points);
+
+                    parkingSpotCoordinatesList.add(parkingSpotCoordinatesDTO);
+                }
+            }
+            return ResponseEntity.ok(parkingSpotCoordinatesList);
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    private static ParkingSpotCoordinatesDTO getParkingSpotCoordinatesDTO(ParkingSpot parkingSpot, List<Point> points) {
+        double centerLongitude = 0.0;
+        double centerLatitude = 0.0;
+
+        for (Point point : points) {
+            centerLongitude += point.getLongitude();
+            centerLatitude += point.getLatitude();
+        }
+
+        int numPoints = points.size();
+        centerLongitude /= numPoints;
+        centerLatitude /= numPoints;
+
+        ParkingSpotCoordinatesDTO parkingSpotCoordinatesDTO = new ParkingSpotCoordinatesDTO();
+        parkingSpotCoordinatesDTO.setParkingSpotId(parkingSpot.getId());
+        parkingSpotCoordinatesDTO.setCenterLongitude(centerLongitude);
+        parkingSpotCoordinatesDTO.setCenterLatitude(centerLatitude);
+        return parkingSpotCoordinatesDTO;
     }
 }
