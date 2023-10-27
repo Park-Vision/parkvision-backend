@@ -2,6 +2,7 @@ package net.parkvision.parkvisionbackend.service;
 
 import java.io.File;
 
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.Reservation;
@@ -76,6 +77,24 @@ public class EmailSenderService {
         String htmlTable = generateHTMLTable(reservation, parking);
         context.setVariable("body", htmlTable);
 
+        sendContextToUser(to, topic, context);
+    }
+
+    @Async("emailTaskExecutor")
+    public void sendHtmlEmailRegistrationCreated(
+            String firstName,
+            String lastName,
+            String to,
+            String topic) throws Exception {
+        Context context = new Context();
+        context.setVariable("title", "Registration confirmation");
+        context.setVariable("description", "Here is the confirmation of the registration you made in our system:");
+        context.setVariable("name", firstName + " " + lastName);
+
+        sendContextToUser(to, topic, context);
+    }
+
+    private void sendContextToUser(String to, String topic, Context context) throws MessagingException {
         String text = templateEngine.process(EMAIL_TEMPLATE, context);
         MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -89,6 +108,7 @@ public class EmailSenderService {
         javaMailSender.send(message);
         System.out.println("Email sent to " + to);
     }
+
 
     public String generateHTMLTable(Reservation reservation, Parking parking) {
         StringBuilder htmlTable = new StringBuilder();
