@@ -3,6 +3,7 @@ package net.parkvision.parkvisionbackend.dto;
 import lombok.Data;
 
 import java.sql.Time;
+import java.util.TimeZone;
 
 @Data
 public class ParkingDTO {
@@ -17,4 +18,5 @@ public class ParkingDTO {
     private Time endTime;
     private double latitude;
     private double longitude;
+    private TimeZone timeZone;
 }

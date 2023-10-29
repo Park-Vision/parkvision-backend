@@ -6,7 +6,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Time;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+import java.util.TimeZone;
 
 
 @Service
@@ -59,6 +60,7 @@ public class DataSeeder {
             parking1.setCostRate(2.5);
             parking1.setLongitude(16.990429400497433);
             parking1.setLatitude(51.11818354620572);
+            parking1.setTimeZone(TimeZone.getTimeZone("Europe/Warsaw"));
             _parkingRepository.save(parking1);
 
 
@@ -72,9 +74,12 @@ public class DataSeeder {
             parking2.setStartTime(new Time(4,30,0));
             parking2.setEndTime(new Time(23,0,0));
             parking2.setCostRate(3.0);
-            parking2.setLongitude(51.10975855141324);
-            parking2.setLatitude(17.059114686292222);
+            parking2.setLatitude(51.10975855141324);
+            parking2.setLongitude(17.059114686292222);
+            parking2.setTimeZone(TimeZone.getTimeZone("Etc/GMT+1"));
             _parkingRepository.save(parking2);
+
+
 
             System.out.println("Data seeded.");
         } else {
@@ -135,10 +140,10 @@ public class DataSeeder {
         if (clientCount == 0) {
             System.out.println("SeedClientData()");
 
-            client.setFirstname("Annaa");
-            client.setLastname("Nowaka");
-            client.setEmail("anna@onet.pl");
-            client.setPassword(new BCryptPasswordEncoder().encode("123456"));
+            client.setFirstname("Filip");
+            client.setLastname("Strózik");
+            client.setEmail("filipshelby@gmail.com");
+            client.setPassword(new BCryptPasswordEncoder().encode("Filip123!"));
             client.setRole(Role.USER);
             _clientRepository.save(client);
 
@@ -151,8 +156,8 @@ public class DataSeeder {
 
             client3.setFirstname("admin");
             client3.setLastname("admin");
-            client3.setEmail("filipshelby@gmail.com");
-            client3.setPassword(new BCryptPasswordEncoder().encode("Filip123!"));
+            client3.setEmail("admin@gmail.com");
+            client3.setPassword(new BCryptPasswordEncoder().encode("Admin123!"));
             client3.setRole(Role.ADMIN);
             _clientRepository.save(client3);
 
@@ -283,15 +288,15 @@ public class DataSeeder {
             System.out.println("seedReservationData()");
 
             reservation.setParkingSpot(parkingSpot1);
-            reservation.setStartDate(ZonedDateTime.now());
-            reservation.setEndDate(ZonedDateTime.now().plusHours(1));
+            reservation.setStartDate(LocalDateTime.now());
+            reservation.setEndDate(LocalDateTime.now().plusHours(1));
             reservation.setUser(client);
             reservation.setRegistrationNumber("123");
             _reservationRepository.save(reservation);
 
             reservation1.setParkingSpot(parkingSpot2);
-            reservation1.setStartDate(ZonedDateTime.now());
-            reservation1.setEndDate(ZonedDateTime.now().plusHours(1));
+            reservation1.setStartDate(LocalDateTime.now());
+            reservation1.setEndDate(LocalDateTime.now().plusHours(1));
             reservation1.setUser(client);
             reservation1.setRegistrationNumber("123");
             _reservationRepository.save(reservation1);

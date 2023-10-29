@@ -12,8 +12,7 @@ import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.ZonedDateTime;
-import java.util.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -115,7 +114,7 @@ public class ReservationService {
         _reservationRepository.deleteById(id);
     }
 
-    public Map<String, ZonedDateTime> getEarliestAvailableTime(ParkingSpot parkingSpot, ZonedDateTime date) {
+    public Map<String, LocalDateTime> getEarliestAvailableTime(ParkingSpot parkingSpot, LocalDateTime date) {
         List<Reservation> reservations = _reservationRepository.findByParkingSpotId(parkingSpot.getId())
                 .stream()
                 .filter(reservation -> reservation.getEndDate().isAfter(date))
@@ -124,22 +123,20 @@ public class ReservationService {
                 .filter(reservation -> reservation.getEndDate().getYear() == date.getYear())
                 .sorted(Comparator.comparing(Reservation::getEndDate)).toList();
 
-        ZonedDateTime parkingEndTime = parkingSpot.getParking().getEndTime().toLocalTime()
-                .atDate(date.toLocalDate())
-                .atZone(date.getZone());
+        LocalDateTime parkingEndTime = parkingSpot.getParking().getEndTime().toLocalTime()
+                .atDate(date.toLocalDate());
 
-        ZonedDateTime parkingStartTime = parkingSpot.getParking().getStartTime().toLocalTime()
-                .atDate(date.toLocalDate())
-                .atZone(date.getZone());
+        LocalDateTime parkingStartTime = parkingSpot.getParking().getStartTime().toLocalTime()
+                .atDate(date.toLocalDate());
 
-        ZonedDateTime earliestAvailableTime = date;
+        LocalDateTime earliestAvailableTime = date;
         if (earliestAvailableTime.isBefore(parkingStartTime)) {
             earliestAvailableTime = parkingStartTime;
         }
 
         for (Reservation reservation : reservations) {
             if (earliestAvailableTime.isBefore(reservation.getStartDate())) {
-                Map<String, ZonedDateTime> map = new HashMap<>();
+                Map<String, LocalDateTime> map = new HashMap<>();
                 map.put("earliestStart", earliestAvailableTime);
                 map.put("earliestEnd", reservation.getStartDate());
                 return map;
@@ -147,7 +144,7 @@ public class ReservationService {
             earliestAvailableTime = reservation.getEndDate();
         }
         if (earliestAvailableTime.isBefore(parkingEndTime)) {
-            Map<String, ZonedDateTime> map = new HashMap<>();
+            Map<String, LocalDateTime> map = new HashMap<>();
             map.put("earliestStart", earliestAvailableTime);
             map.put("earliestEnd", parkingEndTime);
             return map;
@@ -161,7 +158,7 @@ public class ReservationService {
         clientSortedReservations.put("Pending", new ArrayList<>());
         clientSortedReservations.put("Archived", new ArrayList<>());
 
-        ZonedDateTime actualTime = ZonedDateTime.now();
+        LocalDateTime actualTime = LocalDateTime.now();
 
         for (Reservation reservation : clientReservations) {
             String category = reservation.getEndDate().isAfter(actualTime) ? "Pending" : "Archived";

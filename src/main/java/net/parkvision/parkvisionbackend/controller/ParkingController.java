@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -77,11 +77,11 @@ public class ParkingController {
     public ResponseEntity<Integer> getFreeParkingSpotsNumber(@PathVariable Long id, @RequestParam String startDate) {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
             List<ParkingSpot> freeParkingSpots
                     = _parkingSpotService.getFreeSpots(parking.get(),
-                    ZonedDateTime.parse(startDate, formatter),
-                    ZonedDateTime.parse(startDate, formatter).plusMinutes(15)
+                    LocalDateTime.parse(startDate, formatter),
+                    LocalDateTime.parse(startDate, formatter).plusMinutes(15)
             );
             return ResponseEntity.ok(freeParkingSpots.size());
         } else {

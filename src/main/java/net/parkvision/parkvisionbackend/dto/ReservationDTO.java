@@ -2,14 +2,14 @@ package net.parkvision.parkvisionbackend.dto;
 
 import lombok.Data;
 
-import java.time.ZonedDateTime;
-import java.util.Date;
+import java.time.LocalDateTime;
+
 
 @Data
 public class ReservationDTO {
     private Long id;
-    private ZonedDateTime startDate;
-    private ZonedDateTime endDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private String registrationNumber;
     private UserDTO userDTO;
     private ParkingSpotDTO parkingSpotDTO;

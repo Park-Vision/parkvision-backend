@@ -2,6 +2,7 @@ package net.parkvision.parkvisionbackend.model;
 
 import java.sql.Time;
 import java.util.List;
+import java.util.TimeZone;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class Parking {
     private Time endTime;
     private double latitude;
     private double longitude;
+    private TimeZone timeZone;
 
     @OneToMany
     private List<ParkingModerator> parkingModerator;

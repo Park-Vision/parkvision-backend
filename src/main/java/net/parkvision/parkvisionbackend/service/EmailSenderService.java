@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.service;
 
 import java.io.File;
+import java.time.format.DateTimeFormatter;
 
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -111,6 +112,7 @@ public class EmailSenderService {
 
 
     public String generateHTMLTable(Reservation reservation, Parking parking) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         StringBuilder htmlTable = new StringBuilder();
         htmlTable.append("<table style=\"width: 100%\">");
 
@@ -122,12 +124,14 @@ public class EmailSenderService {
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>Start date</th>");
-        htmlTable.append("<td>").append(reservation.getStartDate()).append("</td>");
+        htmlTable.append("<td>").append(reservation.getStartDate().format(formatter)).append(" (")
+                .append(parking.getTimeZone().getID()).append(")").append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>End date</th>");
-        htmlTable.append("<td>").append(reservation.getEndDate()).append("</td>");
+        htmlTable.append("<td>").append(reservation.getEndDate().format(formatter)).append(" (")
+                .append(parking.getTimeZone().getID()).append(")").append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
@@ -137,7 +141,8 @@ public class EmailSenderService {
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>Parking</th>");
-        htmlTable.append("<td>").append(parking.getName()).append(", ").append(parking.getStreet()).append(", ").append(parking.getCity()).append("</td>");
+        htmlTable.append("<td>").append(parking.getName()).append(", ").append(parking.getStreet())
+                .append(", ").append(parking.getCity()).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");

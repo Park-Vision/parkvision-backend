@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,11 +122,11 @@ public class ParkingSpotController {
                                                                         @RequestParam String endDate) {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
             List<ParkingSpotDTO> freeParkingSpots
                     = _parkingSpotService.getFreeSpots(parking.get(),
-                    ZonedDateTime.parse(startDate, formatter),
-                    ZonedDateTime.parse(endDate, formatter)
+                    LocalDateTime.parse(startDate, formatter),
+                    LocalDateTime.parse(endDate, formatter)
             ).stream().map(parkingSpot -> {
                         parkingSpot.setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.getId()));
                         return this.convertToDto(parkingSpot);
@@ -170,13 +170,13 @@ public class ParkingSpotController {
     }
 
     @GetMapping("/parking/{id}/free-time")
-    public ResponseEntity<Map<Long, Map<String, ZonedDateTime>>> getSpotsFreeTimeByParkingId(@PathVariable Long id,
+    public ResponseEntity<Map<Long, Map<String, LocalDateTime>>> getSpotsFreeTimeByParkingId(@PathVariable Long id,
                                                                                              @RequestParam String startDate) {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
-            Map<Long, Map<String, ZonedDateTime>> parkingSpotsWithFreeTime
-                    = _parkingSpotService.getSpotsFreeTime(parking.get(), ZonedDateTime.parse(startDate, formatter)
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+            Map<Long, Map<String, LocalDateTime>> parkingSpotsWithFreeTime
+                    = _parkingSpotService.getSpotsFreeTime(parking.get(), LocalDateTime.parse(startDate, formatter)
             );
             return ResponseEntity.ok(parkingSpotsWithFreeTime);
         } else {

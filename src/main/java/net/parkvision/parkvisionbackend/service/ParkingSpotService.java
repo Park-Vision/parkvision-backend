@@ -9,7 +9,7 @@ import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -79,7 +79,7 @@ public class ParkingSpotService {
         _parkingSpotRepository.deleteById(id);
     }
 
-    public List<ParkingSpot> getFreeSpots(Parking parking, ZonedDateTime startDate, ZonedDateTime endDate) {
+    public List<ParkingSpot> getFreeSpots(Parking parking, LocalDateTime startDate, LocalDateTime endDate) {
         List<ParkingSpot> freeParkingSpots = new ArrayList<>();
 
         for (ParkingSpot parkingSpot : _parkingSpotRepository.findByParkingId(parking.getId())) {
@@ -109,8 +109,8 @@ public class ParkingSpotService {
         return parkingSpotsResponse;
     }
 
-    public Map<Long, Map<String, ZonedDateTime>> getSpotsFreeTime(Parking parking, ZonedDateTime date) {
-        Map<Long, Map<String, ZonedDateTime>> parkingSpotsWhenFree = new HashMap<>();
+    public Map<Long, Map<String, LocalDateTime>> getSpotsFreeTime(Parking parking, LocalDateTime date) {
+        Map<Long, Map<String, LocalDateTime>> parkingSpotsWhenFree = new HashMap<>();
 
         for (ParkingSpot parkingSpot : _parkingSpotRepository.findByParkingId(parking.getId())) {
             parkingSpotsWhenFree.put(parkingSpot.getId(),
