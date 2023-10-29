@@ -1,6 +1,8 @@
 package net.parkvision.parkvisionbackend.service;
 
 import java.io.File;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -111,6 +113,16 @@ public class EmailSenderService {
 
 
     public String generateHTMLTable(Reservation reservation, Parking parking) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+
+        // Create a DateTimeFormatter with the desired pattern
+        ;
+        // Format the ZonedDateTime in the target time zone
+        String formatedStartDateTime = reservation.getStartDate().withZoneSameInstant(ZoneId.of(parking.getTimeZone().getID())).format(formatter);
+        String formatedEndDateTime = reservation.getEndDate().withZoneSameInstant(ZoneId.of(parking.getTimeZone().getID())).format(formatter);
+
+
         StringBuilder htmlTable = new StringBuilder();
         htmlTable.append("<table style=\"width: 100%\">");
 
@@ -122,12 +134,14 @@ public class EmailSenderService {
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>Start date</th>");
-        htmlTable.append("<td>").append(reservation.getStartDate()).append("</td>");
+        htmlTable.append("<td>").append(formatedStartDateTime).append(" (")
+                .append(parking.getTimeZone().getID()).append(")").append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>End date</th>");
-        htmlTable.append("<td>").append(reservation.getEndDate()).append("</td>");
+        htmlTable.append("<td>").append(formatedEndDateTime).append(" (")
+                .append(parking.getTimeZone().getID()).append(")").append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
@@ -137,7 +151,8 @@ public class EmailSenderService {
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>Parking</th>");
-        htmlTable.append("<td>").append(parking.getName()).append(", ").append(parking.getStreet()).append(", ").append(parking.getCity()).append("</td>");
+        htmlTable.append("<td>").append(parking.getName()).append(", ").append(parking.getStreet())
+                .append(", ").append(parking.getCity()).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");

@@ -3,7 +3,6 @@ package net.parkvision.parkvisionbackend.model;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,9 +24,9 @@ public class Reservation {
     private String registrationNumber;
 
     @ManyToOne
-    private User user; // Many-to-one relationship
+    private User user;
     @ManyToOne
-    private ParkingSpot parkingSpot; // Many-to-one relationship
+    private ParkingSpot parkingSpot;
     @OneToMany
-    private List<Payment> payment; // One-to-many relationship
+    private List<Payment> payment;
 }

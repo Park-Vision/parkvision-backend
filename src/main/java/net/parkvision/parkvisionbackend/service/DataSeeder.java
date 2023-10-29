@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Time;
 import java.time.ZonedDateTime;
+import java.util.TimeZone;
 
 
 @Service
@@ -59,6 +60,7 @@ public class DataSeeder {
             parking1.setCostRate(2.5);
             parking1.setLongitude(16.990429400497433);
             parking1.setLatitude(51.11818354620572);
+            parking1.setTimeZone(TimeZone.getTimeZone("Europe/Warsaw"));
             _parkingRepository.save(parking1);
 
 
@@ -72,8 +74,9 @@ public class DataSeeder {
             parking2.setStartTime(new Time(4,30,0));
             parking2.setEndTime(new Time(23,0,0));
             parking2.setCostRate(3.0);
-            parking2.setLongitude(51.10975855141324);
-            parking2.setLatitude(17.059114686292222);
+            parking2.setLatitude(51.10975855141324);
+            parking2.setLongitude(17.059114686292222);
+            parking2.setTimeZone(TimeZone.getTimeZone("Etc/GMT+1"));
             _parkingRepository.save(parking2);
 
             System.out.println("Data seeded.");
