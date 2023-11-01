@@ -22,37 +22,37 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
         this.userDetailsService = userDetailsService;
     }
 
-    @Override
-    public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        final StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
-
-        if (headerAccessor.getCommand() == StompCommand.CONNECT) {
-
-            final String authHeader = headerAccessor.getFirstNativeHeader("Authentication");
-
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                throw new RuntimeException("Received no or incorrect token");
-            }
-            final String jwt = authHeader.substring(7);
-
-            final String userEmail = jwtService.extractUsername(jwt);
-
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-
-            if (userDetails == null) {
-                throw new RuntimeException(String.format("User with provided username: %s doesn't exist", userEmail));
-            }
-
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-            authToken.eraseCredentials();
-            headerAccessor.setUser(authToken);
-        }
-        return message;
-    }
+//    @Override
+//    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+//        final StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(message);
+//
+//        if (headerAccessor.getCommand() == StompCommand.CONNECT) {
+//
+//            final String authHeader = headerAccessor.getFirstNativeHeader("Authentication");
+//
+//            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+//                throw new RuntimeException("Received no or incorrect token");
+//            }
+//            final String jwt = authHeader.substring(7);
+//
+//            final String userEmail = jwtService.extractUsername(jwt);
+//
+//            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+//
+//            if (userDetails == null) {
+//                throw new RuntimeException(String.format("User with provided username: %s doesn't exist", userEmail));
+//            }
+//
+//            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+//                    userDetails,
+//                    null,
+//                    userDetails.getAuthorities()
+//            );
+//
+//            SecurityContextHolder.getContext().setAuthentication(authToken);
+//            authToken.eraseCredentials();
+//            headerAccessor.setUser(authToken);
+//        }
+//        return message;
+//    }
 }
