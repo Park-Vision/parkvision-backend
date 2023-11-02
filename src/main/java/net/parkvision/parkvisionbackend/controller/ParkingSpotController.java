@@ -77,6 +77,7 @@ public class ParkingSpotController {
     public ResponseEntity<ParkingSpotDTO> getParkingSpotById(@PathVariable Long id) {
         Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(id);
         if (parkingSpot.isPresent()) {
+            parkingSpot.get().setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.get().getId()));
             return ResponseEntity.ok(convertToDto(parkingSpot.get()));
         } else {
             return ResponseEntity.notFound().build();

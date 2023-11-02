@@ -19,12 +19,17 @@ public class ParkingSpotService {
     private final ParkingRepository _parkingRepository;
     private final ReservationService _reservationService;
 
+    private final PointService _pointService;
+
     @Autowired
-    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository,
-                              ReservationService reservationService) {
+    public ParkingSpotService(ParkingSpotRepository parkingSpotRepository,
+                              ParkingRepository parkingRepository,
+                              ReservationService reservationService,
+                              PointService pointService) {
         this._parkingSpotRepository = parkingSpotRepository;
         _parkingRepository = parkingRepository;
         _reservationService = reservationService;
+        _pointService = pointService;
     }
 
 
@@ -57,6 +62,12 @@ public class ParkingSpotService {
         if (!_parkingRepository.existsById(parkingSpot.getParking().getId())) {
             throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not " +
                     "exist.");
+        }
+        parkingSpot.setPoints(parkingSpot.getPoints());
+        // edit each point
+        for (int i = 0; i < parkingSpot.getPoints().size(); i++) {
+            parkingSpot.getPoints().get(i).setParkingSpot(parkingSpot);
+            _pointService.updatePoint(parkingSpot.getPoints().get(i));
         }
 
         parkingSpot.setSpotNumber(parkingSpot.getSpotNumber());

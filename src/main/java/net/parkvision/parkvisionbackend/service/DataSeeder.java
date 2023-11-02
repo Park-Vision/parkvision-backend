@@ -153,7 +153,7 @@ public class DataSeeder {
             client3.setLastname("admin");
             client3.setEmail("filipshelby@gmail.com");
             client3.setPassword(new BCryptPasswordEncoder().encode("Filip123!"));
-            client3.setRole(Role.ADMIN);
+            client3.setRole(Role.USER);
             _clientRepository.save(client3);
 
 
