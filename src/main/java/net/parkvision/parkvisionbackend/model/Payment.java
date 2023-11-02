@@ -1,10 +1,12 @@
 package net.parkvision.parkvisionbackend.model;
 
+import com.stripe.param.TopupListParams;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.parkvision.parkvisionbackend.dto.ReservationDTO;
 
 @Data
 @Builder
@@ -15,7 +17,13 @@ public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private PaymentStatus status;
     @ManyToOne
     private Reservation reservation;
+    private String cardNumber;
+    private String expMonth;
+    private String expYear;
+    private String cvc;
+    private String username;
+    private boolean success;
+    private String token;
 }

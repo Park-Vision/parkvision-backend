@@ -1,11 +1,14 @@
 package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.PaymentDTO;
-import net.parkvision.parkvisionbackend.dto.ReservationDTO;
 import net.parkvision.parkvisionbackend.model.Payment;
+import net.parkvision.parkvisionbackend.model.StripeCharge;
 import net.parkvision.parkvisionbackend.service.PaymentService;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,15 +22,17 @@ public class PaymentController {
     private final PaymentService _paymentService;
     private final ModelMapper modelMapper;
 
+    @Value(value = "${stripe.api.secretKey}")
+    String stripeKey;
+
+    @Autowired
     public PaymentController(PaymentService paymentService, ModelMapper modelMapper) {
         _paymentService = paymentService;
         this.modelMapper = modelMapper;
     }
 
     private PaymentDTO convertToDto(Payment payment) {
-        PaymentDTO paymentDTO = modelMapper.map(payment, PaymentDTO.class);
-        paymentDTO.setReservation(modelMapper.map(payment.getReservation(), ReservationDTO.class));
-        return paymentDTO;
+        return modelMapper.map(payment, PaymentDTO.class);
     }
 
     private Payment convertToEntity(PaymentDTO paymentDTO) {
@@ -51,11 +56,20 @@ public class PaymentController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<PaymentDTO> createPayment(@RequestBody PaymentDTO paymentDTO) {
         Payment createdPayment = _paymentService.createPayment(convertToEntity(paymentDTO));
         return ResponseEntity.ok(convertToDto(createdPayment));
     }
+
+
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
+    @PostMapping("/charge")
+    public StripeCharge charge(@RequestBody StripeCharge charge){
+        return _paymentService.charge(charge);
+    }
+
 
     @PutMapping
     public ResponseEntity<PaymentDTO> updatePayment(@RequestBody PaymentDTO paymentDTO) {
