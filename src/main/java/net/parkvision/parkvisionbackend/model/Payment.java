@@ -18,7 +18,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
-    private Reservation reservation;
+    private User user;
     private String cardNumber;
     private String expMonth;
     private String expYear;

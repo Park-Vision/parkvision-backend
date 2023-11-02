@@ -22,9 +22,6 @@ public class PaymentController {
     private final PaymentService _paymentService;
     private final ModelMapper modelMapper;
 
-    @Value(value = "${stripe.api.secretKey}")
-    String stripeKey;
-
     @Autowired
     public PaymentController(PaymentService paymentService, ModelMapper modelMapper) {
         _paymentService = paymentService;
@@ -62,14 +59,6 @@ public class PaymentController {
         Payment createdPayment = _paymentService.createPayment(convertToEntity(paymentDTO));
         return ResponseEntity.ok(convertToDto(createdPayment));
     }
-
-
-    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
-    @PostMapping("/charge")
-    public StripeCharge charge(@RequestBody StripeCharge charge){
-        return _paymentService.charge(charge);
-    }
-
 
     @PutMapping
     public ResponseEntity<PaymentDTO> updatePayment(@RequestBody PaymentDTO paymentDTO) {

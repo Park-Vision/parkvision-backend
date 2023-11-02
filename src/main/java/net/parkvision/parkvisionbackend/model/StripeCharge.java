@@ -19,7 +19,6 @@ public class StripeCharge {
     @Id
     @GeneratedValue
     private Long id;
-    private String stripeToken;
     private String username;
     private Double amount;
     private String currency;
@@ -27,5 +26,7 @@ public class StripeCharge {
     private String message;
     @ManyToOne
     private Payment payment;
+    @ManyToOne
+    private Reservation reservation;
 
 }
