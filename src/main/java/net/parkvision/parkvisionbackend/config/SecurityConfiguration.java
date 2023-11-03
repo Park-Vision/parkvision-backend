@@ -39,9 +39,7 @@ public class SecurityConfiguration {
                         "/swagger-resources/**",
                         "/v3/api-docs/swagger-config",
                         "/v2/api-docs/**",
-                        "/swagger-ui/**",
-                        "/api/payment/charges/**"
-
+                        "/swagger-ui/**"
                 ).permitAll()
                 .and()
                 .authorizeHttpRequests()
