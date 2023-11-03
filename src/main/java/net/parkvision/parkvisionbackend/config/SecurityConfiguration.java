@@ -39,11 +39,13 @@ public class SecurityConfiguration {
                         "/swagger-resources/**",
                         "/v3/api-docs/swagger-config",
                         "/v2/api-docs/**",
-                        "/swagger-ui/**"
+                        "/swagger-ui/**",
+                        "/api/payment/charges/**"
+
                 ).permitAll()
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers(HttpMethod.GET, "/api/parkings/**", "api/parkingspots/parking/**", "api/parkingspots" +
+                .requestMatchers(HttpMethod.GET,  "/api/parkings/**", "api/parkingspots/parking/**", "api/parkingspots" +
                         "/drone/**").permitAll()
 //                .requestMatchers( "/**").hasRole("ADMIN")
                 .anyRequest().authenticated()

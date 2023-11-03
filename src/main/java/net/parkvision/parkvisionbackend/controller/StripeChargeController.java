@@ -45,7 +45,6 @@ public class StripeChargeController {
             return ResponseEntity.notFound().build();
         }
     }
-    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<StripeChargeDTO> createStripeCharge(@RequestBody StripeChargeDTO stripeChargeDTO){
         StripeCharge createdStripeCharge = _stripeChargeService.createStripeCharge(convertToEntity(stripeChargeDTO));
