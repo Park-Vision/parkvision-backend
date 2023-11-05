@@ -28,7 +28,9 @@ public class PointService {
     }
 
     public List<Point> getPointsByParkingSpotId(Long parkingSpotId) {
-        return _pointRepository.findByParkingSpotId(parkingSpotId);
+        List<Point> points = _pointRepository.findByParkingSpotId(parkingSpotId);
+        points.sort((p1, p2) -> (int) (p1.getId() - p2.getId()));
+        return points;
     }
 
     public Point createPoint(Point point) {
