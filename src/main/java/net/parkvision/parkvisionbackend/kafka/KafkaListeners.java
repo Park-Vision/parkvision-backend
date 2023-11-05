@@ -5,6 +5,7 @@ import net.parkvision.parkvisionbackend.service.DroneService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,7 @@ public class KafkaListeners {
         this.droneService = droneService;
     }
 
+    @MessageMapping("/message")
     @KafkaListener(topics = "drones-info", groupId = "parkVision")
     public void infoFromDrones(String message, @Header(KafkaHeaders.RECEIVED_KEY) Integer droneId) {
         Optional<Drone> drone = droneService.getDroneById(Long.valueOf(droneId));

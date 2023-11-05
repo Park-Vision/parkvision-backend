@@ -46,7 +46,10 @@ public class DroneController {
         Optional<Drone> drone = droneService.getDroneById(id);
         if (drone.isPresent()) {
             System.out.println("drone-" + id);
-            kafkaTemplate.send("drone-" + id, command);
+            // PRODUCTION
+            //kafkaTemplate.send("drone-" + id, command);
+            // TEST WS
+            //kafkaTemplate.send("drones-info", String.valueOf(id), command);
             return ResponseEntity.ok(convertToDTO(drone.get()));
         }
         return ResponseEntity.notFound().build();
