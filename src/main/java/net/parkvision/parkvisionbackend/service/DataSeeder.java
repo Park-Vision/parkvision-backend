@@ -138,7 +138,7 @@ public class DataSeeder {
             client.setFirstname("Annaa");
             client.setLastname("Nowaka");
             client.setEmail("anna@onet.pl");
-            client.setPassword(new BCryptPasswordEncoder().encode("Anna123!"));
+            client.setPassword(new BCryptPasswordEncoder().encode("123456"));
             client.setRole(Role.USER);
             _clientRepository.save(client);
 
@@ -149,8 +149,8 @@ public class DataSeeder {
             client2.setRole(Role.USER);
             _clientRepository.save(client2);
 
-            client3.setFirstname("admin");
-            client3.setLastname("admin");
+            client3.setFirstname("filip");
+            client3.setLastname("strózik");
             client3.setEmail("filipshelby@gmail.com");
             client3.setPassword(new BCryptPasswordEncoder().encode("Filip123!"));
             client3.setRole(Role.USER);

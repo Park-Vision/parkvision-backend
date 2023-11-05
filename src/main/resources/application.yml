@@ -27,3 +27,7 @@ spring:
         smtp:
           auth: true
           starttls.enable: true
+stripe:
+  key:
+    publishable: pk_test_51O7dhAIrZoSsqF8FSsocK5PN6flQu4RqAA4h6iU5VMXv2BPBelaOBgKESYUTsJAZZXXOFh5982g9YbK4Lf5I5UIw00m4QsipIP
+    secret: sk_test_51O7dhAIrZoSsqF8F3LIcn6BlsxTxFk4n9PftCY9WFwuULCEtnGja8oPTI8YwT0fGSY9mu82hLlqJMEdyqOxsXroK002KIRuft5

@@ -1,6 +1,8 @@
 package net.parkvision.parkvisionbackend.controller;
 
+import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.dto.UserDTO;
+import net.parkvision.parkvisionbackend.model.ParkingModerator;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.service.UserService;
 import org.modelmapper.ModelMapper;
@@ -25,7 +27,14 @@ public class UserController {
     }
 
     private UserDTO convertToDto(User user) {
-        return modelMapper.map(user, UserDTO.class);
+        UserDTO userDTO = modelMapper.map(user, UserDTO.class);
+
+        // if user is an instance of ParkingManager then set parkingDTO
+        if (user instanceof ParkingModerator) {
+            userDTO.setParkingDTO(((ParkingModerator) user).getParking() == null ? null : modelMapper.map(((ParkingModerator) user).getParking(), ParkingDTO.class));
+        }
+
+        return userDTO;
     }
 
     private User convertToEntity(UserDTO userDTO) {

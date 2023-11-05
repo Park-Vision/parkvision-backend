@@ -15,7 +15,11 @@ public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private PaymentStatus status;
     @ManyToOne
-    private Reservation reservation;
+    private User user;
+    private String cardNumber;
+    private String expMonth;
+    private String expYear;
+    private String cvc;
+    private String token;
 }
