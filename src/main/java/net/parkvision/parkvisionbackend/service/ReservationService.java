@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.*;
 
 @Service
 public class ReservationService {
@@ -65,7 +64,6 @@ public class ReservationService {
         ParkingSpot parkingSpot = _parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId());
 
         Parking parking = _parkingRepository.getReferenceById(parkingSpot.getParking().getId());
-
         Reservation createdReservation = _reservationRepository.save(reservation);
         createdReservation.getParkingSpot().setParking(parking);
         return createdReservation;

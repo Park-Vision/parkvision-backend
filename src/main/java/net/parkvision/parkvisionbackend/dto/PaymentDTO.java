@@ -1,11 +1,15 @@
 package net.parkvision.parkvisionbackend.dto;
 
 import lombok.Data;
-import net.parkvision.parkvisionbackend.model.PaymentStatus;
 
 @Data
 public class PaymentDTO {
     private Long id;
-    private PaymentStatus status;
-    private ReservationDTO reservation;
+    private UserDTO user;
+    private String cardNumber;
+    private String expMonth;
+    private String expYear;
+    private String cvc;
+    private String token;
+
 }
