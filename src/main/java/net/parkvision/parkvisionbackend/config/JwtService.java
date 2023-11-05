@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.config;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -42,6 +43,11 @@ public class JwtService {
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
+    public boolean isTokenValidRefresh(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpiredRefresh(token);
+    }
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -52,12 +58,16 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts
+                    .parserBuilder()
+                    .setSigningKey(getSignInKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 
     private Key getSignInKey() {
@@ -67,6 +77,16 @@ public class JwtService {
 
     public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
+    }
+
+    public boolean isTokenExpiredRefresh(String token) {
+        long expirationInSeconds = extractExpiration(token).getTime() / 1000;
+        // One day
+        long oneDayInSeconds = 24 * 60 * 60;
+        long updatedExpirationInSeconds = expirationInSeconds + oneDayInSeconds;
+        Date updatedExpirationDate = new Date(updatedExpirationInSeconds * 1000);
+
+        return updatedExpirationDate.before(new Date());
     }
 
     public Date extractExpiration(String token) {

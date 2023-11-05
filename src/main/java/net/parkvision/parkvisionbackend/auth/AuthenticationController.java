@@ -2,6 +2,7 @@ package net.parkvision.parkvisionbackend.auth;
 
 import lombok.RequiredArgsConstructor;
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,5 +40,16 @@ public class AuthenticationController {
             @RequestBody AuthenticationRequest request
     ) {
         return ResponseEntity.ok(authenticationService.authenticate(request));
+    }
+
+    @PostMapping("/refreshToken")
+    public ResponseEntity<?> refreshToken(
+            @RequestBody String token
+    ) {
+        AuthenticationResponse authenticationResponse = authenticationService.refresh(token);
+        if (authenticationResponse != null) {
+            return ResponseEntity.ok(authenticationResponse);
+        }
+        return new ResponseEntity<>("Too late", HttpStatus.UNAUTHORIZED);
     }
 }
