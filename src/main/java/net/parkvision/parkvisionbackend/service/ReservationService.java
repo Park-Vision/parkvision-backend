@@ -13,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.*;
 
 @Service
@@ -65,6 +67,13 @@ public class ReservationService {
         ParkingSpot parkingSpot = _parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId());
 
         Parking parking = _parkingRepository.getReferenceById(parkingSpot.getParking().getId());
+        //get parking time zone and transform startDate to OffsetDateTime
+        OffsetDateTime startDate = reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone().toZoneId().getRules().getOffset(reservation.getStartDate())));;
+        OffsetDateTime endDate = reservation.getEndDate().withOffsetSameInstant(ZoneOffset.of(parking.getTimeZone().getID()));
+
+        reservation.setStartDate(startDate);
+        reservation.setEndDate(endDate);
+
         Reservation createdReservation = _reservationRepository.save(reservation);
         createdReservation.getParkingSpot().setParking(parking);
         return createdReservation;
