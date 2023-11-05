@@ -1,6 +1,8 @@
 package net.parkvision.parkvisionbackend.model;
 
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -9,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.repository.Temporal;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
 @Builder
@@ -19,8 +23,8 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private ZonedDateTime startDate;
-    private ZonedDateTime endDate;
+    private String startDate;
+    private String endDate;
     private String registrationNumber;
 
     @ManyToOne
@@ -29,4 +33,36 @@ public class Reservation {
     private ParkingSpot parkingSpot;
     @OneToMany
     private List<Payment> payment;
+
+
+    public OffsetDateTime getStartDate() {
+        if (startDate != null) {
+            return OffsetDateTime.parse(startDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        }
+        return null; // Handle null values if needed
+    }
+
+    public void setStartDate(OffsetDateTime startDate) {
+        if (startDate != null) {
+            this.startDate = startDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } else {
+            this.startDate = null; // Handle null values if needed
+        }
+    }
+
+    // Getter and setter methods for endDate
+    public OffsetDateTime getEndDate() {
+        if (endDate != null) {
+            return OffsetDateTime.parse(endDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        }
+        return null; // Handle null values if needed
+    }
+
+    public void setEndDate(OffsetDateTime endDate) {
+        if (endDate != null) {
+            this.endDate = endDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } else {
+            this.endDate = null; // Handle null values if needed
+        }
+    }
 }

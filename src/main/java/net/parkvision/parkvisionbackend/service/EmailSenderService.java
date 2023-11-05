@@ -2,6 +2,7 @@ package net.parkvision.parkvisionbackend.service;
 
 import java.io.File;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 import jakarta.mail.MessagingException;
@@ -119,8 +120,8 @@ public class EmailSenderService {
         // Create a DateTimeFormatter with the desired pattern
         ;
         // Format the ZonedDateTime in the target time zone
-        String formatedStartDateTime = reservation.getStartDate().withZoneSameInstant(ZoneId.of(parking.getTimeZone().getID())).format(formatter);
-        String formatedEndDateTime = reservation.getEndDate().withZoneSameInstant(ZoneId.of(parking.getTimeZone().getID())).format(formatter);
+        String formatedStartDateTime = reservation.getStartDate().withOffsetSameInstant(ZoneOffset.of(parking.getTimeZone().getID())).format(formatter);
+        String formatedEndDateTime = reservation.getEndDate().withOffsetSameInstant(ZoneOffset.of(parking.getTimeZone().getID())).format(formatter);
 
 
         StringBuilder htmlTable = new StringBuilder();

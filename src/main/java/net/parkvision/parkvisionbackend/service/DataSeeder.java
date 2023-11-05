@@ -6,6 +6,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Time;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.TimeZone;
 
@@ -286,15 +289,19 @@ public class DataSeeder {
             System.out.println("seedReservationData()");
 
             reservation.setParkingSpot(parkingSpot1);
-            reservation.setStartDate(ZonedDateTime.now());
-            reservation.setEndDate(ZonedDateTime.now().plusHours(1));
+            reservation.setStartDate(OffsetDateTime.now());
+            reservation.setEndDate(OffsetDateTime.now().plusHours(1));
             reservation.setUser(client);
             reservation.setRegistrationNumber("123");
             _reservationRepository.save(reservation);
 
             reservation1.setParkingSpot(parkingSpot2);
-            reservation1.setStartDate(ZonedDateTime.now());
-            reservation1.setEndDate(ZonedDateTime.now().plusHours(1));
+            OffsetDateTime utc = OffsetDateTime.now(ZoneId.of("UTC"));
+            System.out.println(utc);
+            OffsetDateTime warsaw = utc.withOffsetSameInstant(ZoneOffset.of("+1"));
+            System.out.println(warsaw);
+            reservation1.setStartDate(warsaw);
+            reservation1.setEndDate(warsaw.plusHours(1));
             reservation1.setUser(client);
             reservation1.setRegistrationNumber("123");
             _reservationRepository.save(reservation1);
