@@ -27,10 +27,3 @@ spring:
         smtp:
           auth: true
           starttls.enable: true
-
-
-#security:
-#  basic:
-#    enabled: false
-
-

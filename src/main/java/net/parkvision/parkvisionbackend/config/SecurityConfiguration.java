@@ -39,12 +39,13 @@ public class SecurityConfiguration {
                         "/swagger-resources/**",
                         "/v3/api-docs/swagger-config",
                         "/v2/api-docs/**",
-                        "/swagger-ui/**"
+                        "/swagger-ui/**",
+                        "/websocket"
                 ).permitAll()
                 .and()
                 .authorizeHttpRequests()
                 .requestMatchers(HttpMethod.GET, "/api/parkings/**", "api/parkingspots/parking/**", "api/parkingspots" +
-                        "/drone/**").permitAll()
+                        "/drone/**", "/ws/**").permitAll()
 //                .requestMatchers( "/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
@@ -61,7 +62,8 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("*"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
