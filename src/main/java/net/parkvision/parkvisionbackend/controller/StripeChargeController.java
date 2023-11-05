@@ -1,7 +1,6 @@
 package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.StripeChargeDTO;
-import net.parkvision.parkvisionbackend.model.Payment;
 import net.parkvision.parkvisionbackend.model.StripeCharge;
 import net.parkvision.parkvisionbackend.service.StripeChargeService;
 import org.modelmapper.ModelMapper;
@@ -39,11 +38,7 @@ public class StripeChargeController {
     @GetMapping("/{id}")
     public ResponseEntity<StripeChargeDTO> getStripeChargeById(@PathVariable Long id){
         Optional<StripeCharge> stripeCharge = _stripeChargeService.getStripeChargeById(id);
-        if (stripeCharge.isPresent()) {
-            return ResponseEntity.ok(convertToDto(stripeCharge.get()));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return stripeCharge.map(charge -> ResponseEntity.ok(convertToDto(charge))).orElseGet(() -> ResponseEntity.notFound().build());
     }
     @PreAuthorize("hasAnyRole('ADMIN','USER','PARKING_MANAGER')") //after add to whole controller
     @PostMapping

@@ -43,7 +43,7 @@ public class SecurityConfiguration {
                 ).permitAll()
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers(HttpMethod.GET,  "/api/parkings/**", "api/parkingspots/parking/**", "api/parkingspots" +
+                .requestMatchers(HttpMethod.GET, "/api/parkings/**", "api/parkingspots/parking/**", "api/parkingspots" +
                         "/drone/**").permitAll()
 //                .requestMatchers( "/**").hasRole("ADMIN")
                 .anyRequest().authenticated()

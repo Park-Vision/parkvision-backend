@@ -2,11 +2,9 @@ package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.PaymentDTO;
 import net.parkvision.parkvisionbackend.model.Payment;
-import net.parkvision.parkvisionbackend.model.StripeCharge;
 import net.parkvision.parkvisionbackend.service.PaymentService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -46,11 +44,7 @@ public class PaymentController {
     @GetMapping("/{id}")
     public ResponseEntity<PaymentDTO> getPaymentById(@PathVariable Long id) {
         Optional<Payment> payment = _paymentService.getPaymentById(id);
-        if (payment.isPresent()) {
-            return ResponseEntity.ok(convertToDto(payment.get()));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return payment.map(value -> ResponseEntity.ok(convertToDto(value))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")

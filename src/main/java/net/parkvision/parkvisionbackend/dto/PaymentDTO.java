@@ -1,9 +1,6 @@
 package net.parkvision.parkvisionbackend.dto;
 
 import lombok.Data;
-import net.parkvision.parkvisionbackend.model.PaymentStatus;
-import net.parkvision.parkvisionbackend.model.Reservation;
-import net.parkvision.parkvisionbackend.model.User;
 
 @Data
 public class PaymentDTO {
