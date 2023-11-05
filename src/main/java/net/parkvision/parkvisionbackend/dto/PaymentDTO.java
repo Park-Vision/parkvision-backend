@@ -10,7 +10,6 @@ public class PaymentDTO {
     private String expMonth;
     private String expYear;
     private String cvc;
-    private boolean success;
     private String token;
 
 }

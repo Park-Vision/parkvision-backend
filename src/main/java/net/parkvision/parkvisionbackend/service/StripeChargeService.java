@@ -10,6 +10,7 @@ import net.parkvision.parkvisionbackend.repository.PaymentRepository;
 import net.parkvision.parkvisionbackend.repository.ReservationRepository;
 import net.parkvision.parkvisionbackend.repository.StripeChargeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -23,6 +24,8 @@ public class StripeChargeService {
     private final PaymentRepository _paymentRepository;
     private final ReservationRepository _reservationRepository;
 
+    @Value("${stripe.key.secret}")
+    private String stripeKey;
 
     @Autowired
     public StripeChargeService(StripeChargeRepository stripeChargeRepository, PaymentRepository paymentRepository,
@@ -41,8 +44,7 @@ public class StripeChargeService {
     }
 
     public StripeCharge createStripeCharge(StripeCharge stripeCharge) {
-        Stripe.apiKey =
-                "sk_test_51O7dhAIrZoSsqF8F3LIcn6BlsxTxFk4n9PftCY9WFwuULCEtnGja8oPTI8YwT0fGSY9mu82hLlqJMEdyqOxsXroK002KIRuft5";
+        Stripe.apiKey = stripeKey;
         if (!_paymentRepository.existsById(stripeCharge.getPayment().getId())) {
             throw new IllegalArgumentException("Payment with ID " + stripeCharge.getPayment().getId() + " does not " +
                     "exist.");

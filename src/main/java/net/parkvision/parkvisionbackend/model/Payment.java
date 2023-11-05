@@ -21,7 +21,5 @@ public class Payment {
     private String expMonth;
     private String expYear;
     private String cvc;
-    private String username;
-    private boolean success;
     private String token;
 }

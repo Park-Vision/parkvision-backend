@@ -8,6 +8,7 @@ import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.PaymentRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -19,6 +20,9 @@ import java.util.Optional;
 public class PaymentService {
     private final PaymentRepository _paymentRepository;
     private final UserRepository _userRepository;
+
+    @Value("${stripe.key.publishable}")
+    private String stripeKey;
 
     @Autowired
     public PaymentService(PaymentRepository paymentRepository, UserRepository userRepository) {
@@ -38,8 +42,7 @@ public class PaymentService {
         if (!_userRepository.existsById(payment.getUser().getId())) {
             throw new IllegalArgumentException("User with ID " + payment.getUser().getId() + " does not exist.");
         }
-        Stripe.apiKey =
-                "pk_test_51O7dhAIrZoSsqF8FSsocK5PN6flQu4RqAA4h6iU5VMXv2BPBelaOBgKESYUTsJAZZXXOFh5982g9YbK4Lf5I5UIw00m4QsipIP";
+        Stripe.apiKey = stripeKey;
         User user = _userRepository.getReferenceById(payment.getUser().getId());
 
         Map<String, Object> card = new HashMap<>();
@@ -54,7 +57,6 @@ public class PaymentService {
         try {
             Token token = Token.create(params);
             if (token != null && token.getId() != null) {
-                payment.setSuccess(true);
                 payment.setToken(token.getId());
                 payment.setUser(user);
             }
