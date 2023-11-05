@@ -1,7 +1,6 @@
 package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
-import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
 import net.parkvision.parkvisionbackend.dto.UserDTO;
 import net.parkvision.parkvisionbackend.model.ParkingModerator;
 import net.parkvision.parkvisionbackend.model.User;
