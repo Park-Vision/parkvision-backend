@@ -8,6 +8,8 @@ import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +19,7 @@ public class AuthenticationService {
     private final UserService userService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final UserDetailsService userDetailsService;
 
     public AuthenticationResponse register(RegisterRequest registerRequest) {
 
@@ -45,7 +48,17 @@ public class AuthenticationService {
         claims.put("userId", user.getId() + "");
         claims.put("role", user.getRole());
         return AuthenticationResponse.builder()
-                .token(jwtService.generateToken(claims,user))
+                .token(jwtService.generateToken(claims, user))
                 .build();
+    }
+
+    public AuthenticationResponse refresh(String token) {
+        User user = userService.getUserByEmail(jwtService.extractUsername(token));
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(user.getEmail());
+        if (jwtService.isTokenValidRefresh(token, userDetails)){
+            return buildAuthenticationResponse(user);
+        }
+        System.out.println("can't refresh");
+        return null;
     }
 }
