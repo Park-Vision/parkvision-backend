@@ -29,8 +29,8 @@ public class DroneController {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    //@Autowired
-    //KafkaTopicConfig kafkaTopicConfig;
+    @Autowired
+    KafkaTopicConfig kafkaTopicConfig;
 
     @Autowired
     public DroneController(DroneService droneService, ModelMapper modelMapper,
@@ -47,7 +47,7 @@ public class DroneController {
         if (drone.isPresent()) {
             System.out.println("drone-" + id);
             // PRODUCTION
-            //kafkaTemplate.send("drone-" + id, command);
+            kafkaTemplate.send("drone-" + id, command);
             // TEST WS
             //kafkaTemplate.send("drones-info", String.valueOf(id), command);
             return ResponseEntity.ok(convertToDTO(drone.get()));
@@ -116,7 +116,7 @@ public class DroneController {
         Drone createdDrone = droneService.createDrone(convertToEntity(droneDto));
 
         try {
-            //kafkaTopicConfig.createNewTopic("drone-" + createdDrone.getId());
+            kafkaTopicConfig.createNewTopic("drone-" + createdDrone.getId());
         } catch (Exception ignored) {
         }
 
