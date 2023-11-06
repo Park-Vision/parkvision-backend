@@ -117,11 +117,8 @@ public class EmailSenderService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 
-        // Create a DateTimeFormatter with the desired pattern
-        ;
-        // Format the ZonedDateTime in the target time zone
-        String formatedStartDateTime = reservation.getStartDate().withOffsetSameInstant(ZoneOffset.of(parking.getTimeZone().getID())).format(formatter);
-        String formatedEndDateTime = reservation.getEndDate().withOffsetSameInstant(ZoneOffset.of(parking.getTimeZone().getID())).format(formatter);
+        String formatedStartDateTime = reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone()).format(formatter);
+        String formatedEndDateTime = reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone()).format(formatter);
 
 
         StringBuilder htmlTable = new StringBuilder();
@@ -136,13 +133,13 @@ public class EmailSenderService {
         htmlTable.append("<tr>");
         htmlTable.append("<th>Start date</th>");
         htmlTable.append("<td>").append(formatedStartDateTime).append(" (")
-                .append(parking.getTimeZone().getID()).append(")").append("</td>");
+                .append(parking.getTimeZone()).append(")").append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>End date</th>");
         htmlTable.append("<td>").append(formatedEndDateTime).append(" (")
-                .append(parking.getTimeZone().getID()).append(")").append("</td>");
+                .append(parking.getTimeZone()).append(")").append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");

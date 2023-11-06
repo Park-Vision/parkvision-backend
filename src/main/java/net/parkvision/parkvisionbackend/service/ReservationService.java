@@ -67,9 +67,8 @@ public class ReservationService {
         ParkingSpot parkingSpot = _parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId());
 
         Parking parking = _parkingRepository.getReferenceById(parkingSpot.getParking().getId());
-        //get parking time zone and transform startDate to OffsetDateTime
-        OffsetDateTime startDate = reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone().toZoneId().getRules().getOffset(reservation.getStartDate())));;
-        OffsetDateTime endDate = reservation.getEndDate().withOffsetSameInstant(ZoneOffset.of(parking.getTimeZone().getID()));
+        OffsetDateTime startDate = reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone());
+        OffsetDateTime endDate = reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone());
 
         reservation.setStartDate(startDate);
         reservation.setEndDate(endDate);
@@ -142,7 +141,7 @@ public class ReservationService {
 
         ZonedDateTime earliestAvailableTime = date;
         if (earliestAvailableTime.isBefore(parkingStartTime.toZonedDateTime())) {
-            earliestAvailableTime = parkingStartTime.toZonedDateTime();
+            earliestAvailableTime = parkingStartTime.atZoneSameInstant(parkingSpot.getParking().getTimeZone().normalized());
         }
 
         for (Reservation reservation : reservations) {
@@ -157,7 +156,7 @@ public class ReservationService {
         if (earliestAvailableTime.isBefore(parkingEndTime.toZonedDateTime())) {
             Map<String, ZonedDateTime> map = new HashMap<>();
             map.put("earliestStart", earliestAvailableTime);
-            map.put("earliestEnd", parkingEndTime.toZonedDateTime());
+            map.put("earliestEnd", parkingEndTime.atZoneSameInstant(parkingSpot.getParking().getTimeZone().normalized()));
             return map;
         }
         return null;

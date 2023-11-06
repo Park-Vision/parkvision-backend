@@ -5,12 +5,7 @@ import net.parkvision.parkvisionbackend.repository.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.TimeZone;
+import java.time.*;
 
 
 @Service
@@ -58,12 +53,12 @@ public class DataSeeder {
             parking1.setDescription("Parking Magnolia Park to parking znajdujący się w centrum Wrocławia. " +
                     "Posiada 100 miejsc parkingowych, w tym 5 miejsc dla osób niepełnosprawnych. " +
                     "Parking jest monitorowany przez 24 godziny na dobę.");
-            parking1.setStartTime(new Time(6,0,0));
-            parking1.setEndTime(new Time(22,0,0));
+            parking1.setStartTime(OffsetTime.of(6,0,0,0, ZoneOffset.of("+1")));
+            parking1.setEndTime(OffsetTime.of(22,0,0,0, ZoneOffset.of("+1")));
             parking1.setCostRate(2.5);
             parking1.setLongitude(16.990429400497433);
             parking1.setLatitude(51.11818354620572);
-            parking1.setTimeZone(TimeZone.getTimeZone("Europe/Warsaw"));
+            parking1.setTimeZone(ZoneOffset.of("+1"));
             _parkingRepository.save(parking1);
 
 
@@ -74,12 +69,12 @@ public class DataSeeder {
             parking2.setDescription("Parking D20 to parking dla studentów i pracowników Politehcniki Wrocławskiej. " +
                     "Posiada 50 miejsc parkingowych, w tym 2 miejsca dla osób niepełnosprawnych. " +
                     "Parking jest monitorowany przez 24 godziny na dobę.");
-            parking2.setStartTime(new Time(4,30,0));
-            parking2.setEndTime(new Time(23,0,0));
+            parking2.setStartTime(OffsetTime.of(4,30,0,0, ZoneOffset.of("-3")));
+            parking2.setEndTime(OffsetTime.of(21,0,0,0, ZoneOffset.of("-3")));
             parking2.setCostRate(3.0);
             parking2.setLatitude(51.10975855141324);
             parking2.setLongitude(17.059114686292222);
-            parking2.setTimeZone(TimeZone.getTimeZone("Etc/GMT+1"));
+            parking2.setTimeZone(ZoneOffset.of("-3"));
             _parkingRepository.save(parking2);
 
             System.out.println("Data seeded.");
