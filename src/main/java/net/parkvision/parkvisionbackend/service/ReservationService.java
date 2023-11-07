@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.*;
 import java.util.*;
 
 @Service
@@ -141,7 +139,8 @@ public class ReservationService {
 
         ZonedDateTime earliestAvailableTime = date;
         if (earliestAvailableTime.isBefore(parkingStartTime.toZonedDateTime())) {
-            earliestAvailableTime = parkingStartTime.atZoneSameInstant(parkingSpot.getParking().getTimeZone().normalized());
+            earliestAvailableTime =
+                    parkingStartTime.atZoneSameInstant(parkingSpot.getParking().getTimeZone().normalized());
         }
 
         for (Reservation reservation : reservations) {
@@ -156,7 +155,8 @@ public class ReservationService {
         if (earliestAvailableTime.isBefore(parkingEndTime.toZonedDateTime())) {
             Map<String, ZonedDateTime> map = new HashMap<>();
             map.put("earliestStart", earliestAvailableTime);
-            map.put("earliestEnd", parkingEndTime.atZoneSameInstant(parkingSpot.getParking().getTimeZone().normalized()));
+            map.put("earliestEnd",
+                    parkingEndTime.atZoneSameInstant(parkingSpot.getParking().getTimeZone().normalized()));
             return map;
         }
         return null;

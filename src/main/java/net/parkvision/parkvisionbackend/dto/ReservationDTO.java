@@ -3,8 +3,6 @@ package net.parkvision.parkvisionbackend.dto;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
-import java.util.Date;
 
 @Data
 public class ReservationDTO {

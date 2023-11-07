@@ -1,11 +1,7 @@
 package net.parkvision.parkvisionbackend.service;
 
-import java.io.File;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.Reservation;
@@ -16,10 +12,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import jakarta.mail.internet.MimeMessage;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.io.File;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -76,7 +73,7 @@ public class EmailSenderService {
         Context context = new Context();
         context.setVariable("title", "Reservation confirmation");
         context.setVariable("description", "Here is the confirmation of the reservation you made in our system. " +
-                "Dates and times are based on parking time zone "+ parking.getTimeZone() +" compared to UTC.");
+                "Dates and times are based on parking time zone " + parking.getTimeZone() + " compared to UTC.");
         context.setVariable("name", firstName + " " + lastName);
         String htmlTable = generateHTMLTable(reservation, parking);
         context.setVariable("body", htmlTable);
@@ -118,8 +115,10 @@ public class EmailSenderService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 
-        String formatedStartDateTime = reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone()).format(formatter);
-        String formatedEndDateTime = reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone()).format(formatter);
+        String formatedStartDateTime =
+                reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone()).format(formatter);
+        String formatedEndDateTime =
+                reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone()).format(formatter);
 
 
         StringBuilder htmlTable = new StringBuilder();
