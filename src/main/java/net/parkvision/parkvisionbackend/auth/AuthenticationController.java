@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.auth;
 
 import lombok.RequiredArgsConstructor;
+import net.parkvision.parkvisionbackend.dto.RefreshTokenDTO;
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,9 +45,9 @@ public class AuthenticationController {
 
     @PostMapping("/refreshToken")
     public ResponseEntity<?> refreshToken(
-            @RequestBody String token
+            @RequestBody RefreshTokenDTO token
     ) {
-        AuthenticationResponse authenticationResponse = authenticationService.refresh(token);
+        AuthenticationResponse authenticationResponse = authenticationService.refresh(token.getToken());
         if (authenticationResponse != null) {
             return ResponseEntity.ok(authenticationResponse);
         }
