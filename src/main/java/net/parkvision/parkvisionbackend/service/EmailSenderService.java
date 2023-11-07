@@ -75,7 +75,8 @@ public class EmailSenderService {
             String topic) throws Exception {
         Context context = new Context();
         context.setVariable("title", "Reservation confirmation");
-        context.setVariable("description", "Here is the confirmation of the reservation you made in our system:");
+        context.setVariable("description", "Here is the confirmation of the reservation you made in our system. " +
+                "Dates and times are based on parking time zone "+ parking.getTimeZone() +" compared to UTC.");
         context.setVariable("name", firstName + " " + lastName);
         String htmlTable = generateHTMLTable(reservation, parking);
         context.setVariable("body", htmlTable);
@@ -132,14 +133,12 @@ public class EmailSenderService {
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>Start date</th>");
-        htmlTable.append("<td>").append(formatedStartDateTime).append(" (")
-                .append(parking.getTimeZone()).append(")").append("</td>");
+        htmlTable.append("<td>").append(formatedStartDateTime).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>End date</th>");
-        htmlTable.append("<td>").append(formatedEndDateTime).append(" (")
-                .append(parking.getTimeZone()).append(")").append("</td>");
+        htmlTable.append("<td>").append(formatedEndDateTime).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
