@@ -95,8 +95,8 @@ public class ParkingSpotService {
 
         for (ParkingSpot parkingSpot : _parkingSpotRepository.findByParkingId(parking.getId())) {
             Reservation reservation = new Reservation();
-            reservation.setStartDate(startDate);
-            reservation.setEndDate(endDate);
+            reservation.setStartDate(startDate.toOffsetDateTime());
+            reservation.setEndDate(endDate.toOffsetDateTime());
             reservation.setParkingSpot(parkingSpot);
             if (_reservationService.isParkingSpotFree(reservation)) {
                 freeParkingSpots.add(parkingSpot);

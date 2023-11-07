@@ -1,8 +1,7 @@
 package net.parkvision.parkvisionbackend.service;
 
-import java.io.File;
-
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.Reservation;
@@ -13,10 +12,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import jakarta.mail.internet.MimeMessage;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.io.File;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -72,7 +72,8 @@ public class EmailSenderService {
             String topic) throws Exception {
         Context context = new Context();
         context.setVariable("title", "Reservation confirmation");
-        context.setVariable("description", "Here is the confirmation of the reservation you made in our system:");
+        context.setVariable("description", "Here is the confirmation of the reservation you made in our system. " +
+                "Dates and times are based on parking time zone " + parking.getTimeZone() + " compared to UTC.");
         context.setVariable("name", firstName + " " + lastName);
         String htmlTable = generateHTMLTable(reservation, parking);
         context.setVariable("body", htmlTable);
@@ -111,6 +112,15 @@ public class EmailSenderService {
 
 
     public String generateHTMLTable(Reservation reservation, Parking parking) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+
+        String formatedStartDateTime =
+                reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone()).format(formatter);
+        String formatedEndDateTime =
+                reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone()).format(formatter);
+
+
         StringBuilder htmlTable = new StringBuilder();
         htmlTable.append("<table style=\"width: 100%\">");
 
@@ -122,12 +132,12 @@ public class EmailSenderService {
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>Start date</th>");
-        htmlTable.append("<td>").append(reservation.getStartDate()).append("</td>");
+        htmlTable.append("<td>").append(formatedStartDateTime).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>End date</th>");
-        htmlTable.append("<td>").append(reservation.getEndDate()).append("</td>");
+        htmlTable.append("<td>").append(formatedEndDateTime).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
@@ -137,7 +147,8 @@ public class EmailSenderService {
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>Parking</th>");
-        htmlTable.append("<td>").append(parking.getName()).append(", ").append(parking.getStreet()).append(", ").append(parking.getCity()).append("</td>");
+        htmlTable.append("<td>").append(parking.getName()).append(", ").append(parking.getStreet())
+                .append(", ").append(parking.getCity()).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
