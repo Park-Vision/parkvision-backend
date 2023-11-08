@@ -63,16 +63,18 @@ public class EmailSenderService {
     }
 
     @Async("emailTaskExecutor")
-    public void sendHtmlEmailReservationCreated(
+    public void sendHtmlEmailReservation(
             String firstName,
             String lastName,
             String to,
+            String title,
+            String description,
             Parking parking,
             Reservation reservation,
             String topic) throws Exception {
         Context context = new Context();
-        context.setVariable("title", "Reservation confirmation");
-        context.setVariable("description", "Here is the confirmation of the reservation you made in our system. " +
+        context.setVariable("title", title);
+        context.setVariable("description",  description +
                 "Dates and times are based on parking time zone " + parking.getTimeZone() + " compared to UTC.");
         context.setVariable("name", firstName + " " + lastName);
         String htmlTable = generateHTMLTable(reservation, parking);
