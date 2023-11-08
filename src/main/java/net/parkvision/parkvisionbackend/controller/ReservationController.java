@@ -4,6 +4,7 @@ import net.parkvision.parkvisionbackend.dto.*;
 import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
 import net.parkvision.parkvisionbackend.model.Reservation;
+import net.parkvision.parkvisionbackend.model.Role;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
@@ -86,10 +87,12 @@ public class ReservationController {
                 return ResponseEntity.badRequest().build();
             }
             try {
-                emailSenderService.sendHtmlEmailReservationCreated(
+                emailSenderService.sendHtmlEmailReservation(
                         user.getFirstname(),
                         user.getLastname(),
                         user.getEmail(),
+                        "Reservation confirmation",
+                        "Here is the confirmation of the reservation you made in our system. ",
                         parkingSpot.get().getParking(),
                         createdReservation, "ParkVision reservation confirmation");
             } catch (Exception e) {
@@ -103,8 +106,36 @@ public class ReservationController {
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<ReservationDTO> updateReservation(@RequestBody ReservationDTO reservationDto) {
+        User user = getUserFromRequest();
+        if (user == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (user.getRole().equals(Role.USER)) {
+            Optional<Reservation> reservation = _reservationService.getReservationById(reservationDto.getId());
+
+            if (reservation.isPresent() && !reservation.get().getUser().getId().equals(user.getId())) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
         try {
+
             Reservation updatedReservation = _reservationService.updateReservation(convertToEntity(reservationDto));
+            Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
+            if (parkingSpot.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+            try {
+                emailSenderService.sendHtmlEmailReservation(
+                        user.getFirstname(),
+                        user.getLastname(),
+                        user.getEmail(),
+                        "Reservation change confirmation",
+                        "Here is the confirmation of the reservation change you made in our system. ",
+                        parkingSpot.get().getParking(),
+                        updatedReservation, "ParkVision reservation change confirmation");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return ResponseEntity.ok(convertToDto(updatedReservation));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
