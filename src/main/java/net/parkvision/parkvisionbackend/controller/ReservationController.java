@@ -158,7 +158,7 @@ public class ReservationController {
         return null;
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @GetMapping("/client")
     public ResponseEntity<Map<String, List<ReservationDTO>>> getClientReservations() {
 
