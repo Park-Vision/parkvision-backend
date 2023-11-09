@@ -2,7 +2,7 @@ spring:
   kafka:
     properties:
       security.protocol: "SSL"
-    bootstrap-servers: localhost:29092
+    bootstrap-servers: kafka:29092
     ssl:
       trust-store-location: kafka.client.truststore.jks
       trust-store-password: maciek
@@ -10,7 +10,7 @@ spring:
       key-store-password: maciek
 
   datasource:
-    url: jdbc:postgresql://localhost:5431/compose-postgres
+    url: jdbc:postgresql://postgresql:5432/compose-postgres
     username: compose-postgres
     password: compose-postgres
     driver-class-name: org.postgresql.Driver

@@ -3,22 +3,22 @@ services:
   postgresql:
     image: 'postgres'
     container_name: postgresql
-    ports:
-      - "5431:5432"
+#    ports:
+#      - "5432:5432"
     environment:
       - POSTGRES_USER=compose-postgres
       - POSTGRES_PASSWORD=compose-postgres
   zookeeper:
     image: wurstmeister/zookeeper
-    ports:
-      - "2181:2181"
+#    ports:
+#      - "2181:2181"
   kafka:
     image: wurstmeister/kafka
     ports:
       - "29092:29092"
     environment:
       KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
-      KAFKA_ADVERTISED_LISTENERS: 'SSL://localhost:29092,PLAINTEXT://kafka:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'SSL://kafka:29092,PLAINTEXT://localhost:9092'
       KAFKA_LISTENERS: 'SSL://:29092,PLAINTEXT://:9092'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
@@ -34,12 +34,22 @@ services:
       #KAFKA_SECURITY_INTER_BROKER_PROTOCOL: 'SSL'
     volumes:
       - ./ssl2:/certs
-#  springboot:
-#    container_name: springboot
-#    image: spring
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - postgresql
-#      - zookeeper
-#      - kafka
+  springboot:
+    container_name: springboot
+    image: spring
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgresql
+      - zookeeper
+      - kafka
+
+  react:
+    restart: always
+    container_name: react
+    image: react
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    depends_on:
+      - springboot
