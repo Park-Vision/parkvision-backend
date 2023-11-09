@@ -92,8 +92,12 @@ public class ParkingSpotService {
 
     public List<ParkingSpot> getFreeSpots(Parking parking, ZonedDateTime startDate, ZonedDateTime endDate) {
         List<ParkingSpot> freeParkingSpots = new ArrayList<>();
+        List<ParkingSpot> activeParkingSpotList = _parkingSpotRepository.findByParkingId(parking.getId());
 
-        for (ParkingSpot parkingSpot : _parkingSpotRepository.findByParkingId(parking.getId())) {
+        // This code is added to remove inactive parking spots from the list
+        activeParkingSpotList.removeIf(parkingSpot -> !parkingSpot.isActive());
+
+        for (ParkingSpot parkingSpot : activeParkingSpotList) {
             Reservation reservation = new Reservation();
             reservation.setStartDate(startDate.toOffsetDateTime());
             reservation.setEndDate(endDate.toOffsetDateTime());
@@ -110,6 +114,12 @@ public class ParkingSpotService {
         return new ArrayList<>(_parkingSpotRepository.findByParkingId(parking.getId()));
     }
 
+    public List<ParkingSpot> getActiveParkingSpots(Parking parking) {
+        return new ArrayList<>(_parkingSpotRepository.findByParkingId(parking.getId()).stream()
+                .filter(ParkingSpot::isActive)
+                .toList());
+    }
+
     public List<ParkingSpot> createParkingSpots(List<ParkingSpot> parkingSpotList) {
         List<ParkingSpot> parkingSpotsResponse = new ArrayList<>();
         if (!parkingSpotList.isEmpty()) {
@@ -122,8 +132,12 @@ public class ParkingSpotService {
 
     public Map<Long, Map<String, ZonedDateTime>> getSpotsFreeTime(Parking parking, ZonedDateTime date) {
         Map<Long, Map<String, ZonedDateTime>> parkingSpotsWhenFree = new HashMap<>();
+        List<ParkingSpot> activeParkingSpotList = _parkingSpotRepository.findByParkingId(parking.getId());
 
-        for (ParkingSpot parkingSpot : _parkingSpotRepository.findByParkingId(parking.getId())) {
+        // This code is added to remove inactive parking spots from the list
+        activeParkingSpotList.removeIf(parkingSpot -> !parkingSpot.isActive());
+
+        for (ParkingSpot parkingSpot : activeParkingSpotList) {
             parkingSpotsWhenFree.put(parkingSpot.getId(),
                     _reservationService.getEarliestAvailableTime(parkingSpot, date));
         }

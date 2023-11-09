@@ -116,7 +116,6 @@ public class ParkingSpotController {
         return ResponseEntity.noContent().build();
     }
 
-
     @GetMapping("/parking/{id}/free")
     public ResponseEntity<List<ParkingSpotDTO>> getFreeSpotsByParkingId(@PathVariable Long id,
                                                                         @RequestParam String startDate,
@@ -138,6 +137,7 @@ public class ParkingSpotController {
             return ResponseEntity.notFound().build();
         }
     }
+
 
     @GetMapping("/parking/{id}")
     public ResponseEntity<List<ParkingSpotDTO>> getSpotsByParkingId(@PathVariable Long id) {
@@ -191,7 +191,7 @@ public class ParkingSpotController {
         if (drone.isPresent()) {
             List<ParkingSpotCoordinatesDTO> parkingSpotCoordinatesList = new ArrayList<>();
 
-            List<ParkingSpot> parkingSpots = _parkingSpotService.getParkingSpots(drone.get());
+            List<ParkingSpot> parkingSpots = _parkingSpotService.getParkingSpots(drone.get()); //TODO: only active?
             for (ParkingSpot parkingSpot : parkingSpots) {
                 List<Point> points = _pointService.getPointsByParkingSpotId(parkingSpot.getId());
                 if (!points.isEmpty()) {
