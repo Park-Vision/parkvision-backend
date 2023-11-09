@@ -26,7 +26,7 @@ services:
       KAFKA_SSL_PROTOCOL: 'TLSv1.1'
       KAFKA_SSL_KEYSTORE_LOCATION: '/certs/kafka.server.keystore.jks'
       KAFKA_SSL_KEYSTORE_PASSWORD: 'maciek'
-      #KAFKA_SSL_CLIENT_AUTH: 'required'
+      KAFKA_SSL_CLIENT_AUTH: 'required'
       KAFKA_SSL_KEY_PASSWORD: 'maciek'
       KAFKA_SSL_TRUSTSTORE_LOCATION: '/certs/kafka.server.truststore.jks'
       KAFKA_SSL_TRUSTSTORE_PASSWORD: 'maciek'
