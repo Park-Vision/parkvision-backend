@@ -52,7 +52,7 @@ keytool -keystore kafka.client.truststore.jks -alias CARoot -import -file ca-cer
 
 # CONFIG SERVER
     ADVERTISED_HOST_NAME: 127.0.0.1
-    ADVERTISED_LISTENERS: 'SSL://localhost:29092,PLAINTEXT://kafka:9092'
+    ADVERTISED_LISTENERS: 'SSL://kafka:29092,PLAINTEXT://localhost:9092'
     LISTENERS: 'SSL://:29092,PLAINTEXT://:9092'
     AUTO_CREATE_TOPICS_ENABLE: 'true'
     ZOOKEEPER_CONNECT: 'zookeeper:2181'
