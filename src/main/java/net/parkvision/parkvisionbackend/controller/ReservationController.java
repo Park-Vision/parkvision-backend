@@ -86,17 +86,19 @@ public class ReservationController {
             if (user == null) {
                 return ResponseEntity.badRequest().build();
             }
-            try {
-                emailSenderService.sendHtmlEmailReservation(
-                        user.getFirstname(),
-                        user.getLastname(),
-                        user.getEmail(),
+            if(user.getRole().equals(Role.USER)) {
+                try {
+                    emailSenderService.sendHtmlEmailReservation(
+                            user.getFirstname(),
+                            user.getLastname(),
+                            user.getEmail(),
                         "Reservation confirmation",
                         "Here is the confirmation of the reservation you made in our system. ",
-                        parkingSpot.get().getParking(),
-                        createdReservation, "ParkVision reservation confirmation");
-            } catch (Exception e) {
-                e.printStackTrace();
+                            parkingSpot.get().getParking(),
+                            createdReservation, "ParkVision reservation confirmation");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
         System.out.println("return ok");

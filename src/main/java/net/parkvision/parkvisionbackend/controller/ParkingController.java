@@ -1,14 +1,14 @@
 package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
-import net.parkvision.parkvisionbackend.model.Parking;
-import net.parkvision.parkvisionbackend.model.ParkingSpot;
+import net.parkvision.parkvisionbackend.model.*;
 import net.parkvision.parkvisionbackend.service.ParkingService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
@@ -43,20 +43,53 @@ public class ParkingController {
     }
 
 
+    private User getUserFromRequest() {
+        Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (user instanceof User) {
+
+            return (User) user;
+        }
+        return null;
+    }
+
     @GetMapping
     public ResponseEntity<List<ParkingDTO>> getAllParkings() {
         List<ParkingDTO> parkings
                 = _parkingService.getAllParkings().stream().map(
                 this::convertToDTO
         ).collect(Collectors.toList());
-        return ResponseEntity.ok(parkings);
+        User user = getUserFromRequest();
+        if( user == null || user.getRole().equals(Role.USER)){
+            return ResponseEntity.ok(parkings);
+        }
+        List<ParkingDTO> filteredParking =
+        parkings.stream()
+                .filter(parkingDTO ->
+                        parkingDTO.getId().equals(((ParkingModerator) user).getParking().getId())).toList();
+        return ResponseEntity.ok(filteredParking);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ParkingDTO> getParkingById(@PathVariable Long id) {
+        User user = getUserFromRequest();
         Optional<Parking> parking = _parkingService.getParkingById(id);
-        if (parking.isPresent()) {
-            return ResponseEntity.ok(convertToDTO(parking.get()));
+        if( user == null || user.getRole().equals(Role.USER)){
+            return parking.map(value -> ResponseEntity.ok(convertToDTO(value))).orElseGet(() -> ResponseEntity.notFound().build());
+        }
+        else if (user.getRole().equals(Role.PARKING_MANAGER)) {
+            if (parking.isPresent()){
+                ParkingModerator parkingModerator = (ParkingModerator) user;
+                if((parkingModerator.getParking().getId().equals(parking.get().getId()))){
+                    return ResponseEntity.ok(convertToDTO(parking.get()));
+                }
+                else{
+                    return ResponseEntity.status(401).build();
+                }
+            }
+            else{
+                return ResponseEntity.notFound().build();
+            }
         } else {
             return ResponseEntity.notFound().build();
         }
