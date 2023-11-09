@@ -47,9 +47,9 @@ public class DroneController {
         if (drone.isPresent()) {
             System.out.println("drone-" + id);
             // PRODUCTION
-            kafkaTemplate.send("drone-" + id, command);
+            //kafkaTemplate.send("drone-" + id, command);
             // TEST WS
-            //kafkaTemplate.send("drones-info", String.valueOf(id), command);
+            kafkaTemplate.send("drones-info", String.valueOf(id), command);
             return ResponseEntity.ok(convertToDTO(drone.get()));
         }
         return ResponseEntity.notFound().build();

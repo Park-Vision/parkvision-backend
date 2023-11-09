@@ -1,8 +1,14 @@
-server:
-  address: localhost
 spring:
   kafka:
-    bootstrap-servers: localhost:9092
+    properties:
+      security.protocol: "SSL"
+    bootstrap-servers: localhost:29092
+    ssl:
+      trust-store-location: kafka.client.truststore.jks
+      trust-store-password: maciek
+      key-store-location: kafka.client.keystore.jks
+      key-store-password: maciek
+
   datasource:
     url: jdbc:postgresql://localhost:5431/compose-postgres
     username: compose-postgres

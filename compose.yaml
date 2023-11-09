@@ -1,6 +1,6 @@
 version: '3'
 services:
-  db:
+  postgresql:
     image: 'postgres'
     container_name: postgresql
     ports:
@@ -15,8 +15,31 @@ services:
   kafka:
     image: wurstmeister/kafka
     ports:
-      - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_ADVERTISED_LISTENERS: 'SSL://localhost:29092,PLAINTEXT://kafka:9092'
+      KAFKA_LISTENERS: 'SSL://:29092,PLAINTEXT://:9092'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_SSL_ENABLED_PROTOCOLS: 'TLSv1.2,TLSv1.3,TLSv1.1'
+      KAFKA_SSL_PROTOCOL: 'TLSv1.1'
+      KAFKA_SSL_KEYSTORE_LOCATION: '/certs/kafka.server.keystore.jks'
+      KAFKA_SSL_KEYSTORE_PASSWORD: 'maciek'
+      #KAFKA_SSL_CLIENT_AUTH: 'required'
+      KAFKA_SSL_KEY_PASSWORD: 'maciek'
+      KAFKA_SSL_TRUSTSTORE_LOCATION: '/certs/kafka.server.truststore.jks'
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: 'maciek'
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
+      #KAFKA_SECURITY_INTER_BROKER_PROTOCOL: 'SSL'
+    volumes:
+      - ./ssl2:/certs
+#  springboot:
+#    container_name: springboot
+#    image: spring
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - postgresql
+#      - zookeeper
+#      - kafka
