@@ -4,6 +4,7 @@ import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.model.*;
 import net.parkvision.parkvisionbackend.service.ParkingService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
+import net.parkvision.parkvisionbackend.service.RequestContext;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -43,23 +44,13 @@ public class ParkingController {
     }
 
 
-    private User getUserFromRequest() {
-        Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (user instanceof User) {
-
-            return (User) user;
-        }
-        return null;
-    }
-
     @GetMapping
     public ResponseEntity<List<ParkingDTO>> getAllParkings() {
         List<ParkingDTO> parkings
                 = _parkingService.getAllParkings().stream().map(
                 this::convertToDTO
         ).collect(Collectors.toList());
-        User user = getUserFromRequest();
+        User user = RequestContext.getUserFromRequest();
         if( user == null || user.getRole().equals(Role.USER)){
             return ResponseEntity.ok(parkings);
         }
@@ -72,7 +63,7 @@ public class ParkingController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ParkingDTO> getParkingById(@PathVariable Long id) {
-        User user = getUserFromRequest();
+        User user = RequestContext.getUserFromRequest();
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if( user == null || user.getRole().equals(Role.USER)){
             return parking.map(value -> ResponseEntity.ok(convertToDTO(value))).orElseGet(() -> ResponseEntity.notFound().build());

@@ -8,6 +8,7 @@ import net.parkvision.parkvisionbackend.model.Role;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
+import net.parkvision.parkvisionbackend.service.RequestContext;
 import net.parkvision.parkvisionbackend.service.ReservationService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,7 @@ public class ReservationController {
         Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
         Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(createdReservation.getParkingSpot().getId());
         if (parkingSpot.isPresent()) {
-            User user = getUserFromRequest();
+            User user = RequestContext.getUserFromRequest();
             if (user == null) {
                 return ResponseEntity.badRequest().build();
             }
@@ -108,7 +109,7 @@ public class ReservationController {
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<ReservationDTO> updateReservation(@RequestBody ReservationDTO reservationDto) {
-        User user = getUserFromRequest();
+        User user = RequestContext.getUserFromRequest();
         if (user == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -151,20 +152,11 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    private User getUserFromRequest(){
-        Object user = SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-        if(user instanceof User) {
-            return (User) user;
-        }
-        return null;
-    }
-
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @GetMapping("/client")
     public ResponseEntity<Map<String, List<ReservationDTO>>> getClientReservations() {
 
-        User client = getUserFromRequest();
+        User client = RequestContext.getUserFromRequest();
         if (client == null) {
             return ResponseEntity.badRequest().build();
         }
