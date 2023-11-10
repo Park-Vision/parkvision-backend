@@ -1,6 +1,6 @@
 spring:
-#  profiles:
-#    active: local
+  profiles:
+    active: local
   kafka:
     bootstrap-servers: localhost:9092
   datasource:

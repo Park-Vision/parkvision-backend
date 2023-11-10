@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-//@Configuration
+@Configuration
 public class KafkaTopicConfig {
 
     @Autowired

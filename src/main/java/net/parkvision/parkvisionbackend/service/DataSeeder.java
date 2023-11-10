@@ -116,8 +116,8 @@ public class DataSeeder {
 
             parkingModerator2.setFirstname("Anna");
             parkingModerator2.setLastname("Nowak");
-            parkingModerator2.setEmail("Pmod@pv.pl");
-            parkingModerator2.setPassword(new BCryptPasswordEncoder().encode("Pmod123!"));
+            parkingModerator2.setEmail("string");
+            parkingModerator2.setPassword(new BCryptPasswordEncoder().encode("string"));
             parkingModerator2.setParking(_parkingRepository.getReferenceById(1L));
             parkingModerator2.setRole(Role.PARKING_MANAGER);
             _parkingModeratorRepository.save(parkingModerator2);
@@ -152,7 +152,7 @@ public class DataSeeder {
 
             client3.setFirstname("filip");
             client3.setLastname("strózik");
-            client3.setEmail("filipshelby@gmail.com");
+            client3.setEmail("filipshelbyxd@gmail.com");
             client3.setPassword(new BCryptPasswordEncoder().encode("Filip123!"));
             client3.setRole(Role.USER);
             _clientRepository.save(client3);
