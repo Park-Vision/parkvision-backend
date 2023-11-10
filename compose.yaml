@@ -10,6 +10,10 @@ services:
       - POSTGRES_PASSWORD=compose-postgres
   zookeeper:
     image: wurstmeister/zookeeper
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
 #    ports:
 #      - "2181:2181"
   kafka:
@@ -34,9 +38,11 @@ services:
       #KAFKA_SECURITY_INTER_BROKER_PROTOCOL: 'SSL'
     volumes:
       - ./ssl2:/certs
+    depends_on:
+      - zookeeper
   springboot:
     container_name: springboot
-    image: spring
+    image: rustyripper/spring
     ports:
       - "8080:8080"
     depends_on:
