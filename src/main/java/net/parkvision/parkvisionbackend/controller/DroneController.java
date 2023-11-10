@@ -5,7 +5,9 @@ import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.kafka.KafkaTopicConfig;
 import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.model.ParkingModerator;
+import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.service.DroneService;
+import net.parkvision.parkvisionbackend.service.RequestContext;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -154,8 +156,7 @@ public class DroneController {
     }
 
     private ParkingModerator getParkingModeratorFromRequest() {
-        Object user = SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
+        User user = RequestContext.getUserFromRequest();
         if (user instanceof ParkingModerator) {
             return (ParkingModerator) user;
         }

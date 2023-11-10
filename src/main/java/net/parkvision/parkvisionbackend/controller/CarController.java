@@ -7,6 +7,7 @@ import net.parkvision.parkvisionbackend.model.Client;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.ClientRepository;
 import net.parkvision.parkvisionbackend.service.CarService;
+import net.parkvision.parkvisionbackend.service.RequestContext;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +53,7 @@ public class CarController {
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/client")
     public ResponseEntity<List<CarDTO>> getAllCarsByClientId() {
-        User client = getClientFromRequest();
+        User client = RequestContext.getUserFromRequest();
         if(client == null){
             return ResponseEntity.badRequest().build();
         }
@@ -66,7 +67,7 @@ public class CarController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER', 'USER')")
     @GetMapping("/{id}")
     public ResponseEntity<CarDTO> getCarById(@PathVariable Long id) {
-        User client = getClientFromRequest();
+        User client = RequestContext.getUserFromRequest();
         Optional<Car> car = _carService.getCarById(id);
         if (car.isPresent() && client.getId().equals(car.get().getClient().getId())) {
             return ResponseEntity.ok(convertToDTO(car.get()));
@@ -78,7 +79,7 @@ public class CarController {
     @PreAuthorize("hasRole('USER')")
     @PostMapping
     public ResponseEntity<CarDTO> createCar(@RequestBody CarDTO carDTO) {
-        User client = getClientFromRequest();
+        User client = RequestContext.getUserFromRequest();
         if(!client.getId().equals(carDTO.getClientDTO().getId())){
             return ResponseEntity.badRequest().build();
         }
@@ -91,7 +92,7 @@ public class CarController {
     @PutMapping
     public ResponseEntity<CarDTO> updateCar(@RequestBody CarDTO carDTO) {
 
-        User client = getClientFromRequest();
+        User client = RequestContext.getUserFromRequest();
         if(client == null){
             return ResponseEntity.badRequest().build();
         }
@@ -117,7 +118,7 @@ public class CarController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
 
-        User client = getClientFromRequest();
+        User client = RequestContext.getUserFromRequest();
         if(client == null){
             return ResponseEntity.badRequest().build();
         }
@@ -133,15 +134,5 @@ public class CarController {
 
         _carService.deleteCar(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private User getClientFromRequest() {
-        Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (user instanceof User) {
-
-            return (User) user;
-        }
-        return null;
     }
 }
