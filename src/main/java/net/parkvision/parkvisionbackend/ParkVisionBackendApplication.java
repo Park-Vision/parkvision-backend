@@ -34,20 +34,7 @@ public class ParkVisionBackendApplication {
 
     @EventListener(ApplicationReadyEvent.class)
     public void triggerWhenStarts() throws Exception {
-        System.out.println("Application started ... sending email");
-
-        // emailSenderService.sendEmail("@gmail.com", "TEST body
-        // <ul><li>jeden</li></ul>", "Test topic 2");
-
-        // List<String> emails = new
-        // ArrayList<>(List.of("maciejmakarakontakt@gmail.com"));
-
-        // for (String email : emails) {
-        // emailSenderService.sendMessageWithAttachment(email, "Powiadomienie z systemu
-        // ParkVision", "Twój pojazd " +
-        // "zostaje wyeskortowany z parkingu przez grupę wojskowych dronów.",
-        // "C:\\Users\\filip\\Documents\\Code\\parkvision-backend\\img.png");
-        // }
+        System.out.println("Application started ...");
     }
 
     @PostConstruct

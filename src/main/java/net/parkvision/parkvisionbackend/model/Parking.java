@@ -1,6 +1,6 @@
 package net.parkvision.parkvisionbackend.model;
 
-import java.sql.Time;
+import java.time.*;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -24,10 +24,11 @@ public class Parking {
     private String street;
     private String zipCode;
     private double costRate;
-    private Time startTime;
-    private Time endTime;
+    private OffsetTime startTime;
+    private OffsetTime endTime;
     private double latitude;
     private double longitude;
+    private ZoneOffset timeZone;
 
     @OneToMany
     private List<ParkingModerator> parkingModerator;
