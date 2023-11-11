@@ -40,11 +40,12 @@ public class DataSeeder {
     public void seedData() {
         Parking parking1 = new Parking();
         Parking parking2 = new Parking();
+        Parking parking3 = new Parking();
+
         long parkingCount = _parkingRepository.count();
 
         if (parkingCount == 0) {
             System.out.println("seedParkingData()");
-
 
             parking1.setName("Magnolia Park");
             parking1.setCity("Wrocław");
@@ -61,12 +62,11 @@ public class DataSeeder {
             parking1.setTimeZone(ZoneOffset.of("+1"));
             _parkingRepository.save(parking1);
 
-
             parking2.setName("D20 - Politechnika Wrocławska");
             parking2.setCity("Wrocław");
             parking2.setStreet("Janiszewskiego 8");
             parking2.setZipCode("50-372");
-            parking2.setDescription("Parking D20 to parking dla studentów i pracowników Politehcniki Wrocławskiej. " +
+            parking2.setDescription("Parking D20 to parking dla studentów i pracowników Politechniki Wrocławskiej. " +
                     "Posiada 50 miejsc parkingowych, w tym 2 miejsca dla osób niepełnosprawnych. " +
                     "Parking jest monitorowany przez 24 godziny na dobę.");
             parking2.setStartTime(OffsetTime.of(4,30,0,0, ZoneOffset.of("-3")));
@@ -76,6 +76,21 @@ public class DataSeeder {
             parking2.setLongitude(17.059114686292222);
             parking2.setTimeZone(ZoneOffset.of("-3"));
             _parkingRepository.save(parking2);
+
+            parking3.setName("Parking Wrońskiego");
+            parking3.setCity("Wrocław");
+            parking3.setStreet("Wrońskiego 1");
+            parking3.setZipCode("50-376");
+            parking3.setDescription("Parking Wrońskiego to parking Politechniki Wrocławskiej dla studentów i pracowników" +
+                    " Politechniki Wrocławskiej. Posiada 50 miejsc parkingowych, w tym 2 miejsca dla osób niepełnosprawnych.");
+            parking3.setStartTime(OffsetTime.of(6,30,0,0, ZoneOffset.of("-2")));
+            parking3.setEndTime(OffsetTime.of(19,0,0,0, ZoneOffset.of("-2")));
+            parking3.setCostRate(2.0);
+            parking3.setLatitude(51.108915212046774);
+            parking3.setLongitude(17.05562300818793);
+            parking3.setTimeZone(ZoneOffset.of("-2"));
+            _parkingRepository.save(parking3);
+
 
             System.out.println("Data seeded.");
         } else {
@@ -108,11 +123,13 @@ public class DataSeeder {
             System.out.println("Data already exists.");
         }
 
-        ParkingModerator parkingModerator1 = new ParkingModerator();
+
         long parkingModeratorCount = _parkingModeratorRepository.count();
 
         if (parkingModeratorCount == 0) {
             System.out.println("SeedParkingModeratorData()");
+
+            ParkingModerator parkingModerator1 = new ParkingModerator();
 
             parkingModerator1.setFirstname("Anna");
             parkingModerator1.setLastname("Nowak");
@@ -134,8 +151,19 @@ public class DataSeeder {
             parkingModerator2.setRole(Role.PARKING_MANAGER);
             _parkingModeratorRepository.save(parkingModerator2);
 
-            System.out.println("Added: " + parkingModerator2.getEmail() + " " + "Pmod123");
+            System.out.println("Added: " + parkingModerator2.getEmail() + " " + "Pmod123!");
 
+            ParkingModerator parkingModerator3 = new ParkingModerator();
+
+            parkingModerator3.setFirstname("Swagger");
+            parkingModerator3.setLastname("ParkingModerator");
+            parkingModerator3.setEmail("string");
+            parkingModerator3.setPassword(new BCryptPasswordEncoder().encode("string"));
+            parkingModerator3.setParking(_parkingRepository.getReferenceById(3L));
+            parkingModerator3.setRole(Role.PARKING_MANAGER);
+            _parkingModeratorRepository.save(parkingModerator3);
+
+            System.out.println("Added: " + parkingModerator3.getEmail() + " " + "Pmod123!");
             System.out.println("Data seeded.");
         } else {
             System.out.println("Data already exists.");
