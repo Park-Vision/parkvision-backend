@@ -188,4 +188,12 @@ public class ReservationService {
 
         return clientSortedReservations;
     }
+
+    public List<Reservation> getAllReservationsByParking(Long id) {
+        return _reservationRepository.findAll()
+                .stream()
+                .filter(reservation -> Objects.equals(reservation.getParkingSpot().getParking().getId(), id))
+                .sorted(Comparator.comparing(Reservation::getEndDate))
+                .toList();
+    }
 }

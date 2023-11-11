@@ -173,4 +173,13 @@ public class ReservationController {
 
         return ResponseEntity.ok(clientReservationsResponse);
     }
+
+    @PreAuthorize("hasRole('PARKING_MANAGER')")
+    @GetMapping("/parking/{id}")
+    public ResponseEntity<List<ReservationDTO>> getAllReservationsByParking(@PathVariable Long id) {
+        List<ReservationDTO> reservations = _reservationService.getAllReservationsByParking(id).stream().map(
+                this::convertToDto
+        ).collect(Collectors.toList());
+        return ResponseEntity.ok(reservations);
+    }
 }
