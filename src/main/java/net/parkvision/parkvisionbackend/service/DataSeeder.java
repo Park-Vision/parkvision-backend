@@ -59,7 +59,7 @@ public class DataSeeder {
             parking1.setLongitude(16.990429400497433);
             parking1.setLatitude(51.11818354620572);
             parking1.setTimeZone(ZoneOffset.of("+1"));
-            parking2.setCurrency("PLN");
+            parking1.setCurrency("PLN");
             _parkingRepository.save(parking1);
 
 
@@ -118,8 +118,8 @@ public class DataSeeder {
 
             parkingModerator2.setFirstname("Anna");
             parkingModerator2.setLastname("Nowak");
-            parkingModerator2.setEmail("string");
-            parkingModerator2.setPassword(new BCryptPasswordEncoder().encode("string"));
+            parkingModerator2.setEmail("Pmod@pv.pl");
+            parkingModerator2.setPassword(new BCryptPasswordEncoder().encode("Test1234"));
             parkingModerator2.setParking(_parkingRepository.getReferenceById(1L));
             parkingModerator2.setRole(Role.PARKING_MANAGER);
             _parkingModeratorRepository.save(parkingModerator2);
