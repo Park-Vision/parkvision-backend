@@ -29,6 +29,7 @@ public class Parking {
     private double latitude;
     private double longitude;
     private ZoneOffset timeZone;
+    private String currency;
 
     @OneToMany
     private List<ParkingModerator> parkingModerator;

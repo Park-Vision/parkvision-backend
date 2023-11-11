@@ -59,6 +59,7 @@ public class DataSeeder {
             parking1.setLongitude(16.990429400497433);
             parking1.setLatitude(51.11818354620572);
             parking1.setTimeZone(ZoneOffset.of("+1"));
+            parking2.setCurrency("PLN");
             _parkingRepository.save(parking1);
 
 
@@ -75,6 +76,7 @@ public class DataSeeder {
             parking2.setLatitude(51.10975855141324);
             parking2.setLongitude(17.059114686292222);
             parking2.setTimeZone(ZoneOffset.of("-3"));
+            parking2.setCurrency("EUR");
             _parkingRepository.save(parking2);
 
             System.out.println("Data seeded.");

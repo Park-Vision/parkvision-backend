@@ -12,6 +12,7 @@ import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -70,6 +71,12 @@ public class ReservationService {
 
         reservation.setStartDate(startDate);
         reservation.setEndDate(endDate);
+
+        Duration duration = Duration.between(startDate, endDate);
+        long minutes = duration.toMinutes();
+        double amount = minutes / 60.0 + parking.getCostRate();
+
+        reservation.setAmount(amount);
 
         Reservation createdReservation = _reservationRepository.save(reservation);
         createdReservation.getParkingSpot().setParking(parking);

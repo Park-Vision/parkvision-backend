@@ -12,4 +12,6 @@ public class ReservationDTO {
     private String registrationNumber;
     private UserDTO userDTO;
     private ParkingSpotDTO parkingSpotDTO;
+    private double amount;
+
 }

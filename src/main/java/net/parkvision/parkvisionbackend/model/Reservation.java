@@ -22,6 +22,7 @@ public class Reservation {
     private String startDate;
     private String endDate;
     private String registrationNumber;
+    private double amount;
 
     @ManyToOne
     private User user;

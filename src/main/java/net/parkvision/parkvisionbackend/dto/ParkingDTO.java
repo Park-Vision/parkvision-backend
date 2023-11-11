@@ -18,4 +18,6 @@ public class ParkingDTO {
     private double latitude;
     private double longitude;
     private ZoneOffset timeZone;
+    private String currency;
+
 }
