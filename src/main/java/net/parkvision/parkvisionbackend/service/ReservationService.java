@@ -107,8 +107,15 @@ public class ReservationService {
                     " not exist.");
         }
 
-        reservation.setStartDate(reservation.getStartDate());
-        reservation.setEndDate(reservation.getEndDate());
+        ParkingSpot parkingSpot = _parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId());
+
+        Parking parking = _parkingRepository.getReferenceById(parkingSpot.getParking().getId());
+
+        OffsetDateTime startDate = reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone());
+        OffsetDateTime endDate = reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone());
+
+        reservation.setStartDate(startDate);
+        reservation.setEndDate(endDate);
         reservation.setRegistrationNumber(reservation.getRegistrationNumber());
         reservation.setUser(reservation.getUser());
         reservation.setParkingSpot(reservation.getParkingSpot());
