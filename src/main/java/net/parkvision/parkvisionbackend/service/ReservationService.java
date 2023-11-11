@@ -74,7 +74,7 @@ public class ReservationService {
 
         Duration duration = Duration.between(startDate, endDate);
         long minutes = duration.toMinutes();
-        double amount = minutes / 60.0 + parking.getCostRate();
+        double amount = minutes * parking.getCostRate() / 60.0;
 
         reservation.setAmount(amount);
 
