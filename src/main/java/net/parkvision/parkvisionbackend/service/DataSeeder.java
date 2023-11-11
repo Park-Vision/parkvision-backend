@@ -186,7 +186,6 @@ public class DataSeeder {
 
             parkingSpot1.setSpotNumber("1");
             parkingSpot1.setActive(true);
-            parkingSpot1.setOccupied(false);
             parkingSpot1.setParking(parking1);
 
             _parkingSpotRepository.save(parkingSpot1);
@@ -194,7 +193,6 @@ public class DataSeeder {
 
             parkingSpot2.setSpotNumber("2");
             parkingSpot2.setActive(true);
-            parkingSpot2.setOccupied(false);
             parkingSpot2.setParking(parking1);
 
             _parkingSpotRepository.save(parkingSpot2);

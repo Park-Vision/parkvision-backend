@@ -71,7 +71,6 @@ public class ParkingSpotService {
         }
 
         parkingSpot.setSpotNumber(parkingSpot.getSpotNumber());
-        parkingSpot.setOccupied(parkingSpot.isOccupied());
         parkingSpot.setActive(parkingSpot.isActive());
         parkingSpot.setParking(parkingSpot.getParking());
 
