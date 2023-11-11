@@ -92,10 +92,7 @@ public class ParkingSpotService {
 
     public List<ParkingSpot> getFreeSpots(Parking parking, ZonedDateTime startDate, ZonedDateTime endDate) {
         List<ParkingSpot> freeParkingSpots = new ArrayList<>();
-        List<ParkingSpot> activeParkingSpotList = _parkingSpotRepository.findByParkingId(parking.getId());
-
-        // This code is added to remove inactive parking spots from the list
-        activeParkingSpotList.removeIf(parkingSpot -> !parkingSpot.isActive());
+        List<ParkingSpot> activeParkingSpotList = getActiveParkingSpots(parking);
 
         for (ParkingSpot parkingSpot : activeParkingSpotList) {
             Reservation reservation = new Reservation();
@@ -132,10 +129,7 @@ public class ParkingSpotService {
 
     public Map<Long, Map<String, ZonedDateTime>> getSpotsFreeTime(Parking parking, ZonedDateTime date) {
         Map<Long, Map<String, ZonedDateTime>> parkingSpotsWhenFree = new HashMap<>();
-        List<ParkingSpot> activeParkingSpotList = _parkingSpotRepository.findByParkingId(parking.getId());
-
-        // This code is added to remove inactive parking spots from the list
-        activeParkingSpotList.removeIf(parkingSpot -> !parkingSpot.isActive());
+        List<ParkingSpot> activeParkingSpotList = getActiveParkingSpots(parking);
 
         for (ParkingSpot parkingSpot : activeParkingSpotList) {
             parkingSpotsWhenFree.put(parkingSpot.getId(),
