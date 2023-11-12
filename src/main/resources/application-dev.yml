@@ -1,0 +1,35 @@
+spring:
+  kafka:
+    properties:
+      security.protocol: "SSL"
+    bootstrap-servers: localhost:29092
+    ssl:
+      trust-store-location: kafka.client.truststore.jks
+      trust-store-password: maciek
+      key-store-location: kafka.client.keystore.jks
+      key-store-password: maciek
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/compose-postgres
+    username: compose-postgres
+    password: compose-postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: parkvision.info@gmail.com
+    password: zzwbdafgndoappdy
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
