@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 public class ParkingSpotController {
 
     private final ParkingSpotService _parkingSpotService;
-
     private final ModelMapper modelMapper;
     private final ParkingService _parkingService;
     private final PointController _pointController;
@@ -185,8 +184,7 @@ public class ParkingSpotController {
         }
     }
 
-    @GetMapping("/drone/{id}")
-    public ResponseEntity<List<ParkingSpotCoordinatesDTO>> getSpotCoordinatesByDroneId(@PathVariable Long id) {
+    public List<ParkingSpotCoordinatesDTO> getSpotCoordinatesByDroneId(Long id) {
         Optional<Drone> drone = _droneService.getDroneById(id);
         if (drone.isPresent()) {
             List<ParkingSpotCoordinatesDTO> parkingSpotCoordinatesList = new ArrayList<>();
@@ -195,15 +193,15 @@ public class ParkingSpotController {
             for (ParkingSpot parkingSpot : parkingSpots) {
                 List<Point> points = _pointService.getPointsByParkingSpotId(parkingSpot.getId());
                 if (!points.isEmpty()) {
-                    ParkingSpotCoordinatesDTO parkingSpotCoordinatesDTO = getParkingSpotCoordinatesDTO(parkingSpot, points);
+                    ParkingSpotCoordinatesDTO parkingSpotCoordinatesDTO = getParkingSpotCoordinatesDTO(parkingSpot,
+                            points);
 
                     parkingSpotCoordinatesList.add(parkingSpotCoordinatesDTO);
                 }
             }
-            return ResponseEntity.ok(parkingSpotCoordinatesList);
-        } else {
-            return ResponseEntity.notFound().build();
+            return parkingSpotCoordinatesList;
         }
+        return null;
     }
 
     private static ParkingSpotCoordinatesDTO getParkingSpotCoordinatesDTO(ParkingSpot parkingSpot, List<Point> points) {
