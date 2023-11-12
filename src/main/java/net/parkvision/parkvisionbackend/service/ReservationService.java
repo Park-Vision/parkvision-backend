@@ -127,17 +127,21 @@ public class ReservationService {
         _reservationRepository.deleteById(id);
     }
 
-    public void cancelReservation(Long id) {
+    public Reservation cancelReservation(Long id) {
         Optional<StripeCharge> stripeCharge = _stripeChargeService.getStripeChargeByReservationId(id);
         if (stripeCharge.isPresent()) {
             StripeCharge refundedCharge =  _stripeChargeService.refundCharge(stripeCharge.get().getId());
             if (refundedCharge.getSuccess()) {
                 refundedCharge.setReservation(null);
                 StripeCharge updatedCharge = _stripeChargeService.updateStripeCharge(refundedCharge);
-                if (updatedCharge.getReservation() == null)
+                if (updatedCharge.getReservation() == null) {
+                    Reservation canceledReservation = _reservationRepository.getReferenceById(id);
                     deleteReservation(id);
+                    return canceledReservation;
+                }
             }
         }
+        return null;
     }
 
     public Map<String, ZonedDateTime> getEarliestAvailableTime(ParkingSpot parkingSpot, ZonedDateTime date) {

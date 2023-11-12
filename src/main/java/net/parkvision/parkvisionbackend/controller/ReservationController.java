@@ -155,19 +155,36 @@ public class ReservationController {
             if (reservation.isPresent() && !reservation.get().getUser().getId().equals(user.getId())) {
                 return ResponseEntity.badRequest().build();
             }
-            _reservationService.cancelReservation(id);
+            Reservation canceledReservation = _reservationService.cancelReservation(id);
+            if (canceledReservation == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(canceledReservation.getParkingSpot().getId());
+            if (parkingSpot.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+            try {
+                emailSenderService.sendHtmlEmailReservation(
+                        user.getFirstname(),
+                        user.getLastname(),
+                        user.getEmail(),
+                        "Reservation cancellation confirmation",
+                        "Here is the confirmation of the reservation cancellation you made in our system. ",
+                        parkingSpot.get().getParking(),
+                        canceledReservation, "ParkVision reservation cancellation confirmation");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return ResponseEntity.ok().build();
         }
         else if (user.getRole().equals(Role.PARKING_MANAGER)) {
-            // cast user to parking manager
             ParkingModerator parkingManager = (ParkingModerator) user;
 
             if (reservation.isPresent() && !reservation.get().getParkingSpot().getParking().getId().equals(parkingManager.getParking().getId())) {
                 return ResponseEntity.badRequest().build();
             }
             _reservationService.deleteReservation(id);
-
         }
-
         return ResponseEntity.noContent().build();
     }
 
