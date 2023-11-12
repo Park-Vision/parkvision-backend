@@ -11,9 +11,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,24 +144,31 @@ public class ReservationController {
 
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
+    public ResponseEntity<String> deleteReservation(@PathVariable Long id) {
         User user = RequestContext.getUserFromRequest();
         Optional<Reservation> reservation = _reservationService.getReservationById(id);
 
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
+        if (reservation.isPresent()) {
+            OffsetDateTime reservationStartDate = reservation.get().getStartDate();
+            OffsetDateTime now = OffsetDateTime.now();
+            if (reservationStartDate.isBefore(now)) {
+                return ResponseEntity.badRequest().body("Cannot cancel reservation in the past.");
+            }
+        }
         if (user.getRole().equals(Role.USER)) {
             if (reservation.isPresent() && !reservation.get().getUser().getId().equals(user.getId())) {
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest().body("User does not have permission to cancel this reservation.");
             }
             Reservation canceledReservation = _reservationService.cancelReservation(id);
             if (canceledReservation == null) {
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest().body("Failed to cancel the reservation.");
             }
             Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(canceledReservation.getParkingSpot().getId());
             if (parkingSpot.isEmpty()) {
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest().body("Failed to retrieve parking spot information.");
             }
             try {
                 emailSenderService.sendHtmlEmailReservation(
@@ -181,7 +188,7 @@ public class ReservationController {
             ParkingModerator parkingManager = (ParkingModerator) user;
 
             if (reservation.isPresent() && !reservation.get().getParkingSpot().getParking().getId().equals(parkingManager.getParking().getId())) {
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest().body("Parking manager does not have permission to delete this reservation.");
             }
             _reservationService.deleteReservation(id);
         }
