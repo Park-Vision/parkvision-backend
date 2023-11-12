@@ -2,10 +2,7 @@ package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.*;
 import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
-import net.parkvision.parkvisionbackend.model.ParkingSpot;
-import net.parkvision.parkvisionbackend.model.Reservation;
-import net.parkvision.parkvisionbackend.model.Role;
-import net.parkvision.parkvisionbackend.model.User;
+import net.parkvision.parkvisionbackend.model.*;
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
 import net.parkvision.parkvisionbackend.service.RequestContext;
@@ -148,7 +145,29 @@ public class ReservationController {
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        _reservationService.deleteReservation(id);
+        User user = RequestContext.getUserFromRequest();
+        Optional<Reservation> reservation = _reservationService.getReservationById(id);
+
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        if (user.getRole().equals(Role.USER)) {
+            if (reservation.isPresent() && !reservation.get().getUser().getId().equals(user.getId())) {
+                return ResponseEntity.badRequest().build();
+            }
+            _reservationService.cancelReservation(id);
+        }
+        else if (user.getRole().equals(Role.PARKING_MANAGER)) {
+            // cast user to parking manager
+            ParkingModerator parkingManager = (ParkingModerator) user;
+
+            if (reservation.isPresent() && !reservation.get().getParkingSpot().getParking().getId().equals(parkingManager.getParking().getId())) {
+                return ResponseEntity.badRequest().build();
+            }
+            _reservationService.deleteReservation(id);
+
+        }
+
         return ResponseEntity.noContent().build();
     }
 

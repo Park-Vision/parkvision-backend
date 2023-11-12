@@ -43,6 +43,9 @@ public class StripeChargeService {
     public Optional<StripeCharge> getStripeChargeById(String id) {
         return _stripeChargeRepository.findById(id);
     }
+    public Optional<StripeCharge> getStripeChargeByReservationId(Long id) {
+        return _stripeChargeRepository.findByReservationId(id);
+    }
 
     public StripeCharge createStripeCharge(StripeCharge stripeCharge) {
         Stripe.apiKey = stripeKey;
@@ -112,6 +115,13 @@ public class StripeChargeService {
         } else {
             throw new IllegalArgumentException("StripeCharge with ID " + id + " not found.");
         }
+    }
+
+    public StripeCharge updateStripeCharge(StripeCharge stripeCharge) {
+        if (!_stripeChargeRepository.existsById(stripeCharge.getId())) {
+            throw new IllegalArgumentException("StripeCharge with ID " + stripeCharge.getId() + " does not exist.");
+        }
+        return _stripeChargeRepository.save(stripeCharge);
     }
 
     public void deleteStripeCharge(String id) {

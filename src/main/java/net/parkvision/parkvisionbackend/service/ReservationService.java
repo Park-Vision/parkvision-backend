@@ -1,10 +1,7 @@
 package net.parkvision.parkvisionbackend.service;
 
 import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
-import net.parkvision.parkvisionbackend.model.Parking;
-import net.parkvision.parkvisionbackend.model.ParkingSpot;
-import net.parkvision.parkvisionbackend.model.Reservation;
-import net.parkvision.parkvisionbackend.model.User;
+import net.parkvision.parkvisionbackend.model.*;
 import net.parkvision.parkvisionbackend.repository.ParkingRepository;
 import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
 import net.parkvision.parkvisionbackend.repository.ReservationRepository;
@@ -25,14 +22,17 @@ public class ReservationService {
 
     private final UserRepository _userRepository;
     private final ParkingSpotRepository _parkingSpotRepository;
+    private final StripeChargeService _stripeChargeService;
 
     @Autowired
     public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository,
-                              ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository) {
+                              ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository,
+                              StripeChargeService stripeChargeService) {
         _reservationRepository = reservationRepository;
         _userRepository = userRepository;
         _parkingSpotRepository = parkingSpotRepository;
         _parkingRepository = parkingRepository;
+        _stripeChargeService = stripeChargeService;
     }
 
     public List<Reservation> getAllReservations() {
@@ -125,6 +125,19 @@ public class ReservationService {
 
     public void deleteReservation(Long id) {
         _reservationRepository.deleteById(id);
+    }
+
+    public void cancelReservation(Long id) {
+        Optional<StripeCharge> stripeCharge = _stripeChargeService.getStripeChargeByReservationId(id);
+        if (stripeCharge.isPresent()) {
+            StripeCharge refundedCharge =  _stripeChargeService.refundCharge(stripeCharge.get().getId());
+            if (refundedCharge.getSuccess()) {
+                refundedCharge.setReservation(null);
+                StripeCharge updatedCharge = _stripeChargeService.updateStripeCharge(refundedCharge);
+                if (updatedCharge.getReservation() == null)
+                    deleteReservation(id);
+            }
+        }
     }
 
     public Map<String, ZonedDateTime> getEarliestAvailableTime(ParkingSpot parkingSpot, ZonedDateTime date) {
