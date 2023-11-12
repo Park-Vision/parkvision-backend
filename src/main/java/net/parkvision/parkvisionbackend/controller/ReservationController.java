@@ -148,6 +148,7 @@ public class ReservationController {
         User user = RequestContext.getUserFromRequest();
         Optional<Reservation> reservation = _reservationService.getReservationById(id);
 
+
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
@@ -158,8 +159,34 @@ public class ReservationController {
                 return ResponseEntity.badRequest().body("Cannot cancel reservation in the past.");
             }
         }
-        if (user.getRole().equals(Role.USER)) {
-            if (reservation.isPresent() && !reservation.get().getUser().getId().equals(user.getId())) {
+        if (reservation.isPresent() && user.getRole().equals(Role.PARKING_MANAGER)) {
+            ParkingModerator parkingManager = (ParkingModerator) user;
+
+            if (!reservation.get().getParkingSpot().getParking().getId().equals(parkingManager.getParking().getId())) {
+                return ResponseEntity.badRequest().body("Parking manager does not have permission to delete this reservation.");
+            }
+
+            if(reservation.get().getUser().getId().equals(user.getId())){
+                _reservationService.deleteReservation(id);
+                return ResponseEntity.ok().build();
+            } else {
+                try {
+                    emailSenderService.sendHtmlEmailReservation(
+                            reservation.get().getUser().getFirstname(),
+                            reservation.get().getUser().getLastname(),
+                            reservation.get().getUser().getEmail(),
+                            "Reservation cancellation confirmation",
+                            "Here is the confirmation of the reservation cancellation you made in our system. ",
+                            reservation.get().getParkingSpot().getParking(),
+                            reservation.get(), "ParkVision reservation cancellation confirmation");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                _reservationService.deleteReservation(id);
+                return ResponseEntity.ok().build();
+            }
+        } else if (reservation.isPresent() && user.getRole().equals(Role.USER)) {
+            if (!reservation.get().getUser().getId().equals(user.getId())) {
                 return ResponseEntity.badRequest().body("User does not have permission to cancel this reservation.");
             }
             Reservation canceledReservation = _reservationService.cancelReservation(id);
@@ -184,14 +211,7 @@ public class ReservationController {
             }
             return ResponseEntity.ok().build();
         }
-        else if (user.getRole().equals(Role.PARKING_MANAGER)) {
-            ParkingModerator parkingManager = (ParkingModerator) user;
 
-            if (reservation.isPresent() && !reservation.get().getParkingSpot().getParking().getId().equals(parkingManager.getParking().getId())) {
-                return ResponseEntity.badRequest().body("Parking manager does not have permission to delete this reservation.");
-            }
-            _reservationService.deleteReservation(id);
-        }
         return ResponseEntity.noContent().build();
     }
 
