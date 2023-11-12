@@ -91,12 +91,13 @@ public class EmailSenderService {
             String lastName,
             String to,
             String title,
+            String description,
             StripeCharge stripeCharge,
             Reservation reservation,
             String topic) throws Exception {
         Context context = new Context();
         context.setVariable("title", title);
-        context.setVariable("description",  "Here is the confirmation of the payment for your reservation.");
+        context.setVariable("description",  description);
         context.setVariable("name", firstName + " " + lastName);
         String htmlTable = generateHTMLTable(reservation, stripeCharge);
         context.setVariable("body", htmlTable);

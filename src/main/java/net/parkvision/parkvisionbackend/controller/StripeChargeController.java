@@ -59,23 +59,38 @@ public class StripeChargeController {
             }
             if(user.getRole().equals(Role.USER)) {
                 try {
-                    emailSenderService.sendHtmlEmailReservation(
-                            user.getFirstname(),
-                            user.getLastname(),
-                            user.getEmail(),
-                            "Reservation confirmation",
-                            "Here is the confirmation of the reservation you made in our system. ",
-                            reservation.get().getParkingSpot().getParking(),
-                            reservation.get(), "ParkVision reservation confirmation");
+                    if (createdStripeCharge.getSuccess()){
+                        emailSenderService.sendHtmlEmailReservation(
+                                user.getFirstname(),
+                                user.getLastname(),
+                                user.getEmail(),
+                                "Reservation confirmation",
+                                "Here is the confirmation of the reservation you made in our system. ",
+                                reservation.get().getParkingSpot().getParking(),
+                                reservation.get(), "ParkVision reservation confirmation");
 
-                    emailSenderService.sendHtmlEmailPayment(
-                            user.getFirstname(),
-                            user.getLastname(),
-                            user.getEmail(),
-                            "Payment confirmation",
-                            createdStripeCharge,
-                            reservation.get(),
-                            "ParkVision payment confirmation");
+                        emailSenderService.sendHtmlEmailPayment(
+                                user.getFirstname(),
+                                user.getLastname(),
+                                user.getEmail(),
+                                "Payment confirmation",
+                                "Here is the confirmation of the payment for your reservation.",
+                                createdStripeCharge,
+                                reservation.get(),
+                                "ParkVision payment confirmation");
+                    } else {
+                        emailSenderService.sendHtmlEmailPayment(
+                                user.getFirstname(),
+                                user.getLastname(),
+                                user.getEmail(),
+                                "Payment declined",
+                                "Payment for your reservation was declined. Please try again.",
+                                createdStripeCharge,
+                                reservation.get(),
+                                "ParkVision payment declined");
+                        _reservationService.deleteReservation(reservation.get().getId());
+                    }
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
