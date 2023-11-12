@@ -12,10 +12,15 @@ import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
+
+import static java.lang.Float.parseFloat;
 
 @Service
 public class ReservationService {
@@ -75,9 +80,9 @@ public class ReservationService {
         Duration duration = Duration.between(startDate, endDate);
         long minutes = duration.toMinutes();
         double amount = minutes * parking.getCostRate() / 60.0;
+        BigDecimal roundedAmount = BigDecimal.valueOf(amount).setScale(2, RoundingMode.HALF_UP);
 
-        reservation.setAmount(amount);
-
+        reservation.setAmount(roundedAmount.doubleValue());
         Reservation createdReservation = _reservationRepository.save(reservation);
         createdReservation.getParkingSpot().setParking(parking);
         return createdReservation;

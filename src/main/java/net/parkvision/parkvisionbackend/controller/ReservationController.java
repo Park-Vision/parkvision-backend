@@ -81,28 +81,28 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
         Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
-        Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(createdReservation.getParkingSpot().getId());
-        if (parkingSpot.isPresent()) {
-            User user = RequestContext.getUserFromRequest();
-            if (user == null) {
-                return ResponseEntity.badRequest().build();
-            }
-            if(user.getRole().equals(Role.USER)) {
-                try {
-                    emailSenderService.sendHtmlEmailReservation(
-                            user.getFirstname(),
-                            user.getLastname(),
-                            user.getEmail(),
-                        "Reservation confirmation",
-                        "Here is the confirmation of the reservation you made in our system. ",
-                            parkingSpot.get().getParking(),
-                            createdReservation, "ParkVision reservation confirmation");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        System.out.println("return ok");
+//        Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(createdReservation.getParkingSpot().getId());
+//        if (parkingSpot.isPresent()) {
+//            User user = RequestContext.getUserFromRequest();
+//            if (user == null) {
+//                return ResponseEntity.badRequest().build();
+//            }
+//            if(user.getRole().equals(Role.USER)) {
+//                try {
+//                    emailSenderService.sendHtmlEmailReservation(
+//                            user.getFirstname(),
+//                            user.getLastname(),
+//                            user.getEmail(),
+//                        "Reservation confirmation",
+//                        "Here is the confirmation of the reservation you made in our system. ",
+//                            parkingSpot.get().getParking(),
+//                            createdReservation, "ParkVision reservation confirmation");
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        System.out.println("return ok");
         return ResponseEntity.ok(convertToDto(createdReservation));
     }
 
@@ -126,18 +126,6 @@ public class ReservationController {
             Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
             if (parkingSpot.isEmpty()) {
                 return ResponseEntity.badRequest().build();
-            }
-            try {
-                emailSenderService.sendHtmlEmailReservation(
-                        user.getFirstname(),
-                        user.getLastname(),
-                        user.getEmail(),
-                        "Reservation change confirmation",
-                        "Here is the confirmation of the reservation change you made in our system. ",
-                        parkingSpot.get().getParking(),
-                        updatedReservation, "ParkVision reservation change confirmation");
-            } catch (Exception e) {
-                e.printStackTrace();
             }
             return ResponseEntity.ok(convertToDto(updatedReservation));
         } catch (IllegalArgumentException e) {
