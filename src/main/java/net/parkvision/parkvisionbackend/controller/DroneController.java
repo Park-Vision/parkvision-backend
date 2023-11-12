@@ -51,30 +51,33 @@ public class DroneController {
         User user = RequestContext.getUserFromRequest();
         Optional<Drone> drone = droneService.getDroneById(id);
         ParkingModerator parkingModerator = (ParkingModerator) user;
-        if (drone.isPresent() ) {
-            System.out.println("drone-" + id);
-            // PRODUCTION
-            //kafkaTemplate.send("drone-" + id, command);
-            // TEST WS
-            if (command.equals("start")) {
-                List<ParkingSpotCoordinatesDTO> parkingSpotCoordinatesDTOList =
-                        parkingSpotController.getSpotCoordinatesByDroneId(id);
-                Map<String, Object> map = new HashMap<>();
-                map.put("command", command);
-                map.put("cords", parkingSpotCoordinatesDTOList);
-                ObjectMapper objectMapper = new ObjectMapper();
-                try {
-                    String json = objectMapper.writeValueAsString(map);
-                    System.out.println(json);
-                    kafkaTemplate.send("drones-info", String.valueOf(id), json);
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
+        if (drone.isPresent()) {
+            assert parkingModerator != null;
+            if (Objects.equals(parkingModerator.getParking().getId(), drone.get().getParking().getId())) {
+                System.out.println("drone-" + id);
+                // PRODUCTION
+                //kafkaTemplate.send("drone-" + id, command);
+                // TEST WS
+                if (command.equals("start")) {
+                    List<ParkingSpotCoordinatesDTO> parkingSpotCoordinatesDTOList =
+                            parkingSpotController.getSpotCoordinatesByDroneId(id);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("command", command);
+                    map.put("cords", parkingSpotCoordinatesDTOList);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    try {
+                        String json = objectMapper.writeValueAsString(map);
+                        System.out.println(json);
+                        kafkaTemplate.send("drones-info", String.valueOf(id), json);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    kafkaTemplate.send("drones-info", String.valueOf(id), command);
                 }
-            } else {
-                kafkaTemplate.send("drones-info", String.valueOf(id), command);
-            }
 
-            return ResponseEntity.ok(convertToDTO(drone.get()));
+                return ResponseEntity.ok(convertToDTO(drone.get()));
+            }
         }
         return ResponseEntity.notFound().build();
     }
