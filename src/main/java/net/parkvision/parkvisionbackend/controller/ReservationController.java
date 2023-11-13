@@ -78,20 +78,21 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
         Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
-        Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(createdReservation.getParkingSpot().getId());
+        Optional<ParkingSpot> parkingSpot =
+                _parkingSpotService.getParkingSpotById(createdReservation.getParkingSpot().getId());
         if (parkingSpot.isPresent()) {
             User user = RequestContext.getUserFromRequest();
             if (user == null) {
                 return ResponseEntity.badRequest().build();
             }
-            if(user.getRole().equals(Role.USER)) {
+            if (user.getRole().equals(Role.USER)) {
                 try {
                     emailSenderService.sendHtmlEmailReservation(
                             user.getFirstname(),
                             user.getLastname(),
                             user.getEmail(),
-                        "Reservation confirmation",
-                        "Here is the confirmation of the reservation you made in our system. ",
+                            "Reservation confirmation",
+                            "Here is the confirmation of the reservation you made in our system. ",
                             parkingSpot.get().getParking(),
                             createdReservation, "ParkVision reservation confirmation");
                 } catch (Exception e) {
@@ -120,7 +121,8 @@ public class ReservationController {
         try {
 
             Reservation updatedReservation = _reservationService.updateReservation(convertToEntity(reservationDto));
-            Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
+            Optional<ParkingSpot> parkingSpot =
+                    _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
             if (parkingSpot.isEmpty()) {
                 return ResponseEntity.badRequest().build();
             }
@@ -163,10 +165,11 @@ public class ReservationController {
             ParkingModerator parkingManager = (ParkingModerator) user;
 
             if (!reservation.get().getParkingSpot().getParking().getId().equals(parkingManager.getParking().getId())) {
-                return ResponseEntity.badRequest().body("Parking manager does not have permission to delete this reservation.");
+                return ResponseEntity.badRequest().body("Parking manager does not have permission to delete this " +
+                        "reservation.");
             }
 
-            if(reservation.get().getUser().getId().equals(user.getId())){
+            if (reservation.get().getUser().getId().equals(user.getId())) {
                 _reservationService.deleteReservation(id);
                 return ResponseEntity.ok().build();
             } else {
@@ -193,7 +196,8 @@ public class ReservationController {
             if (canceledReservation == null) {
                 return ResponseEntity.badRequest().body("Failed to cancel the reservation.");
             }
-            Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(canceledReservation.getParkingSpot().getId());
+            Optional<ParkingSpot> parkingSpot =
+                    _parkingSpotService.getParkingSpotById(canceledReservation.getParkingSpot().getId());
             if (parkingSpot.isEmpty()) {
                 return ResponseEntity.badRequest().body("Failed to retrieve parking spot information.");
             }

@@ -130,7 +130,7 @@ public class ReservationService {
     public Reservation cancelReservation(Long id) {
         Optional<StripeCharge> stripeCharge = _stripeChargeService.getStripeChargeByReservationId(id);
         if (stripeCharge.isPresent()) {
-            StripeCharge refundedCharge =  _stripeChargeService.refundCharge(stripeCharge.get().getId());
+            StripeCharge refundedCharge = _stripeChargeService.refundCharge(stripeCharge.get().getId());
             if (refundedCharge.getSuccess()) {
                 refundedCharge.setReservation(null);
                 StripeCharge updatedCharge = _stripeChargeService.updateStripeCharge(refundedCharge);
@@ -168,7 +168,7 @@ public class ReservationService {
         }
 
         for (Reservation reservation : reservations) {
-            if (earliestAvailableTime.isBefore(reservation.getStartDate().toZonedDateTime())) {
+            if (earliestAvailableTime.plusMinutes(15).isBefore(reservation.getStartDate().toZonedDateTime())) {
                 Map<String, ZonedDateTime> map = new HashMap<>();
                 map.put("earliestStart", earliestAvailableTime);
                 map.put("earliestEnd", reservation.getStartDate().toZonedDateTime());

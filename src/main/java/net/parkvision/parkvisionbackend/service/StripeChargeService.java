@@ -43,6 +43,7 @@ public class StripeChargeService {
     public Optional<StripeCharge> getStripeChargeById(String id) {
         return _stripeChargeRepository.findById(id);
     }
+
     public Optional<StripeCharge> getStripeChargeByReservationId(Long id) {
         return _stripeChargeRepository.findByReservationId(id);
     }
