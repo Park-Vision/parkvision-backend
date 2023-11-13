@@ -1,8 +1,8 @@
 package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.StripeChargeDTO;
-import net.parkvision.parkvisionbackend.model.StripeCharge;
-import net.parkvision.parkvisionbackend.service.StripeChargeService;
+import net.parkvision.parkvisionbackend.model.*;
+import net.parkvision.parkvisionbackend.service.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,10 +16,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/payments/charge")
 public class StripeChargeController {
     private final StripeChargeService _stripeChargeService;
-    private final ModelMapper modelMapper;
+    private final ParkingSpotService _parkingSpotService;
 
-    public StripeChargeController(StripeChargeService stripeChargeService, ModelMapper modelMapper) {
+    private final ReservationService _reservationService;
+    private final ModelMapper modelMapper;
+    private final EmailSenderService emailSenderService;
+
+    public StripeChargeController(StripeChargeService stripeChargeService, ParkingSpotService parkingSpotService, ReservationService reservationService, ModelMapper modelMapper, EmailSenderService emailSenderService) {
         _stripeChargeService = stripeChargeService;
+        _parkingSpotService = parkingSpotService;
+        _reservationService = reservationService;
+        this.emailSenderService = emailSenderService;
         this.modelMapper = modelMapper;
     }
 
@@ -48,6 +55,37 @@ public class StripeChargeController {
     @PostMapping
     public ResponseEntity<StripeChargeDTO> createStripeCharge(@RequestBody StripeChargeDTO stripeChargeDTO) {
         StripeCharge createdStripeCharge = _stripeChargeService.createStripeCharge(convertToEntity(stripeChargeDTO));
+        Optional<Reservation> reservation = _reservationService.getReservationById(createdStripeCharge.getReservation().getId());
+        if (reservation.isPresent()){
+            User user = RequestContext.getUserFromRequest();
+            if (user == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            if(user.getRole().equals(Role.USER)) {
+                try {
+                    emailSenderService.sendHtmlEmailReservation(
+                            user.getFirstname(),
+                            user.getLastname(),
+                            user.getEmail(),
+                            "Reservation confirmation",
+                            "Here is the confirmation of the reservation you made in our system. ",
+                            reservation.get().getParkingSpot().getParking(),
+                            reservation.get(), "ParkVision reservation confirmation");
+
+                    emailSenderService.sendHtmlEmailPayment(
+                            user.getFirstname(),
+                            user.getLastname(),
+                            user.getEmail(),
+                            "Payment confirmation",
+                            createdStripeCharge,
+                            reservation.get(),
+                            "ParkVision payment confirmation");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        System.out.println("return ok");
         return ResponseEntity.ok(convertToDto(createdStripeCharge));
     }
 

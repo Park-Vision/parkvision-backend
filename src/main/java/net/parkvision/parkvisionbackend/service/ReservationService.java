@@ -9,9 +9,15 @@ import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
+
+import static java.lang.Float.parseFloat;
 
 @Service
 public class ReservationService {
@@ -204,5 +210,13 @@ public class ReservationService {
         clientSortedReservations.get("Archived").sort(Comparator.comparing(Reservation::getEndDate).reversed());
 
         return clientSortedReservations;
+    }
+
+    public List<Reservation> getAllReservationsByParking(Long id) {
+        return _reservationRepository.findAll()
+                .stream()
+                .filter(reservation -> Objects.equals(reservation.getParkingSpot().getParking().getId(), id))
+                .sorted(Comparator.comparing(Reservation::getEndDate))
+                .toList();
     }
 }

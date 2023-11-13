@@ -3,10 +3,7 @@ package net.parkvision.parkvisionbackend.controller;
 import net.parkvision.parkvisionbackend.dto.*;
 import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
 import net.parkvision.parkvisionbackend.model.*;
-import net.parkvision.parkvisionbackend.service.EmailSenderService;
-import net.parkvision.parkvisionbackend.service.ParkingSpotService;
-import net.parkvision.parkvisionbackend.service.RequestContext;
-import net.parkvision.parkvisionbackend.service.ReservationService;
+import net.parkvision.parkvisionbackend.service.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +23,7 @@ public class ReservationController {
     private final ReservationService _reservationService;
 
     private final ParkingSpotService _parkingSpotService;
+    private final ParkingService _parkingService;
     private final EmailSenderService emailSenderService;
     private final ModelMapper modelMapper;
 
@@ -33,11 +31,12 @@ public class ReservationController {
     public ReservationController(ReservationService reservationService,
                                  EmailSenderService emailSenderService,
                                  ModelMapper modelMapper,
-                                 ParkingSpotService parkingSpotService) {
+                                 ParkingSpotService parkingSpotService, ParkingService parkingService) {
         _reservationService = reservationService;
         this.modelMapper = modelMapper;
         this.emailSenderService = emailSenderService;
         _parkingSpotService = parkingSpotService;
+        _parkingService = parkingService;
     }
 
     private ReservationDTO convertToDto(Reservation reservation) {
@@ -71,37 +70,18 @@ public class ReservationController {
         return reservation.map(value -> ResponseEntity.ok(convertToDto(value))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    //todo znajdz rezerwacje danego parkingu po id
     //todo znajdz rezerwacje danego parkingu po id i dacie
 
     @PreAuthorize("hasAnyRole('USER','PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
-        Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
         Optional<ParkingSpot> parkingSpot =
-                _parkingSpotService.getParkingSpotById(createdReservation.getParkingSpot().getId());
+                _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
         if (parkingSpot.isPresent()) {
-            User user = RequestContext.getUserFromRequest();
-            if (user == null) {
-                return ResponseEntity.badRequest().build();
-            }
-            if (user.getRole().equals(Role.USER)) {
-                try {
-                    emailSenderService.sendHtmlEmailReservation(
-                            user.getFirstname(),
-                            user.getLastname(),
-                            user.getEmail(),
-                            "Reservation confirmation",
-                            "Here is the confirmation of the reservation you made in our system. ",
-                            parkingSpot.get().getParking(),
-                            createdReservation, "ParkVision reservation confirmation");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
+            return ResponseEntity.ok(convertToDto(createdReservation));
         }
-        System.out.println("return ok");
-        return ResponseEntity.ok(convertToDto(createdReservation));
+        return ResponseEntity.badRequest().build();
     }
 
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
@@ -125,18 +105,6 @@ public class ReservationController {
                     _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
             if (parkingSpot.isEmpty()) {
                 return ResponseEntity.badRequest().build();
-            }
-            try {
-                emailSenderService.sendHtmlEmailReservation(
-                        user.getFirstname(),
-                        user.getLastname(),
-                        user.getEmail(),
-                        "Reservation change confirmation",
-                        "Here is the confirmation of the reservation change you made in our system. ",
-                        parkingSpot.get().getParking(),
-                        updatedReservation, "ParkVision reservation change confirmation");
-            } catch (Exception e) {
-                e.printStackTrace();
             }
             return ResponseEntity.ok(convertToDto(updatedReservation));
         } catch (IllegalArgumentException e) {
@@ -239,5 +207,31 @@ public class ReservationController {
         }
 
         return ResponseEntity.ok(clientReservationsResponse);
+    }
+
+    @PreAuthorize("hasRole('PARKING_MANAGER')")
+    @GetMapping("/parking/{id}")
+    public ResponseEntity<List<ReservationDTO>> getAllReservationsByParking(@PathVariable Long id) {
+        User user = RequestContext.getUserFromRequest();
+        Optional<Parking> parking = _parkingService.getParkingById(id);
+        if (user != null && user.getRole().equals(Role.PARKING_MANAGER)) {
+            if (parking.isPresent()){
+                ParkingModerator parkingModerator = (ParkingModerator) user;
+                if((parkingModerator.getParking().getId().equals(parking.get().getId()))){
+                    List<ReservationDTO> reservations = _reservationService.getAllReservationsByParking(id).stream().map(
+                            this::convertToDto
+                    ).collect(Collectors.toList());
+                    return ResponseEntity.ok(reservations);
+                }
+                else{
+                    return ResponseEntity.status(401).build();
+                }
+            }
+            else{
+                return ResponseEntity.notFound().build();
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
