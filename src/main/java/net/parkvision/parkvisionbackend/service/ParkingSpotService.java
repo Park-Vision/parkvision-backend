@@ -9,6 +9,7 @@ import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -89,14 +90,14 @@ public class ParkingSpotService {
         _parkingSpotRepository.deleteById(id);
     }
 
-    public List<ParkingSpot> getFreeSpots(Parking parking, ZonedDateTime startDate, ZonedDateTime endDate) {
+    public List<ParkingSpot> getFreeSpots(Parking parking, OffsetDateTime startDate, OffsetDateTime endDate) {
         List<ParkingSpot> freeParkingSpots = new ArrayList<>();
         List<ParkingSpot> activeParkingSpotList = getActiveParkingSpots(parking);
 
         for (ParkingSpot parkingSpot : activeParkingSpotList) {
             Reservation reservation = new Reservation();
-            reservation.setStartDate(startDate.toOffsetDateTime());
-            reservation.setEndDate(endDate.toOffsetDateTime());
+            reservation.setStartDate(startDate);
+            reservation.setEndDate(endDate);
             reservation.setParkingSpot(parkingSpot);
             if (_reservationService.isParkingSpotFree(reservation)) {
                 freeParkingSpots.add(parkingSpot);
@@ -126,9 +127,12 @@ public class ParkingSpotService {
         return parkingSpotsResponse;
     }
 
-    public Map<Long, Map<String, ZonedDateTime>> getSpotsFreeTime(Parking parking, ZonedDateTime date) {
-        Map<Long, Map<String, ZonedDateTime>> parkingSpotsWhenFree = new HashMap<>();
+    public Map<Long, Map<String, OffsetDateTime>> getSpotsFreeTime(Parking parking, OffsetDateTime date) {
+        Map<Long, Map<String, OffsetDateTime>> parkingSpotsWhenFree = new HashMap<>();
         List<ParkingSpot> activeParkingSpotList = getActiveParkingSpots(parking);
+
+        date = date.withOffsetSameInstant(parking.getTimeZone());
+
 
         for (ParkingSpot parkingSpot : activeParkingSpotList) {
             parkingSpotsWhenFree.put(parkingSpot.getId(),
