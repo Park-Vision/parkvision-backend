@@ -179,6 +179,12 @@ public class EmailSenderService {
         htmlTable.append("<td>").append(reservation.getParkingSpot().getId()).append("</td>");
         htmlTable.append("</tr>");
 
+        htmlTable.append("<tr>");
+        htmlTable.append("<th>Amount</th>");
+        htmlTable.append("<td>").append(reservation.getAmount())
+                .append(" ")
+                .append(parking.getCurrency()).append("</td>");
+        htmlTable.append("</tr>");
 
         htmlTable.append("</table>");
 
@@ -200,7 +206,7 @@ public class EmailSenderService {
         htmlTable.append("<th>Amount</th>");
         htmlTable.append("<td>").append(reservation.getAmount())
                 .append(" ")
-                .append(reservation.getParkingSpot().getParking().getCurrency()).append("</td>");
+                .append(charge.getCurrency()).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");

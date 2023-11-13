@@ -3,10 +3,7 @@ package net.parkvision.parkvisionbackend.controller;
 import net.parkvision.parkvisionbackend.dto.*;
 import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
 import net.parkvision.parkvisionbackend.model.*;
-import net.parkvision.parkvisionbackend.service.EmailSenderService;
-import net.parkvision.parkvisionbackend.service.ParkingSpotService;
-import net.parkvision.parkvisionbackend.service.RequestContext;
-import net.parkvision.parkvisionbackend.service.ReservationService;
+import net.parkvision.parkvisionbackend.service.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -78,31 +75,13 @@ public class ReservationController {
     @PreAuthorize("hasAnyRole('USER','PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
-        Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
         Optional<ParkingSpot> parkingSpot =
-                _parkingSpotService.getParkingSpotById(createdReservation.getParkingSpot().getId());
+                _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
         if (parkingSpot.isPresent()) {
-            User user = RequestContext.getUserFromRequest();
-            if (user == null) {
-                return ResponseEntity.badRequest().build();
-            }
-            if (user.getRole().equals(Role.USER)) {
-                try {
-                    emailSenderService.sendHtmlEmailReservation(
-                            user.getFirstname(),
-                            user.getLastname(),
-                            user.getEmail(),
-                            "Reservation confirmation",
-                            "Here is the confirmation of the reservation you made in our system. ",
-                            parkingSpot.get().getParking(),
-                            createdReservation, "ParkVision reservation confirmation");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
+            return ResponseEntity.ok(convertToDto(createdReservation));
         }
-        System.out.println("return ok");
-        return ResponseEntity.ok(convertToDto(createdReservation));
+        return ResponseEntity.badRequest().build();
     }
 
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
