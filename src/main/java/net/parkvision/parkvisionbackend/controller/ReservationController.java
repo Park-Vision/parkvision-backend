@@ -2,10 +2,7 @@ package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.*;
 import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
-import net.parkvision.parkvisionbackend.model.ParkingSpot;
-import net.parkvision.parkvisionbackend.model.Reservation;
-import net.parkvision.parkvisionbackend.model.Role;
-import net.parkvision.parkvisionbackend.model.User;
+import net.parkvision.parkvisionbackend.model.*;
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
 import net.parkvision.parkvisionbackend.service.RequestContext;
@@ -14,9 +11,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,20 +78,21 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
         Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
-        Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(createdReservation.getParkingSpot().getId());
+        Optional<ParkingSpot> parkingSpot =
+                _parkingSpotService.getParkingSpotById(createdReservation.getParkingSpot().getId());
         if (parkingSpot.isPresent()) {
             User user = RequestContext.getUserFromRequest();
             if (user == null) {
                 return ResponseEntity.badRequest().build();
             }
-            if(user.getRole().equals(Role.USER)) {
+            if (user.getRole().equals(Role.USER)) {
                 try {
                     emailSenderService.sendHtmlEmailReservation(
                             user.getFirstname(),
                             user.getLastname(),
                             user.getEmail(),
-                        "Reservation confirmation",
-                        "Here is the confirmation of the reservation you made in our system. ",
+                            "Reservation confirmation",
+                            "Here is the confirmation of the reservation you made in our system. ",
                             parkingSpot.get().getParking(),
                             createdReservation, "ParkVision reservation confirmation");
                 } catch (Exception e) {
@@ -123,7 +121,8 @@ public class ReservationController {
         try {
 
             Reservation updatedReservation = _reservationService.updateReservation(convertToEntity(reservationDto));
-            Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
+            Optional<ParkingSpot> parkingSpot =
+                    _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
             if (parkingSpot.isEmpty()) {
                 return ResponseEntity.badRequest().build();
             }
@@ -147,8 +146,76 @@ public class ReservationController {
 
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        _reservationService.deleteReservation(id);
+    public ResponseEntity<String> deleteReservation(@PathVariable Long id) {
+        User user = RequestContext.getUserFromRequest();
+        Optional<Reservation> reservation = _reservationService.getReservationById(id);
+
+
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        if (reservation.isPresent()) {
+            OffsetDateTime reservationStartDate = reservation.get().getStartDate();
+            OffsetDateTime now = OffsetDateTime.now();
+            if (reservationStartDate.isBefore(now)) {
+                return ResponseEntity.badRequest().body("Cannot cancel reservation in the past.");
+            }
+        }
+        if (reservation.isPresent() && user.getRole().equals(Role.PARKING_MANAGER)) {
+            ParkingModerator parkingManager = (ParkingModerator) user;
+
+            if (!reservation.get().getParkingSpot().getParking().getId().equals(parkingManager.getParking().getId())) {
+                return ResponseEntity.badRequest().body("Parking manager does not have permission to delete this " +
+                        "reservation.");
+            }
+
+            if (reservation.get().getUser().getId().equals(user.getId())) {
+                _reservationService.deleteReservation(id);
+                return ResponseEntity.ok().build();
+            } else {
+                try {
+                    emailSenderService.sendHtmlEmailReservation(
+                            reservation.get().getUser().getFirstname(),
+                            reservation.get().getUser().getLastname(),
+                            reservation.get().getUser().getEmail(),
+                            "Reservation cancellation confirmation",
+                            "Here is the confirmation of the reservation cancellation you made in our system. ",
+                            reservation.get().getParkingSpot().getParking(),
+                            reservation.get(), "ParkVision reservation cancellation confirmation");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                _reservationService.deleteReservation(id);
+                return ResponseEntity.ok().build();
+            }
+        } else if (reservation.isPresent() && user.getRole().equals(Role.USER)) {
+            if (!reservation.get().getUser().getId().equals(user.getId())) {
+                return ResponseEntity.badRequest().body("User does not have permission to cancel this reservation.");
+            }
+            Reservation canceledReservation = _reservationService.cancelReservation(id);
+            if (canceledReservation == null) {
+                return ResponseEntity.badRequest().body("Failed to cancel the reservation.");
+            }
+            Optional<ParkingSpot> parkingSpot =
+                    _parkingSpotService.getParkingSpotById(canceledReservation.getParkingSpot().getId());
+            if (parkingSpot.isEmpty()) {
+                return ResponseEntity.badRequest().body("Failed to retrieve parking spot information.");
+            }
+            try {
+                emailSenderService.sendHtmlEmailReservation(
+                        user.getFirstname(),
+                        user.getLastname(),
+                        user.getEmail(),
+                        "Reservation cancellation confirmation",
+                        "Here is the confirmation of the reservation cancellation you made in our system. ",
+                        parkingSpot.get().getParking(),
+                        canceledReservation, "ParkVision reservation cancellation confirmation");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return ResponseEntity.ok().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 

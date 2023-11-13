@@ -3,6 +3,7 @@ package net.parkvision.parkvisionbackend.service;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
+import com.stripe.model.Refund;
 import net.parkvision.parkvisionbackend.model.Payment;
 import net.parkvision.parkvisionbackend.model.Reservation;
 import net.parkvision.parkvisionbackend.model.StripeCharge;
@@ -39,8 +40,12 @@ public class StripeChargeService {
         return _stripeChargeRepository.findAll();
     }
 
-    public Optional<StripeCharge> getStripeChargeById(Long id) {
+    public Optional<StripeCharge> getStripeChargeById(String id) {
         return _stripeChargeRepository.findById(id);
+    }
+
+    public Optional<StripeCharge> getStripeChargeByReservationId(Long id) {
+        return _stripeChargeRepository.findByReservationId(id);
     }
 
     public StripeCharge createStripeCharge(StripeCharge stripeCharge) {
@@ -69,6 +74,7 @@ public class StripeChargeService {
 
         try {
             Charge charge = Charge.create(chargeParams);
+            stripeCharge.setId(charge.getId());
             stripeCharge.setMessage(charge.getOutcome().getSellerMessage());
             if (charge.getPaid()) {
                 stripeCharge.setReservation(reservation);
@@ -81,7 +87,45 @@ public class StripeChargeService {
         }
     }
 
-    public void deleteStripeCharge(Long id) {
+    public StripeCharge refundCharge(String id) {
+        Optional<StripeCharge> optionalStripeCharge = getStripeChargeById(id);
+
+        if (optionalStripeCharge.isPresent()) {
+            StripeCharge stripeCharge = optionalStripeCharge.get();
+
+            try {
+
+                Map<String, Object> params = new HashMap<>();
+                params.put(
+                        "charge",
+                        stripeCharge.getId()
+                );
+
+                Refund refund = Refund.create(params);
+
+                if (refund.getStatus().equals("succeeded")) {
+                    stripeCharge.setSuccess(refund.getStatus().equals("succeeded"));
+                    stripeCharge.setMessage("refund " + refund.getStatus());
+                }
+                _stripeChargeRepository.save(stripeCharge);
+
+                return stripeCharge;
+            } catch (StripeException e) {
+                throw new RuntimeException("Error processing refund: " + e.getMessage());
+            }
+        } else {
+            throw new IllegalArgumentException("StripeCharge with ID " + id + " not found.");
+        }
+    }
+
+    public StripeCharge updateStripeCharge(StripeCharge stripeCharge) {
+        if (!_stripeChargeRepository.existsById(stripeCharge.getId())) {
+            throw new IllegalArgumentException("StripeCharge with ID " + stripeCharge.getId() + " does not exist.");
+        }
+        return _stripeChargeRepository.save(stripeCharge);
+    }
+
+    public void deleteStripeCharge(String id) {
         _stripeChargeRepository.deleteById(id);
     }
 }
