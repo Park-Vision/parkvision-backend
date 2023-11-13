@@ -81,28 +81,6 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
         Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
-//        Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(createdReservation.getParkingSpot().getId());
-//        if (parkingSpot.isPresent()) {
-//            User user = RequestContext.getUserFromRequest();
-//            if (user == null) {
-//                return ResponseEntity.badRequest().build();
-//            }
-//            if(user.getRole().equals(Role.USER)) {
-//                try {
-//                    emailSenderService.sendHtmlEmailReservation(
-//                            user.getFirstname(),
-//                            user.getLastname(),
-//                            user.getEmail(),
-//                        "Reservation confirmation",
-//                        "Here is the confirmation of the reservation you made in our system. ",
-//                            parkingSpot.get().getParking(),
-//                            createdReservation, "ParkVision reservation confirmation");
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//        System.out.println("return ok");
         return ResponseEntity.ok(convertToDto(createdReservation));
     }
 
