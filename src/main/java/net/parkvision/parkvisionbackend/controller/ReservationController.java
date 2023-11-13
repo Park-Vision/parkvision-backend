@@ -2,21 +2,15 @@ package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.*;
 import net.parkvision.parkvisionbackend.exception.ReservationConflictException;
-import net.parkvision.parkvisionbackend.model.ParkingSpot;
-import net.parkvision.parkvisionbackend.model.Reservation;
-import net.parkvision.parkvisionbackend.model.Role;
-import net.parkvision.parkvisionbackend.model.User;
-import net.parkvision.parkvisionbackend.service.EmailSenderService;
-import net.parkvision.parkvisionbackend.service.ParkingSpotService;
-import net.parkvision.parkvisionbackend.service.RequestContext;
-import net.parkvision.parkvisionbackend.service.ReservationService;
+import net.parkvision.parkvisionbackend.model.*;
+import net.parkvision.parkvisionbackend.service.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +23,7 @@ public class ReservationController {
     private final ReservationService _reservationService;
 
     private final ParkingSpotService _parkingSpotService;
+    private final ParkingService _parkingService;
     private final EmailSenderService emailSenderService;
     private final ModelMapper modelMapper;
 
@@ -36,11 +31,12 @@ public class ReservationController {
     public ReservationController(ReservationService reservationService,
                                  EmailSenderService emailSenderService,
                                  ModelMapper modelMapper,
-                                 ParkingSpotService parkingSpotService) {
+                                 ParkingSpotService parkingSpotService, ParkingService parkingService) {
         _reservationService = reservationService;
         this.modelMapper = modelMapper;
         this.emailSenderService = emailSenderService;
         _parkingSpotService = parkingSpotService;
+        _parkingService = parkingService;
     }
 
     private ReservationDTO convertToDto(Reservation reservation) {
@@ -74,7 +70,6 @@ public class ReservationController {
         return reservation.map(value -> ResponseEntity.ok(convertToDto(value))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    //todo znajdz rezerwacje danego parkingu po id
     //todo znajdz rezerwacje danego parkingu po id i dacie
 
     @PreAuthorize("hasAnyRole('USER','PARKING_MANAGER')")
@@ -101,20 +96,90 @@ public class ReservationController {
         try {
 
             Reservation updatedReservation = _reservationService.updateReservation(convertToEntity(reservationDto));
-            Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
+            Optional<ParkingSpot> parkingSpot =
+                    _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
             if (parkingSpot.isEmpty()) {
                 return ResponseEntity.badRequest().build();
             }
             return ResponseEntity.ok(convertToDto(updatedReservation));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
+
         }
     }
 
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        _reservationService.deleteReservation(id);
+    public ResponseEntity<String> deleteReservation(@PathVariable Long id) {
+        User user = RequestContext.getUserFromRequest();
+        Optional<Reservation> reservation = _reservationService.getReservationById(id);
+
+
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        if (reservation.isPresent()) {
+            OffsetDateTime reservationStartDate = reservation.get().getStartDate();
+            OffsetDateTime now = OffsetDateTime.now();
+            if (reservationStartDate.isBefore(now)) {
+                return ResponseEntity.badRequest().body("Cannot cancel reservation in the past.");
+            }
+        }
+        if (reservation.isPresent() && user.getRole().equals(Role.PARKING_MANAGER)) {
+            ParkingModerator parkingManager = (ParkingModerator) user;
+
+            if (!reservation.get().getParkingSpot().getParking().getId().equals(parkingManager.getParking().getId())) {
+                return ResponseEntity.badRequest().body("Parking manager does not have permission to delete this " +
+                        "reservation.");
+            }
+
+            if (reservation.get().getUser().getId().equals(user.getId())) {
+                _reservationService.deleteReservation(id);
+                return ResponseEntity.ok().build();
+            } else {
+                try {
+                    emailSenderService.sendHtmlEmailReservation(
+                            reservation.get().getUser().getFirstname(),
+                            reservation.get().getUser().getLastname(),
+                            reservation.get().getUser().getEmail(),
+                            "Reservation cancellation confirmation",
+                            "Here is the confirmation of the reservation cancellation you made in our system. ",
+                            reservation.get().getParkingSpot().getParking(),
+                            reservation.get(), "ParkVision reservation cancellation confirmation");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                _reservationService.deleteReservation(id);
+                return ResponseEntity.ok().build();
+            }
+        } else if (reservation.isPresent() && user.getRole().equals(Role.USER)) {
+            if (!reservation.get().getUser().getId().equals(user.getId())) {
+                return ResponseEntity.badRequest().body("User does not have permission to cancel this reservation.");
+            }
+            Reservation canceledReservation = _reservationService.cancelReservation(id);
+            if (canceledReservation == null) {
+                return ResponseEntity.badRequest().body("Failed to cancel the reservation.");
+            }
+            Optional<ParkingSpot> parkingSpot =
+                    _parkingSpotService.getParkingSpotById(canceledReservation.getParkingSpot().getId());
+            if (parkingSpot.isEmpty()) {
+                return ResponseEntity.badRequest().body("Failed to retrieve parking spot information.");
+            }
+            try {
+                emailSenderService.sendHtmlEmailReservation(
+                        user.getFirstname(),
+                        user.getLastname(),
+                        user.getEmail(),
+                        "Reservation cancellation confirmation",
+                        "Here is the confirmation of the reservation cancellation you made in our system. ",
+                        parkingSpot.get().getParking(),
+                        canceledReservation, "ParkVision reservation cancellation confirmation");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return ResponseEntity.ok().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 
@@ -143,9 +208,27 @@ public class ReservationController {
     @PreAuthorize("hasRole('PARKING_MANAGER')")
     @GetMapping("/parking/{id}")
     public ResponseEntity<List<ReservationDTO>> getAllReservationsByParking(@PathVariable Long id) {
-        List<ReservationDTO> reservations = _reservationService.getAllReservationsByParking(id).stream().map(
-                this::convertToDto
-        ).collect(Collectors.toList());
-        return ResponseEntity.ok(reservations);
+
+        User user = RequestContext.getUserFromRequest();
+        Optional<Parking> parking = _parkingService.getParkingById(id);
+        if (user != null && user.getRole().equals(Role.PARKING_MANAGER)) {
+            if (parking.isPresent()){
+                ParkingModerator parkingModerator = (ParkingModerator) user;
+                if((parkingModerator.getParking().getId().equals(parking.get().getId()))){
+                    List<ReservationDTO> reservations = _reservationService.getAllReservationsByParking(id).stream().map(
+                            this::convertToDto
+                    ).collect(Collectors.toList());
+                    return ResponseEntity.ok(reservations);
+                }
+                else{
+                    return ResponseEntity.status(401).build();
+                }
+            }
+            else{
+                return ResponseEntity.notFound().build();
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

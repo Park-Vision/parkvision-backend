@@ -24,7 +24,6 @@ public class ParkingController {
 
     private final ParkingService _parkingService;
     private final ParkingSpotService _parkingSpotService;
-
     private final ModelMapper modelMapper;
 
     @Autowired
@@ -90,7 +89,7 @@ public class ParkingController {
     public ResponseEntity<Integer> getParkingSpotsNumber(@PathVariable Long id) {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
-            List<ParkingSpot> parkingSpots = _parkingSpotService.getParkingSpots(parking.get());
+            List<ParkingSpot> parkingSpots = _parkingSpotService.getActiveParkingSpots(parking.get());
             return ResponseEntity.ok(parkingSpots.size());
         } else {
             return ResponseEntity.notFound().build();
