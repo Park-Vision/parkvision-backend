@@ -1,5 +1,6 @@
 package net.parkvision.parkvisionbackend.kafka;
 
+import net.parkvision.parkvisionbackend.config.MessageEncryptor;
 import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.service.DroneService;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -26,6 +27,15 @@ public class KafkaListeners {
     public void infoFromDrones(String message, @Header(KafkaHeaders.RECEIVED_KEY) Integer droneId) {
         Optional<Drone> drone = droneService.getDroneById(Long.valueOf(droneId));
         System.out.println("Received Message from Drone " + droneId + ": " + message);
-        drone.ifPresent(value -> template.convertAndSend("/topic/parkings/" + value.getParking().getId(), message));
+        try {
+            message = MessageEncryptor.decryptMessage(message, drone.get().getDroneKey());
+            System.out.println(message);
+            String finalMessage = message;
+            drone.ifPresent(value -> template.convertAndSend("/topic/parkings/" + value.getParking().getId(),
+                    finalMessage));
+
+        } catch (Exception ignored) {
+
+        }
     }
 }
