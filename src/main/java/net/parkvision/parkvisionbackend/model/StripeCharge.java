@@ -17,8 +17,7 @@ import java.util.Map;
 @Entity
 public class StripeCharge {
     @Id
-    @GeneratedValue
-    private Long id;
+    private String id;
     private String username;
     private Double amount;
     private String currency;
