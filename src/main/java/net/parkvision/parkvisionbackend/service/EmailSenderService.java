@@ -92,6 +92,7 @@ public class EmailSenderService {
             String to,
             String title,
             String description,
+
             StripeCharge stripeCharge,
             Reservation reservation,
             String topic) throws Exception {
@@ -179,6 +180,13 @@ public class EmailSenderService {
         htmlTable.append("<td>").append(reservation.getParkingSpot().getId()).append("</td>");
         htmlTable.append("</tr>");
 
+        htmlTable.append("<tr>");
+        htmlTable.append("<th>Amount</th>");
+        htmlTable.append("<td>").append(reservation.getAmount())
+                .append(" ")
+                .append(parking.getCurrency()).append("</td>");
+        htmlTable.append("</tr>");
+
         htmlTable.append("</table>");
 
         return htmlTable.toString();
@@ -198,7 +206,7 @@ public class EmailSenderService {
         htmlTable.append("<th>Amount</th>");
         htmlTable.append("<td>").append(reservation.getAmount())
                 .append(" ")
-                .append(reservation.getParkingSpot().getParking().getCurrency()).append("</td>");
+                .append(charge.getCurrency()).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");

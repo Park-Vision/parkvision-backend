@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class StripeChargeDTO {
-    private Long id;
+    private String id;
     private String username;
     private Double amount;
     private String currency;

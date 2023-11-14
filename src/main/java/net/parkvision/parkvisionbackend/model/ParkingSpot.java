@@ -18,7 +18,6 @@ public class ParkingSpot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String spotNumber;
-    private boolean occupied;
     private boolean active;
 
     @OneToMany(cascade = CascadeType.ALL)

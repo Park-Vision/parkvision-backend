@@ -1,7 +1,11 @@
 package net.parkvision.parkvisionbackend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.parkvision.parkvisionbackend.dto.DroneDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
+import net.parkvision.parkvisionbackend.dto.ParkingSpotCoordinatesDTO;
+import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
 import net.parkvision.parkvisionbackend.kafka.KafkaTopicConfig;
 import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.model.ParkingModerator;
@@ -13,12 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -33,26 +34,50 @@ public class DroneController {
 
     @Autowired
     KafkaTopicConfig kafkaTopicConfig;
+    private final ParkingSpotController parkingSpotController;
 
     @Autowired
     public DroneController(DroneService droneService, ModelMapper modelMapper,
-                           KafkaTemplate<String, String> kafkaTemplate) {
+                           KafkaTemplate<String, String> kafkaTemplate, ParkingSpotController parkingSpotController) {
         this.droneService = droneService;
         this.modelMapper = modelMapper;
         this.kafkaTemplate = kafkaTemplate;
+        this.parkingSpotController = parkingSpotController;
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping("/{id}/{command}")
     public ResponseEntity<DroneDTO> startDrone(@PathVariable Long id, @PathVariable String command) {
+        User user = RequestContext.getUserFromRequest();
         Optional<Drone> drone = droneService.getDroneById(id);
+        ParkingModerator parkingModerator = (ParkingModerator) user;
         if (drone.isPresent()) {
-            System.out.println("drone-" + id);
-            // PRODUCTION
-            //kafkaTemplate.send("drone-" + id, command);
-            // TEST WS
-            kafkaTemplate.send("drones-info", String.valueOf(id), command);
-            return ResponseEntity.ok(convertToDTO(drone.get()));
+            assert parkingModerator != null;
+            if (Objects.equals(parkingModerator.getParking().getId(), drone.get().getParking().getId())) {
+                System.out.println("drone-" + id);
+                // PRODUCTION
+                //kafkaTemplate.send("drone-" + id, command);
+                // TEST WS
+                if (command.equals("start")) {
+                    List<ParkingSpotCoordinatesDTO> parkingSpotCoordinatesDTOList =
+                            parkingSpotController.getSpotCoordinatesByDroneId(id);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("command", command);
+                    map.put("cords", parkingSpotCoordinatesDTOList);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    try {
+                        String json = objectMapper.writeValueAsString(map);
+                        System.out.println(json);
+                        kafkaTemplate.send("drones-info", String.valueOf(id), json);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    kafkaTemplate.send("drones-info", String.valueOf(id), command);
+                }
+
+                return ResponseEntity.ok(convertToDTO(drone.get()));
+            }
         }
         return ResponseEntity.notFound().build();
     }
