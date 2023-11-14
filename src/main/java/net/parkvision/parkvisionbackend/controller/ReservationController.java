@@ -75,8 +75,13 @@ public class ReservationController {
     @PreAuthorize("hasAnyRole('USER','PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
-        Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
-        return ResponseEntity.ok(convertToDto(createdReservation));
+        Optional<ParkingSpot> parkingSpot =
+                _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
+        if (parkingSpot.isPresent()) {
+            Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
+            return ResponseEntity.ok(convertToDto(createdReservation));
+        }
+        return ResponseEntity.badRequest().build();
     }
 
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")

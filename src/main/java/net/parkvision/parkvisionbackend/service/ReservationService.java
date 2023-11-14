@@ -77,12 +77,6 @@ public class ReservationService {
         reservation.setStartDate(startDate);
         reservation.setEndDate(endDate);
 
-        Duration duration = Duration.between(startDate, endDate);
-        long minutes = duration.toMinutes();
-        double amount = minutes * parking.getCostRate() / 60.0;
-        BigDecimal roundedAmount = BigDecimal.valueOf(amount).setScale(2, RoundingMode.HALF_UP);
-
-        reservation.setAmount(roundedAmount.doubleValue());
         Reservation createdReservation = _reservationRepository.save(reservation);
         createdReservation.getParkingSpot().setParking(parking);
         return createdReservation;
