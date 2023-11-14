@@ -3,6 +3,7 @@ package net.parkvision.parkvisionbackend.service;
 import net.parkvision.parkvisionbackend.model.DroneMission;
 import net.parkvision.parkvisionbackend.repository.DroneMissionRepository;
 import net.parkvision.parkvisionbackend.repository.DroneRepository;
+import net.parkvision.parkvisionbackend.repository.MissionSpotResultRepository;
 import net.parkvision.parkvisionbackend.repository.ParkingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,14 +17,16 @@ public class DroneMissionService {
     private final DroneMissionRepository _droneMissionRepository;
     private final ParkingRepository _parkingRepository;
     private final DroneRepository _droneRepository;
-
+    private final MissionSpotResultRepository _missionSpotResultRepository;
 
     @Autowired
     public DroneMissionService(DroneMissionRepository droneMissionRepository, ParkingRepository parkingRepository,
-                               DroneRepository droneRepository) {
+                               DroneRepository droneRepository,
+                               MissionSpotResultRepository missionSpotResultRepository) {
         this._droneMissionRepository = droneMissionRepository;
         _parkingRepository = parkingRepository;
         _droneRepository = droneRepository;
+        _missionSpotResultRepository = missionSpotResultRepository;
     }
 
     public List<DroneMission> getAllDroneMissions() {
@@ -44,7 +47,13 @@ public class DroneMissionService {
             throw new IllegalArgumentException("Drone with ID " + droneMission.getDrone().getId() + " does not exist.");
         }
 
-        return _droneMissionRepository.save(droneMission);
+        DroneMission droneMissionResult = _droneMissionRepository.save(droneMission);
+
+        for (int i = 0; i < droneMission.getMissionSpotResultList().size(); i++) {
+            droneMission.getMissionSpotResultList().get(i).setDroneMission(droneMission);
+            _missionSpotResultRepository.save(droneMission.getMissionSpotResultList().get(i));
+        }
+        return droneMissionResult;
     }
 
     public DroneMission updateDroneMission(DroneMission droneMission) {
@@ -62,12 +71,15 @@ public class DroneMissionService {
             throw new IllegalArgumentException("Drone with ID " + droneMission.getDrone().getId() + " does not exist.");
         }
 
-        droneMission.setMissionName(droneMission.getMissionName());
-        droneMission.setMissionDescription(droneMission.getMissionDescription());
-        droneMission.setMissionStatus(droneMission.getMissionStatus());
+        droneMission.setMissionSpotResultList(droneMission.getMissionSpotResultList());
+
+        for (int i = 0; i < droneMission.getMissionSpotResultList().size(); i++) {
+            droneMission.getMissionSpotResultList().get(i).setDroneMission(droneMission);
+            _missionSpotResultRepository.save(droneMission.getMissionSpotResultList().get(i));
+        }
+        droneMission.setStatus(droneMission.getStatus());
         droneMission.setMissionStartDate(droneMission.getMissionStartDate());
         droneMission.setMissionEndDate(droneMission.getMissionEndDate());
-        droneMission.setMissionStatus(droneMission.getMissionStatus());
 
         return _droneMissionRepository.save(droneMission);
     }

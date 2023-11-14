@@ -189,8 +189,8 @@ public class DataSeeder {
 
             client2.setFirstname("Jan");
             client2.setLastname("Kowalski");
-            client2.setEmail("jan@pv.pl:");
-            client2.setPassword(new BCryptPasswordEncoder().encode("654321"));
+            client2.setEmail("macki2708@gmail.com");
+            client2.setPassword(new BCryptPasswordEncoder().encode("Macki123!"));
             client2.setRole(Role.USER);
             _clientRepository.save(client2);
 

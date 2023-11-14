@@ -1,9 +1,9 @@
 package net.parkvision.parkvisionbackend.controller;
 
-import net.parkvision.parkvisionbackend.dto.DroneDTO;
-import net.parkvision.parkvisionbackend.dto.DroneMissionDTO;
-import net.parkvision.parkvisionbackend.dto.ParkingDTO;
+import net.parkvision.parkvisionbackend.dto.*;
 import net.parkvision.parkvisionbackend.model.DroneMission;
+import net.parkvision.parkvisionbackend.model.MissionSpotResult;
+import net.parkvision.parkvisionbackend.model.Point;
 import net.parkvision.parkvisionbackend.service.DroneMissionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,10 +30,22 @@ public class DroneMissionController {
         this.modelMapper = modelMapper;
     }
 
+    public MissionSpotResultDTO convertToDtoMissionSpot(MissionSpotResult missionSpotResult) {
+        MissionSpotResultDTO missionSpotResultDTO = modelMapper.map(missionSpotResult, MissionSpotResultDTO.class);
+        missionSpotResultDTO.setParkingSpotDTO(modelMapper.map(missionSpotResult.getParkingSpot(),
+                ParkingSpotDTO.class));
+        return missionSpotResultDTO;
+    }
+
     private DroneMissionDTO convertToDTO(DroneMission droneMission) {
         DroneMissionDTO droneMissionDTO = modelMapper.map(droneMission, DroneMissionDTO.class);
         droneMissionDTO.setDroneDTO(modelMapper.map(droneMission.getDrone(), DroneDTO.class));
         droneMissionDTO.setParkingDTO(modelMapper.map(droneMission.getParking(), ParkingDTO.class));
+        if (!droneMission.getMissionSpotResultList().isEmpty()) {
+            droneMissionDTO.setMissionSpotResultList(droneMission.getMissionSpotResultList().stream().map(
+                    this::convertToDtoMissionSpot
+            ).collect(Collectors.toList()));
+        }
         return droneMissionDTO;
     }
 
