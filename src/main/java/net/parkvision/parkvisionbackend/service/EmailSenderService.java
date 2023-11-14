@@ -207,35 +207,6 @@ public class EmailSenderService {
         htmlTable.append("<th>Amount</th>");
         htmlTable.append("<td>").append(reservation.getAmount())
                 .append(" ")
-                .append(charge.getCurrency()).append("</td>");
-        htmlTable.append("</tr>");
-
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Payment ID</th>");
-        htmlTable.append("<td>").append(charge.getId());
-        htmlTable.append("</tr>");
-
-
-        htmlTable.append("</table>");
-
-        return htmlTable.toString();
-    }
-
-    public String generateHTMLTable(Reservation reservation, StripeCharge charge) {
-
-        StringBuilder htmlTable = new StringBuilder();
-        htmlTable.append("<table style=\"width: 100%\">");
-
-        // Create rows for Reservation fields
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Reservation number</th>");
-        htmlTable.append("<td>").append(reservation.getId()).append("</td>");
-        htmlTable.append("</tr>");
-
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Amount</th>");
-        htmlTable.append("<td>").append(reservation.getAmount())
-                .append(" ")
                 .append(reservation.getParkingSpot().getParking().getCurrency()).append("</td>");
         htmlTable.append("</tr>");
 
