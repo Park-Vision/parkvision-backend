@@ -33,3 +33,5 @@ spring:
         smtp:
           auth: true
           starttls.enable: true
+park-vision:
+  hour-rule: 2
