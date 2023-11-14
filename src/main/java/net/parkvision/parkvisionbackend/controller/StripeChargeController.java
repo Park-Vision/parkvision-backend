@@ -50,36 +50,50 @@ public class StripeChargeController {
         Optional<StripeCharge> stripeCharge = _stripeChargeService.getStripeChargeById(id);
         return stripeCharge.map(charge -> ResponseEntity.ok(convertToDto(charge))).orElseGet(() -> ResponseEntity.notFound().build());
     }
-
-    @PreAuthorize("hasAnyRole('ADMIN','USER','PARKING_MANAGER')") //after add to whole controller
+    @PreAuthorize("hasRole('USER')")
     @PostMapping
-    public ResponseEntity<StripeChargeDTO> createStripeCharge(@RequestBody StripeChargeDTO stripeChargeDTO) {
+    public ResponseEntity<StripeChargeDTO> createStripeCharge(@RequestBody StripeChargeDTO stripeChargeDTO){
+        User user = RequestContext.getUserFromRequest();
         StripeCharge createdStripeCharge = _stripeChargeService.createStripeCharge(convertToEntity(stripeChargeDTO));
         Optional<Reservation> reservation = _reservationService.getReservationById(createdStripeCharge.getReservation().getId());
         if (reservation.isPresent()){
-            User user = RequestContext.getUserFromRequest();
             if (user == null) {
                 return ResponseEntity.badRequest().build();
             }
             if(user.getRole().equals(Role.USER)) {
                 try {
-                    emailSenderService.sendHtmlEmailReservation(
-                            user.getFirstname(),
-                            user.getLastname(),
-                            user.getEmail(),
-                            "Reservation confirmation",
-                            "Here is the confirmation of the reservation you made in our system. ",
-                            reservation.get().getParkingSpot().getParking(),
-                            reservation.get(), "ParkVision reservation confirmation");
+                    if (createdStripeCharge.getSuccess()){
+                        emailSenderService.sendHtmlEmailReservation(
+                                user.getFirstname(),
+                                user.getLastname(),
+                                user.getEmail(),
+                                "Reservation confirmation",
+                                "Here is the confirmation of the reservation you made in our system. ",
+                                reservation.get().getParkingSpot().getParking(),
+                                reservation.get(), "ParkVision reservation confirmation");
 
-                    emailSenderService.sendHtmlEmailPayment(
-                            user.getFirstname(),
-                            user.getLastname(),
-                            user.getEmail(),
-                            "Payment confirmation",
-                            createdStripeCharge,
-                            reservation.get(),
-                            "ParkVision payment confirmation");
+                        emailSenderService.sendHtmlEmailPayment(
+                                user.getFirstname(),
+                                user.getLastname(),
+                                user.getEmail(),
+                                "Payment confirmation",
+                                "Here is the confirmation of the payment for your reservation.",
+                                createdStripeCharge,
+                                reservation.get(),
+                                "ParkVision payment confirmation");
+                    } else {
+                        createdStripeCharge.setReservation(null);
+                        emailSenderService.sendHtmlEmailPayment(
+                                user.getFirstname(),
+                                user.getLastname(),
+                                user.getEmail(),
+                                "Payment declined",
+                                "Payment for your reservation was declined. Please try again.",
+                                createdStripeCharge,
+                                reservation.get(),
+                                "ParkVision payment declined");
+                        _reservationService.deleteReservation(reservation.get().getId());
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
