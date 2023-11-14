@@ -131,7 +131,7 @@ public class ParkingSpotService {
         Map<Long, Map<String, OffsetDateTime>> parkingSpotsWhenFree = new HashMap<>();
         List<ParkingSpot> activeParkingSpotList = getActiveParkingSpots(parking);
 
-        date = date.withOffsetSameInstant(parking.getTimeZone());
+        date = date.withOffsetSameInstant(parking.getTimeZone());//TODO reduntant
 
 
         for (ParkingSpot parkingSpot : activeParkingSpotList) {
