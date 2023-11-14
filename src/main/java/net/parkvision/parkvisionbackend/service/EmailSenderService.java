@@ -91,14 +91,12 @@ public class EmailSenderService {
             String lastName,
             String to,
             String title,
-            String description,
-
             StripeCharge stripeCharge,
             Reservation reservation,
             String topic) throws Exception {
         Context context = new Context();
         context.setVariable("title", title);
-        context.setVariable("description",  description);
+        context.setVariable("description",  "Here is the confirmation of the payment for your reservation.");
         context.setVariable("name", firstName + " " + lastName);
         String htmlTable = generateHTMLTable(reservation, stripeCharge);
         context.setVariable("body", htmlTable);
@@ -134,6 +132,7 @@ public class EmailSenderService {
         javaMailSender.send(message);
         System.out.println("Email sent to " + to);
     }
+
 
     public String generateHTMLTable(Reservation reservation, Parking parking) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -197,6 +196,7 @@ public class EmailSenderService {
         StringBuilder htmlTable = new StringBuilder();
         htmlTable.append("<table style=\"width: 100%\">");
 
+        // Create rows for Reservation fields
         htmlTable.append("<tr>");
         htmlTable.append("<th>Reservation number</th>");
         htmlTable.append("<td>").append(reservation.getId()).append("</td>");
@@ -213,6 +213,7 @@ public class EmailSenderService {
         htmlTable.append("<th>Payment ID</th>");
         htmlTable.append("<td>").append(charge.getId());
         htmlTable.append("</tr>");
+
 
         htmlTable.append("</table>");
 
