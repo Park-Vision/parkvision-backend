@@ -106,6 +106,25 @@ public class EmailSenderService {
     }
 
     @Async("emailTaskExecutor")
+    public void sendHtmlEmailPaymentDeclined(
+            String firstName,
+            String lastName,
+            String to,
+            String title,
+            String description,
+            Reservation reservation,
+            String topic) throws Exception {
+        Context context = new Context();
+        context.setVariable("title", title);
+        context.setVariable("description",  description);
+        context.setVariable("name", firstName + " " + lastName);
+        String htmlTable = generateHTMLTable(reservation);
+        context.setVariable("body", htmlTable);
+
+        sendContextToUser(to, topic, context);
+    }
+
+    @Async("emailTaskExecutor")
     public void sendHtmlEmailRegistrationCreated(
             String firstName,
             String lastName,
@@ -191,7 +210,6 @@ public class EmailSenderService {
         StringBuilder htmlTable = new StringBuilder();
         htmlTable.append("<table style=\"width: 100%\">");
 
-        // Create rows for Reservation fields
         htmlTable.append("<tr>");
         htmlTable.append("<th>Reservation number</th>");
         htmlTable.append("<td>").append(reservation.getId()).append("</td>");
@@ -211,6 +229,26 @@ public class EmailSenderService {
 
 
         htmlTable.append("</table>");
+
+        return htmlTable.toString();
+    }
+
+    public String generateHTMLTable(Reservation reservation) {
+
+        StringBuilder htmlTable = new StringBuilder();
+        htmlTable.append("<table style=\"width: 100%\">");
+
+        htmlTable.append("<tr>");
+        htmlTable.append("<th>Reservation number</th>");
+        htmlTable.append("<td>").append(reservation.getId()).append("</td>");
+        htmlTable.append("</tr>");
+
+        htmlTable.append("<tr>");
+        htmlTable.append("<th>Amount</th>");
+        htmlTable.append("<td>").append(reservation.getAmount())
+                .append(" ")
+                .append(reservation.getParkingSpot().getParking().getCurrency()).append("</td>");
+        htmlTable.append("</tr>");
 
         return htmlTable.toString();
     }

@@ -2,6 +2,7 @@ package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.StripeChargeDTO;
 import net.parkvision.parkvisionbackend.model.*;
+import net.parkvision.parkvisionbackend.repository.ReservationRepository;
 import net.parkvision.parkvisionbackend.service.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -50,10 +51,10 @@ public class StripeChargeController {
     @PreAuthorize("hasRole('USER')")
     @PostMapping
     public ResponseEntity<StripeChargeDTO> createStripeCharge(@RequestBody StripeChargeDTO stripeChargeDTO){
+        User user = RequestContext.getUserFromRequest();
         StripeCharge createdStripeCharge = _stripeChargeService.createStripeCharge(convertToEntity(stripeChargeDTO));
         Optional<Reservation> reservation = _reservationService.getReservationById(createdStripeCharge.getReservation().getId());
         if (reservation.isPresent()){
-            User user = RequestContext.getUserFromRequest();
             if (user == null) {
                 return ResponseEntity.badRequest().build();
             }
@@ -79,6 +80,7 @@ public class StripeChargeController {
                                 reservation.get(),
                                 "ParkVision payment confirmation");
                     } else {
+                        createdStripeCharge.setReservation(null);
                         emailSenderService.sendHtmlEmailPayment(
                                 user.getFirstname(),
                                 user.getLastname(),
