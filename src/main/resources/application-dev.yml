@@ -1,5 +1,11 @@
 spring:
+  docker:
+    compose:
+      enabled: true
+      file: compose-dev.yml
   kafka:
+    consumer:
+      auto-offset-reset: earliest
     properties:
       security.protocol: "SSL"
     bootstrap-servers: localhost:29092
