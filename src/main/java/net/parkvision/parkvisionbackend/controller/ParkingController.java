@@ -13,8 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -101,7 +99,6 @@ public class ParkingController {
     public ResponseEntity<Integer> getFreeParkingSpotsNumber(@PathVariable Long id, @RequestParam OffsetDateTime startDate) {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
             List<ParkingSpot> freeParkingSpots
                     = _parkingSpotService.getFreeSpots(parking.get(),
                     startDate,

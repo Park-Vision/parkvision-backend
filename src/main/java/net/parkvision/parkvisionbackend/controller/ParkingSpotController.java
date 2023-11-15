@@ -18,8 +18,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -124,7 +122,6 @@ public class ParkingSpotController {
         if (parking.isPresent()) {
             startDate = startDate.withOffsetSameInstant(parking.get().getTimeZone());
             endDate = endDate.withOffsetSameInstant(parking.get().getTimeZone());
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
             List<ParkingSpotDTO> freeParkingSpots
                     = _parkingSpotService.getFreeSpots(parking.get(),
                     startDate,
