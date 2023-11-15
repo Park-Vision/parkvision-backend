@@ -1,18 +1,20 @@
 package net.parkvision.parkvisionbackend.dto;
 
 import lombok.Data;
+import net.parkvision.parkvisionbackend.model.MissionSpotResult;
 
+import java.time.OffsetDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class DroneMissionDTO {
     private Long id;
-    private String missionName;
-    private String missionDescription;
-    private String missionStatus;
-    private Date missionStartDate;
-    private Date missionEndDate;
+    private String status;
+    private OffsetDateTime missionStartDate;
+    private OffsetDateTime missionEndDate;
     private ParkingDTO parkingDTO;
     private DroneDTO droneDTO;
+    private List<MissionSpotResultDTO> missionSpotResultList;
 }
 
