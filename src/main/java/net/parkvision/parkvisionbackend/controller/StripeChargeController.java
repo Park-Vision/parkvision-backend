@@ -46,7 +46,7 @@ public class StripeChargeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StripeChargeDTO> getStripeChargeById(@PathVariable String id) {
+    public ResponseEntity<StripeChargeDTO> getStripeChargeById(@PathVariable Long id) {
         Optional<StripeCharge> stripeCharge = _stripeChargeService.getStripeChargeById(id);
         return stripeCharge.map(charge -> ResponseEntity.ok(convertToDto(charge))).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -104,13 +104,13 @@ public class StripeChargeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StripeChargeDTO> refundCharge(@PathVariable String id) {
+    public ResponseEntity<StripeChargeDTO> refundCharge(@PathVariable Long id) {
         StripeCharge updatedStripeCharge = _stripeChargeService.refundCharge(id);
         return ResponseEntity.ok(convertToDto(updatedStripeCharge));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteStripeCharge(@PathVariable String id) {
+    public ResponseEntity<Void> deleteStripeCharge(@PathVariable Long id) {
         _stripeChargeService.deleteStripeCharge(id);
         return ResponseEntity.noContent().build();
     }

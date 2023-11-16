@@ -91,6 +91,7 @@ public class DataSeeder {
             parking3.setLatitude(51.108915212046774);
             parking3.setLongitude(17.05562300818793);
             parking3.setTimeZone(ZoneOffset.of("-2"));
+            parking2.setCurrency("PLN");
             _parkingRepository.save(parking3);
 
 
@@ -174,6 +175,7 @@ public class DataSeeder {
         Client client = new Client();
         Client client2 = new Client();
         Client client3 = new Client();
+        Client client4 = new Client();
 
         long clientCount = _clientRepository.count();
 
@@ -200,6 +202,14 @@ public class DataSeeder {
             client3.setPassword(new BCryptPasswordEncoder().encode("Filip123!"));
             client3.setRole(Role.USER);
             _clientRepository.save(client3);
+
+            client4.setFirstname("Weronika");
+            client4.setLastname("Litkowska");
+            client4.setEmail("weronika.lit0@gmail.com");
+            client4.setPassword(new BCryptPasswordEncoder().encode("Test1234"));
+            client4.setRole(Role.USER);
+            _clientRepository.save(client4);
+
 
 
             System.out.println("Data seeded.");

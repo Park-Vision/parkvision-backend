@@ -44,7 +44,7 @@ public class StripeChargeService {
         return _stripeChargeRepository.findAll();
     }
 
-    public Optional<StripeCharge> getStripeChargeById(String id) {
+    public Optional<StripeCharge> getStripeChargeById(Long id) {
         return _stripeChargeRepository.findById(id);
     }
 
@@ -79,7 +79,7 @@ public class StripeChargeService {
 
         try {
             Charge charge = Charge.create(chargeParams);
-            stripeCharge.setId(charge.getId());
+            stripeCharge.setChargeId(charge.getId());
             stripeCharge.setMessage(charge.getOutcome().getSellerMessage());
             if (charge.getPaid()) {
                 stripeCharge.setSuccess(true);
@@ -92,18 +92,21 @@ public class StripeChargeService {
         return stripeCharge;
     }
 
-    public StripeCharge refundCharge(String id) {
-        Optional<StripeCharge> optionalStripeCharge = getStripeChargeById(id);
+    public StripeCharge refundCharge(Long id) {
+        if (!_stripeChargeRepository.existsById(id)) {
+            throw new IllegalArgumentException("StripeCharge with ID " + id + " " +
+                    "does not exist.");
+        }
+        StripeCharge stripeCharge = _stripeChargeRepository.getReferenceById(id);
 
-        if (optionalStripeCharge.isPresent()) {
-            StripeCharge stripeCharge = optionalStripeCharge.get();
+        if (stripeCharge.getChargeId() != null) {
 
             try {
 
                 Map<String, Object> params = new HashMap<>();
                 params.put(
                         "charge",
-                        stripeCharge.getId()
+                        stripeCharge.getChargeId()
                 );
 
                 Refund refund = Refund.create(params);
@@ -130,7 +133,9 @@ public class StripeChargeService {
         return _stripeChargeRepository.save(stripeCharge);
     }
 
-    public void deleteStripeCharge(String id) {
+    public void deleteStripeCharge(Long id) {
+
         _stripeChargeRepository.deleteById(id);
     }
+
 }
