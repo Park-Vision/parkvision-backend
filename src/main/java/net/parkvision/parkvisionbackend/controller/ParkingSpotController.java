@@ -17,8 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -117,15 +116,16 @@ public class ParkingSpotController {
 
     @GetMapping("/parking/{id}/free")
     public ResponseEntity<List<ParkingSpotDTO>> getFreeSpotsByParkingId(@PathVariable Long id,
-                                                                        @RequestParam String startDate,
-                                                                        @RequestParam String endDate) {
+                                                                        @RequestParam OffsetDateTime startDate,
+                                                                        @RequestParam OffsetDateTime endDate) {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+            startDate = startDate.withOffsetSameInstant(parking.get().getTimeZone());
+            endDate = endDate.withOffsetSameInstant(parking.get().getTimeZone());
             List<ParkingSpotDTO> freeParkingSpots
                     = _parkingSpotService.getFreeSpots(parking.get(),
-                    ZonedDateTime.parse(startDate, formatter),
-                    ZonedDateTime.parse(endDate, formatter)
+                    startDate,
+                    endDate
             ).stream().map(parkingSpot -> {
                         parkingSpot.setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.getId()));
                         return this.convertToDto(parkingSpot);
@@ -170,14 +170,13 @@ public class ParkingSpotController {
     }
 
     @GetMapping("/parking/{id}/free-time")
-    public ResponseEntity<Map<Long, Map<String, ZonedDateTime>>> getSpotsFreeTimeByParkingId(@PathVariable Long id,
-                                                                                             @RequestParam String startDate) {
+    public ResponseEntity<Map<Long, Map<String, OffsetDateTime>>> getSpotsFreeTimeByParkingId(@PathVariable Long id,
+                                                                                             @RequestParam OffsetDateTime startDate) {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
-            Map<Long, Map<String, ZonedDateTime>> parkingSpotsWithFreeTime
-                    = _parkingSpotService.getSpotsFreeTime(parking.get(), ZonedDateTime.parse(startDate, formatter)
-            );
+            startDate = startDate.withOffsetSameInstant(parking.get().getTimeZone());
+            Map<Long, Map<String, OffsetDateTime>> parkingSpotsWithFreeTime
+                    = _parkingSpotService.getSpotsFreeTime(parking.get(), startDate);
             return ResponseEntity.ok(parkingSpotsWithFreeTime);
         } else {
             return ResponseEntity.notFound().build();
