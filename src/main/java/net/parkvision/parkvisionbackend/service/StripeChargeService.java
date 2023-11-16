@@ -7,6 +7,7 @@ import com.stripe.model.Refund;
 import net.parkvision.parkvisionbackend.model.Payment;
 import net.parkvision.parkvisionbackend.model.Reservation;
 import net.parkvision.parkvisionbackend.model.StripeCharge;
+import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.PaymentRepository;
 import net.parkvision.parkvisionbackend.repository.ReservationRepository;
 import net.parkvision.parkvisionbackend.repository.StripeChargeRepository;
@@ -24,23 +25,26 @@ public class StripeChargeService {
     private final StripeChargeRepository _stripeChargeRepository;
     private final PaymentRepository _paymentRepository;
     private final ReservationRepository _reservationRepository;
+    private final EmailSenderService emailSenderService;
+
 
     @Value("${stripe.key.secret}")
     private String stripeKey;
 
     @Autowired
     public StripeChargeService(StripeChargeRepository stripeChargeRepository, PaymentRepository paymentRepository,
-                               ReservationRepository reservationRepository) {
+                               ReservationRepository reservationRepository, EmailSenderService emailSenderService) {
         this._stripeChargeRepository = stripeChargeRepository;
         this._paymentRepository = paymentRepository;
         this._reservationRepository = reservationRepository;
+        this.emailSenderService = emailSenderService;
     }
 
     public List<StripeCharge> getAllStripeCharges() {
         return _stripeChargeRepository.findAll();
     }
 
-    public Optional<StripeCharge> getStripeChargeById(String id) {
+    public Optional<StripeCharge> getStripeChargeById(Long id) {
         return _stripeChargeRepository.findById(id);
     }
 
@@ -71,34 +75,38 @@ public class StripeChargeService {
         Map<String, Object> metaData = new HashMap<>();
         metaData.put("id", stripeCharge.getPayment().getToken());
         chargeParams.put("metadata", metaData);
+        stripeCharge.setReservation(reservation);
 
         try {
             Charge charge = Charge.create(chargeParams);
-            stripeCharge.setId(charge.getId());
+            stripeCharge.setChargeId(charge.getId());
             stripeCharge.setMessage(charge.getOutcome().getSellerMessage());
             if (charge.getPaid()) {
-                stripeCharge.setReservation(reservation);
                 stripeCharge.setSuccess(true);
             }
-            _stripeChargeRepository.save(stripeCharge);
-            return stripeCharge;
         } catch (StripeException exception) {
-            throw new RuntimeException(exception.getMessage());
+            stripeCharge.setMessage(exception.getMessage());
+            stripeCharge.setSuccess(false);
         }
+        _stripeChargeRepository.save(stripeCharge);
+        return stripeCharge;
     }
 
-    public StripeCharge refundCharge(String id) {
-        Optional<StripeCharge> optionalStripeCharge = getStripeChargeById(id);
+    public StripeCharge refundCharge(Long id) {
+        if (!_stripeChargeRepository.existsById(id)) {
+            throw new IllegalArgumentException("StripeCharge with ID " + id + " " +
+                    "does not exist.");
+        }
+        StripeCharge stripeCharge = _stripeChargeRepository.getReferenceById(id);
 
-        if (optionalStripeCharge.isPresent()) {
-            StripeCharge stripeCharge = optionalStripeCharge.get();
+        if (stripeCharge.getChargeId() != null) {
 
             try {
 
                 Map<String, Object> params = new HashMap<>();
                 params.put(
                         "charge",
-                        stripeCharge.getId()
+                        stripeCharge.getChargeId()
                 );
 
                 Refund refund = Refund.create(params);
@@ -125,7 +133,9 @@ public class StripeChargeService {
         return _stripeChargeRepository.save(stripeCharge);
     }
 
-    public void deleteStripeCharge(String id) {
+    public void deleteStripeCharge(Long id) {
+
         _stripeChargeRepository.deleteById(id);
     }
+
 }

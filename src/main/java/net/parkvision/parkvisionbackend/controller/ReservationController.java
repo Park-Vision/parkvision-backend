@@ -127,6 +127,7 @@ public class ReservationController {
             return ResponseEntity.ok(convertToDto(updatedReservation));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
+
         }
     }
 
