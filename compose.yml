@@ -22,7 +22,8 @@ services:
       - "29092:29092"
     environment:
       KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
-      KAFKA_ADVERTISED_LISTENERS: 'SSL://kafka:29092,PLAINTEXT://localhost:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'SSL://localhost:29092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'localhost'
       KAFKA_LISTENERS: 'SSL://:29092,PLAINTEXT://:9092'
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
@@ -50,12 +51,12 @@ services:
       - zookeeper
       - kafka
 
-  react:
-    restart: always
-    container_name: react
-    image: react
-    ports:
-      - "3000:3000"
-    stdin_open: true
-    depends_on:
-      - springboot
+#  react:
+#    restart: always
+#    container_name: react
+#    image: react
+#    ports:
+#      - "3000:3000"
+#    stdin_open: true
+#    depends_on:
+#      - springboot

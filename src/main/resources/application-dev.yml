@@ -1,6 +1,14 @@
 spring:
   docker:
     compose:
+      profiles:
+        active: "dev"
+      readiness:
+        tcp:
+          connect-timeout: 10s
+          read-timeout: 5s
+      skip:
+        in-tests: false
       enabled: true
       file: compose-dev.yml
   kafka:

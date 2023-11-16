@@ -59,7 +59,7 @@ public class ParkingSpotController {
         return parkingSpotDTO;
     }
 
-    private ParkingSpot convertToEntity(ParkingSpotDTO parkingSpotDTO) {
+    public ParkingSpot convertToEntity(ParkingSpotDTO parkingSpotDTO) {
         return modelMapper.map(parkingSpotDTO, ParkingSpot.class);
     }
 

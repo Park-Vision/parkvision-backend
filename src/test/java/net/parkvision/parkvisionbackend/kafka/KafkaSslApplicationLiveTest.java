@@ -40,7 +40,7 @@ class KafkaSslApplicationLiveTest {
     @Test
     void givenSslIsConfigured_whenProducerSendsMessageOverSsl_thenConsumerReceivesOverSsl() throws JsonProcessingException, InterruptedException {
         String message = generateSampleMessage();
-        Thread.sleep(4000);
+        //Thread.sleep(4000);
         kafkaTemplate.send("drones-info", String.valueOf(1), message);
         Thread.sleep(4000);
         assertEquals(droneMissionRepository.count(), 1);
