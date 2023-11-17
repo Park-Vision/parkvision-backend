@@ -5,6 +5,7 @@ import net.parkvision.parkvisionbackend.model.*;
 import net.parkvision.parkvisionbackend.service.ParkingService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
 import net.parkvision.parkvisionbackend.service.RequestContext;
+import net.parkvision.parkvisionbackend.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -23,14 +25,17 @@ public class ParkingController {
 
     private final ParkingService _parkingService;
     private final ParkingSpotService _parkingSpotService;
+
+    private final UserService _userService;
     private final ModelMapper modelMapper;
 
     @Autowired
     public ParkingController(ParkingService parkingService, ParkingSpotService parkingSpotService,
-                             ModelMapper modelMapper) {
+                             ModelMapper modelMapper, UserService userService) {
         _parkingService = parkingService;
         this._parkingSpotService = parkingSpotService;
         this.modelMapper = modelMapper;
+        this._userService = userService;
     }
 
     private ParkingDTO convertToDTO(Parking parking) {
@@ -113,13 +118,35 @@ public class ParkingController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ParkingDTO> createParking(@RequestBody ParkingDTO parkingDTO) {
+        User user = RequestContext.getUserFromRequest();
+        if(user == null ){
+            return ResponseEntity.status(401).build();
+        }
         Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
+        User parkingModerator = _userService.getUserById(user.getId());
+        if (parkingModerator.getRole().equals(Role.PARKING_MANAGER)) {
+            ParkingModerator realParkingModerator = (ParkingModerator) parkingModerator;
+            realParkingModerator.setParking(createdParking);
+            _userService.updateUser(realParkingModerator);
+        }
+        else{
+            return ResponseEntity.status(401).build();
+        }
         return ResponseEntity.ok(convertToDTO(createdParking));
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<ParkingDTO> updateParking(@RequestBody ParkingDTO parkingDTO) {
+        User user = RequestContext.getUserFromRequest();
+        if(user == null ){
+            return ResponseEntity.status(401).build();
+        }
+        ParkingModerator parkingModerator = (ParkingModerator) user;
+        if(!parkingModerator.getParking().getId().equals(parkingDTO.getId())){
+            return ResponseEntity.status(401).build();
+        }
+
         try {
             Parking updatedParking = _parkingService.updateParking(convertToEntity(parkingDTO));
             return ResponseEntity.ok(convertToDTO(updatedParking));
