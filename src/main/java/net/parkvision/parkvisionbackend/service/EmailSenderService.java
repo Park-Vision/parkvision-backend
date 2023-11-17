@@ -4,7 +4,9 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import net.parkvision.parkvisionbackend.model.Parking;
+import net.parkvision.parkvisionbackend.model.Payment;
 import net.parkvision.parkvisionbackend.model.Reservation;
+import net.parkvision.parkvisionbackend.model.StripeCharge;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
@@ -84,6 +86,27 @@ public class EmailSenderService {
     }
 
     @Async("emailTaskExecutor")
+    public void sendHtmlEmailPayment(
+            String firstName,
+            String lastName,
+            String to,
+            String title,
+            String description,
+
+            StripeCharge stripeCharge,
+            Reservation reservation,
+            String topic) throws Exception {
+        Context context = new Context();
+        context.setVariable("title", title);
+        context.setVariable("description",  description);
+        context.setVariable("name", firstName + " " + lastName);
+        String htmlTable = generateHTMLTable(reservation, stripeCharge);
+        context.setVariable("body", htmlTable);
+
+        sendContextToUser(to, topic, context);
+    }
+
+    @Async("emailTaskExecutor")
     public void sendHtmlEmailRegistrationCreated(
             String firstName,
             String lastName,
@@ -111,7 +134,6 @@ public class EmailSenderService {
         javaMailSender.send(message);
         System.out.println("Email sent to " + to);
     }
-
 
     public String generateHTMLTable(Reservation reservation, Parking parking) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -158,6 +180,39 @@ public class EmailSenderService {
         htmlTable.append("<td>").append(reservation.getParkingSpot().getId()).append("</td>");
         htmlTable.append("</tr>");
 
+        htmlTable.append("<tr>");
+        htmlTable.append("<th>Amount</th>");
+        htmlTable.append("<td>").append(reservation.getAmount())
+                .append(" ")
+                .append(parking.getCurrency()).append("</td>");
+        htmlTable.append("</tr>");
+
+        htmlTable.append("</table>");
+
+        return htmlTable.toString();
+    }
+
+    public String generateHTMLTable(Reservation reservation, StripeCharge charge) {
+
+        StringBuilder htmlTable = new StringBuilder();
+        htmlTable.append("<table style=\"width: 100%\">");
+
+        htmlTable.append("<tr>");
+        htmlTable.append("<th>Reservation number</th>");
+        htmlTable.append("<td>").append(reservation.getId()).append("</td>");
+        htmlTable.append("</tr>");
+
+        htmlTable.append("<tr>");
+        htmlTable.append("<th>Amount</th>");
+        htmlTable.append("<td>").append(reservation.getAmount())
+                .append(" ")
+                .append(charge.getCurrency()).append("</td>");
+        htmlTable.append("</tr>");
+
+        htmlTable.append("<tr>");
+        htmlTable.append("<th>Payment ID</th>");
+        htmlTable.append("<td>").append(charge.getId());
+        htmlTable.append("</tr>");
 
         htmlTable.append("</table>");
 

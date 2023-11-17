@@ -60,6 +60,7 @@ public class DataSeeder {
             parking1.setLongitude(16.990429400497433);
             parking1.setLatitude(51.11818354620572);
             parking1.setTimeZone(ZoneOffset.of("+1"));
+            parking1.setCurrency("PLN");
             _parkingRepository.save(parking1);
 
             parking2.setName("D20 - Politechnika Wrocławska");
@@ -75,6 +76,7 @@ public class DataSeeder {
             parking2.setLatitude(51.10975855141324);
             parking2.setLongitude(17.059114686292222);
             parking2.setTimeZone(ZoneOffset.of("-3"));
+            parking2.setCurrency("EUR");
             _parkingRepository.save(parking2);
 
             parking3.setName("Parking Wrońskiego");
@@ -89,6 +91,7 @@ public class DataSeeder {
             parking3.setLatitude(51.108915212046774);
             parking3.setLongitude(17.05562300818793);
             parking3.setTimeZone(ZoneOffset.of("-2"));
+            parking2.setCurrency("PLN");
             _parkingRepository.save(parking3);
 
 
@@ -172,6 +175,7 @@ public class DataSeeder {
         Client client = new Client();
         Client client2 = new Client();
         Client client3 = new Client();
+        Client client4 = new Client();
 
         long clientCount = _clientRepository.count();
 
@@ -187,8 +191,8 @@ public class DataSeeder {
 
             client2.setFirstname("Jan");
             client2.setLastname("Kowalski");
-            client2.setEmail("jan@pv.pl:");
-            client2.setPassword(new BCryptPasswordEncoder().encode("654321"));
+            client2.setEmail("macki2708@gmail.com");
+            client2.setPassword(new BCryptPasswordEncoder().encode("Macki123!"));
             client2.setRole(Role.USER);
             _clientRepository.save(client2);
 
@@ -198,6 +202,14 @@ public class DataSeeder {
             client3.setPassword(new BCryptPasswordEncoder().encode("Filip123!"));
             client3.setRole(Role.USER);
             _clientRepository.save(client3);
+
+            client4.setFirstname("Weronika");
+            client4.setLastname("Litkowska");
+            client4.setEmail("weronika.lit0@gmail.com");
+            client4.setPassword(new BCryptPasswordEncoder().encode("Test1234"));
+            client4.setRole(Role.USER);
+            _clientRepository.save(client4);
+
 
 
             System.out.println("Data seeded.");
