@@ -6,6 +6,7 @@ import net.parkvision.parkvisionbackend.model.*;
 import net.parkvision.parkvisionbackend.service.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,8 @@ public class ReservationController {
     private final ParkingService _parkingService;
     private final EmailSenderService emailSenderService;
     private final ModelMapper modelMapper;
+    @Value("${park-vision.hour-rule}")
+    private int hourRule;
 
     @Autowired
     public ReservationController(ReservationService reservationService,
@@ -106,6 +109,21 @@ public class ReservationController {
             if (parkingSpot.isEmpty()) {
                 return ResponseEntity.badRequest().build();
             }
+            if (updatedReservation.getUser().getId().equals(user.getId())
+                    || user.getRole().equals(Role.PARKING_MANAGER)) {
+                try {
+                    emailSenderService.sendHtmlEmailReservation(
+                            updatedReservation.getUser().getFirstname(),
+                            updatedReservation.getUser().getLastname(),
+                            updatedReservation.getUser().getEmail(),
+                            "Reservation update confirmation",
+                            "Here is the confirmation of the reservation update you made in our system. ",
+                            parkingSpot.get().getParking(),
+                            updatedReservation, "ParkVision reservation update confirmation");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             return ResponseEntity.ok(convertToDto(updatedReservation));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
@@ -123,25 +141,27 @@ public class ReservationController {
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
-        if (reservation.isPresent()) {
-            OffsetDateTime reservationStartDate = reservation.get().getStartDate();
-            OffsetDateTime now = OffsetDateTime.now();
-            if (reservationStartDate.isBefore(now)) {
-                return ResponseEntity.badRequest().body("Cannot cancel reservation in the past.");
-            }
-        }
+        OffsetDateTime now = OffsetDateTime.now();
+
+
         if (reservation.isPresent() && user.getRole().equals(Role.PARKING_MANAGER)) {
             ParkingModerator parkingManager = (ParkingModerator) user;
+
+
 
             if (!reservation.get().getParkingSpot().getParking().getId().equals(parkingManager.getParking().getId())) {
                 return ResponseEntity.badRequest().body("Parking manager does not have permission to delete this " +
                         "reservation.");
             }
 
+            if (reservation.get().getStartDate().isBefore(now)) {
+                return ResponseEntity.badRequest().body("Cannot cancel reservation in the past.");
+            }
+
             if (reservation.get().getUser().getId().equals(user.getId())) {
                 _reservationService.deleteReservation(id);
-                return ResponseEntity.ok().build();
             } else {
+                _reservationService.cancelReservation(id);
                 try {
                     emailSenderService.sendHtmlEmailReservation(
                             reservation.get().getUser().getFirstname(),
@@ -154,13 +174,17 @@ public class ReservationController {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                _reservationService.deleteReservation(id);
-                return ResponseEntity.ok().build();
             }
+            return ResponseEntity.ok().build();
         } else if (reservation.isPresent() && user.getRole().equals(Role.USER)) {
             if (!reservation.get().getUser().getId().equals(user.getId())) {
                 return ResponseEntity.badRequest().body("User does not have permission to cancel this reservation.");
             }
+
+            if (reservation.get().getStartDate().isBefore(now.plusHours(hourRule))) {
+                return ResponseEntity.badRequest().body("Cannot cancel reservation less than " + hourRule + " hours before start.");
+            }
+
             Reservation canceledReservation = _reservationService.cancelReservation(id);
             if (canceledReservation == null) {
                 return ResponseEntity.badRequest().body("Failed to cancel the reservation.");

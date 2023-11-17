@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface StripeChargeRepository extends JpaRepository<StripeCharge, String> {
+public interface StripeChargeRepository extends JpaRepository<StripeCharge, Long> {
     Optional<StripeCharge> findByReservationId(Long id);
+
 }

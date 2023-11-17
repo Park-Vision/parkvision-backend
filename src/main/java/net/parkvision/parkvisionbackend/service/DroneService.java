@@ -1,5 +1,6 @@
 package net.parkvision.parkvisionbackend.service;
 
+import net.parkvision.parkvisionbackend.config.MessageEncryptor;
 import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.repository.DroneRepository;
 import net.parkvision.parkvisionbackend.repository.ParkingRepository;
@@ -37,6 +38,8 @@ public class DroneService {
         if (!_parkingRepository.existsById(drone.getParking().getId())) {
             throw new IllegalArgumentException("Parking with ID " + drone.getParking().getId() + " does not exist.");
         }
+
+        drone.setDroneKey(MessageEncryptor.generateKey());
         return _droneRepository.save(drone);
     }
 

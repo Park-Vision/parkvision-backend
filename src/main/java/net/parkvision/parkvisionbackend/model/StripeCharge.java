@@ -17,12 +17,14 @@ import java.util.Map;
 @Entity
 public class StripeCharge {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String username;
     private Double amount;
     private String currency;
     private Boolean success;
     private String message;
+    private String chargeId;
     @ManyToOne
     private Payment payment;
     @ManyToOne

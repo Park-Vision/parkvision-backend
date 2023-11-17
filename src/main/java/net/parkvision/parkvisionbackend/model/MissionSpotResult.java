@@ -6,23 +6,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Drone {
+public class MissionSpotResult {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String model;
-    private String serialNumber;
-    private String droneKey;
+    private Boolean occupied;
+
     @ManyToOne
-    private Parking parking;
-    @OneToMany
-    private List<DroneMission> droneMission;
+    private ParkingSpot parkingSpot;
+    @ManyToOne(cascade = CascadeType.ALL)
+    private DroneMission droneMission;
 }

@@ -14,7 +14,6 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 import static java.lang.Float.parseFloat;
@@ -151,43 +150,47 @@ public class ReservationService {
         return null;
     }
 
-    public Map<String, ZonedDateTime> getEarliestAvailableTime(ParkingSpot parkingSpot, ZonedDateTime date) {
+    public Map<String, OffsetDateTime> getEarliestAvailableTime(ParkingSpot parkingSpot, OffsetDateTime date) {
         List<Reservation> reservations = _reservationRepository.findByParkingSpotId(parkingSpot.getId())
                 .stream()
-                .filter(reservation -> reservation.getEndDate().isAfter(date.toOffsetDateTime()))
+                .filter(reservation -> reservation.getEndDate().isAfter(date))
                 .filter(reservation -> reservation.getEndDate().getDayOfMonth() == date.getDayOfMonth())
                 .filter(reservation -> reservation.getEndDate().getMonth() == date.getMonth())
                 .filter(reservation -> reservation.getEndDate().getYear() == date.getYear())
                 .sorted(Comparator.comparing(Reservation::getEndDate)).toList();
 
-        OffsetDateTime parkingEndTime = parkingSpot.getParking().getEndTime().toLocalTime()
-                .atDate(date.toLocalDate())
-                .atZone(date.getZone()).toOffsetDateTime();
+        OffsetDateTime parkingEndTime = OffsetDateTime.of(
+                date.toLocalDate(),
+                parkingSpot.getParking().getEndTime().toLocalTime(),
+                parkingSpot.getParking().getEndTime().getOffset()
+        );
 
-        OffsetDateTime parkingStartTime = parkingSpot.getParking().getStartTime().toLocalTime()
-                .atDate(date.toLocalDate())
-                .atZone(date.getZone()).toOffsetDateTime();
+        OffsetDateTime parkingStartTime = OffsetDateTime.of(
+                date.toLocalDate(),
+                parkingSpot.getParking().getStartTime().toLocalTime(),
+                parkingSpot.getParking().getStartTime().getOffset()
+        );
 
-        ZonedDateTime earliestAvailableTime = date;
-        if (earliestAvailableTime.isBefore(parkingStartTime.toZonedDateTime())) {
-            earliestAvailableTime =
-                    parkingStartTime.atZoneSameInstant(parkingSpot.getParking().getTimeZone().normalized());
+        OffsetDateTime earliestAvailableTime = OffsetDateTime.of(date.toLocalDateTime(), parkingSpot.getParking().getTimeZone());
+        if (earliestAvailableTime.isBefore(parkingStartTime)) {
+            earliestAvailableTime = parkingStartTime;
         }
 
         for (Reservation reservation : reservations) {
-            if (earliestAvailableTime.plusMinutes(15).isBefore(reservation.getStartDate().toZonedDateTime())) {
-                Map<String, ZonedDateTime> map = new HashMap<>();
+            //TODO add 15 break.
+            if (earliestAvailableTime.plusMinutes(15).isBefore(reservation.getStartDate())) {
+                Map<String, OffsetDateTime> map = new HashMap<>();
                 map.put("earliestStart", earliestAvailableTime);
-                map.put("earliestEnd", reservation.getStartDate().toZonedDateTime());
+                map.put("earliestEnd", reservation.getStartDate());
                 return map;
             }
-            earliestAvailableTime = reservation.getEndDate().toZonedDateTime();
+            earliestAvailableTime = reservation.getEndDate();
         }
-        if (earliestAvailableTime.isBefore(parkingEndTime.toZonedDateTime())) {
-            Map<String, ZonedDateTime> map = new HashMap<>();
+        if (earliestAvailableTime.isBefore(parkingEndTime)) {
+            Map<String, OffsetDateTime> map = new HashMap<>();
             map.put("earliestStart", earliestAvailableTime);
             map.put("earliestEnd",
-                    parkingEndTime.atZoneSameInstant(parkingSpot.getParking().getTimeZone().normalized()));
+                    parkingEndTime);
             return map;
         }
         return null;

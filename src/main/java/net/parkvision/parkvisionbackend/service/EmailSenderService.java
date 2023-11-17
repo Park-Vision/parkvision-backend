@@ -134,7 +134,6 @@ public class EmailSenderService {
         System.out.println("Email sent to " + to);
     }
 
-
     public String generateHTMLTable(Reservation reservation, Parking parking) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -197,7 +196,6 @@ public class EmailSenderService {
         StringBuilder htmlTable = new StringBuilder();
         htmlTable.append("<table style=\"width: 100%\">");
 
-        // Create rows for Reservation fields
         htmlTable.append("<tr>");
         htmlTable.append("<th>Reservation number</th>");
         htmlTable.append("<td>").append(reservation.getId()).append("</td>");
@@ -214,7 +212,6 @@ public class EmailSenderService {
         htmlTable.append("<th>Payment ID</th>");
         htmlTable.append("<td>").append(charge.getId());
         htmlTable.append("</tr>");
-
 
         htmlTable.append("</table>");
 
