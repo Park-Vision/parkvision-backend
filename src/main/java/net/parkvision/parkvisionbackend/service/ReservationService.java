@@ -222,4 +222,21 @@ public class ReservationService {
                 .sorted(Comparator.comparing(Reservation::getEndDate))
                 .toList();
     }
+
+    public List<Reservation> getAllReservationsByParkingSpot(Long id) {
+        return _reservationRepository.findAll()
+                .stream()
+                .filter(reservation -> Objects.equals(reservation.getParkingSpot().getId(), id))
+                .sorted(Comparator.comparing(Reservation::getEndDate))
+                .toList();
+    }
+
+    public List<Reservation> getFutureReservationByParkingSpot(Long id) {
+        return _reservationRepository.findAll()
+                .stream()
+                .filter(reservation -> Objects.equals(reservation.getParkingSpot().getId(), id))
+                .filter(reservation -> reservation.getStartDate().isAfter(OffsetDateTime.now()))
+                .sorted(Comparator.comparing(Reservation::getEndDate))
+                .toList();
+    }
 }
