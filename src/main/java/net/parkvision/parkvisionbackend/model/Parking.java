@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.TimeZoneStorage;
+import org.hibernate.annotations.TimeZoneStorageType;
 
 @Data
 @Builder
@@ -24,7 +26,9 @@ public class Parking {
     private String street;
     private String zipCode;
     private double costRate;
+    @TimeZoneStorage(TimeZoneStorageType.COLUMN)
     private OffsetTime startTime;
+    @TimeZoneStorage(TimeZoneStorageType.COLUMN)
     private OffsetTime endTime;
     private double latitude;
     private double longitude;

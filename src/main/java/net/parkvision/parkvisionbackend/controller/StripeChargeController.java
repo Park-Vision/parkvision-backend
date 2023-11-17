@@ -46,18 +46,18 @@ public class StripeChargeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StripeChargeDTO> getStripeChargeById(@PathVariable String id) {
+    public ResponseEntity<StripeChargeDTO> getStripeChargeById(@PathVariable Long id) {
         Optional<StripeCharge> stripeCharge = _stripeChargeService.getStripeChargeById(id);
         return stripeCharge.map(charge -> ResponseEntity.ok(convertToDto(charge))).orElseGet(() -> ResponseEntity.notFound().build());
     }
-
+  
     @PreAuthorize("hasRole('USER')")
     @PostMapping
-    public ResponseEntity<StripeChargeDTO> createStripeCharge(@RequestBody StripeChargeDTO stripeChargeDTO) {
+    public ResponseEntity<StripeChargeDTO> createStripeCharge(@RequestBody StripeChargeDTO stripeChargeDTO){
+        User user = RequestContext.getUserFromRequest();
         StripeCharge createdStripeCharge = _stripeChargeService.createStripeCharge(convertToEntity(stripeChargeDTO));
         Optional<Reservation> reservation = _reservationService.getReservationById(createdStripeCharge.getReservation().getId());
         if (reservation.isPresent()){
-            User user = RequestContext.getUserFromRequest();
             if (user == null) {
                 return ResponseEntity.badRequest().build();
             }
@@ -83,6 +83,7 @@ public class StripeChargeController {
                                 reservation.get(),
                                 "ParkVision payment confirmation");
                     } else {
+                        createdStripeCharge.setReservation(null);
                         emailSenderService.sendHtmlEmailPayment(
                                 user.getFirstname(),
                                 user.getLastname(),
@@ -104,13 +105,13 @@ public class StripeChargeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StripeChargeDTO> refundCharge(@PathVariable String id) {
+    public ResponseEntity<StripeChargeDTO> refundCharge(@PathVariable Long id) {
         StripeCharge updatedStripeCharge = _stripeChargeService.refundCharge(id);
         return ResponseEntity.ok(convertToDto(updatedStripeCharge));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteStripeCharge(@PathVariable String id) {
+    public ResponseEntity<Void> deleteStripeCharge(@PathVariable Long id) {
         _stripeChargeService.deleteStripeCharge(id);
         return ResponseEntity.noContent().build();
     }
