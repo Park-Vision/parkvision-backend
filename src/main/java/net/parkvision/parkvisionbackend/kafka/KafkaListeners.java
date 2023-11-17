@@ -43,6 +43,7 @@ public class KafkaListeners {
 
         try {
             message = MessageEncryptor.decryptMessage(message, drone.get().getDroneKey());
+            System.out.println(message);
             Map result = new ObjectMapper().readValue(message, HashMap.class);
             if (result.get("command").equals("start")) {
                 DroneMission droneMission = new DroneMission();
@@ -70,6 +71,7 @@ public class KafkaListeners {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        drone.ifPresent(value -> template.convertAndSend("/topic/parkings/" + value.getParking().getId(), message));
+        String finalMessage = message;
+        drone.ifPresent(value -> template.convertAndSend("/topic/parkings/" + value.getParking().getId(), finalMessage));
     }
 }
