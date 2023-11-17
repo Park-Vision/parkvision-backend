@@ -2,6 +2,7 @@ package net.parkvision.parkvisionbackend.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.parkvision.parkvisionbackend.config.MessageEncryptor;
 import net.parkvision.parkvisionbackend.dto.DroneDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotCoordinatesDTO;
@@ -63,24 +64,26 @@ public class DroneController {
                 // PRODUCTION
                 //kafkaTemplate.send("drone-" + id, command);
                 // TEST WS
-                if (command.equals("start")) {
-                    List<ParkingSpotCoordinatesDTO> parkingSpotCoordinatesDTOList =
-                            parkingSpotController.getSpotCoordinatesByDroneId(id);
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("command", command);
-                    map.put("cords", parkingSpotCoordinatesDTOList);
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    try {
+                try {
+                    String encrypt;
+                    if (command.equals("start") || command.equals("stop")) {
+                        List<ParkingSpotCoordinatesDTO> parkingSpotCoordinatesDTOList =
+                                parkingSpotController.getSpotCoordinatesByDroneId(id);
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("command", command);
+                        map.put("cords", parkingSpotCoordinatesDTOList);
+                        ObjectMapper objectMapper = new ObjectMapper();
+
                         String json = objectMapper.writeValueAsString(map);
                         System.out.println(json);
-                        //kafkaTemplate.send("drones-info", String.valueOf(id), json);
-                        kafkaTemplate.send("drone-" + id, json);
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+                        encrypt = MessageEncryptor.encryptMessage(json, drone.get().getDroneKey());
+                        System.out.println(encrypt);
+                        kafkaTemplate.send("drones-info", String.valueOf(id), encrypt);
                     }
-                } else {
-                    //kafkaTemplate.send("drones-info", String.valueOf(id), command);
-                    kafkaTemplate.send("drone-" + id, command);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
 
                 return ResponseEntity.ok(convertToDTO(drone.get()));
