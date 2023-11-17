@@ -20,6 +20,7 @@ public class Drone {
     private String name;
     private String model;
     private String serialNumber;
+    private String droneKey;
     @ManyToOne
     private Parking parking;
     @OneToMany
