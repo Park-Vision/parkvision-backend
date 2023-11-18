@@ -65,7 +65,7 @@ public class ParkingSpotController {
     @GetMapping
     public ResponseEntity<List<ParkingSpotDTO>> getAllParkingSpots() {
         List<ParkingSpotDTO> parkingSpots
-                = _parkingSpotService.getAllParkingSpots().stream().map(
+                = _parkingSpotService.getAllParkingSpotsWithPoints().stream().map(
                 this::convertToDto
         ).collect(Collectors.toList());
         return ResponseEntity.ok(parkingSpots);
@@ -103,8 +103,12 @@ public class ParkingSpotController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @DeleteMapping("/soft/{id}")
     public ResponseEntity<Void> softDeleteParkingSpot(@PathVariable Long id) {
-        _parkingSpotService.softDeleteParkingSpot(id);
-        return ResponseEntity.noContent().build();
+        try {
+            _parkingSpotService.softDeleteParkingSpot(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(409).build();
+        }
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
@@ -143,7 +147,7 @@ public class ParkingSpotController {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
             List<ParkingSpotDTO> parkingSpots
-                    = _parkingSpotService.getParkingSpots(parking.get()).stream().map(parkingSpot -> {
+                    = _parkingSpotService.getParkingSpotsWithPoints(parking.get()).stream().map(parkingSpot -> {
                         parkingSpot.setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.getId()));
                         return this.convertToDto(parkingSpot);
                     }
@@ -188,7 +192,7 @@ public class ParkingSpotController {
         if (drone.isPresent()) {
             List<ParkingSpotCoordinatesDTO> parkingSpotCoordinatesList = new ArrayList<>();
 
-            List<ParkingSpot> parkingSpots = _parkingSpotService.getParkingSpots(drone.get()); //TODO: only active?
+            List<ParkingSpot> parkingSpots = _parkingSpotService.getParkingSpots(drone.get());
             for (ParkingSpot parkingSpot : parkingSpots) {
                 List<Point> points = _pointService.getPointsByParkingSpotId(parkingSpot.getId());
                 if (!points.isEmpty()) {
