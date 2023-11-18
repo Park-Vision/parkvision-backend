@@ -138,11 +138,11 @@ public class EmailSenderService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 
-        String formatedStartDateTime =
+        String formattedStartDateTime =
                 reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone()).format(formatter);
-        String formatedEndDateTime =
+        String formattedEndDateTime =
                 reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone()).format(formatter);
-
+        String formattedAmount = String.format("%.2f", reservation.getAmount());
 
         StringBuilder htmlTable = new StringBuilder();
         htmlTable.append("<table style=\"width: 100%\">");
@@ -155,12 +155,12 @@ public class EmailSenderService {
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>Start date</th>");
-        htmlTable.append("<td>").append(formatedStartDateTime).append("</td>");
+        htmlTable.append("<td>").append(formattedStartDateTime).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>End date</th>");
-        htmlTable.append("<td>").append(formatedEndDateTime).append("</td>");
+        htmlTable.append("<td>").append(formattedEndDateTime).append("</td>");
         htmlTable.append("</tr>");
 
         htmlTable.append("<tr>");
@@ -181,7 +181,7 @@ public class EmailSenderService {
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>Amount</th>");
-        htmlTable.append("<td>").append(reservation.getAmount())
+        htmlTable.append("<td>").append(formattedAmount)
                 .append(" ")
                 .append(parking.getCurrency()).append("</td>");
         htmlTable.append("</tr>");
@@ -193,6 +193,8 @@ public class EmailSenderService {
 
     public String generateHTMLTable(Reservation reservation, StripeCharge charge) {
 
+        String formattedAmount = String.format("%.2f", reservation.getAmount());
+
         StringBuilder htmlTable = new StringBuilder();
         htmlTable.append("<table style=\"width: 100%\">");
 
@@ -203,7 +205,7 @@ public class EmailSenderService {
 
         htmlTable.append("<tr>");
         htmlTable.append("<th>Amount</th>");
-        htmlTable.append("<td>").append(reservation.getAmount())
+        htmlTable.append("<td>").append(formattedAmount)
                 .append(" ")
                 .append(reservation.getParkingSpot().getParking().getCurrency()).append("</td>");
         htmlTable.append("</tr>");
