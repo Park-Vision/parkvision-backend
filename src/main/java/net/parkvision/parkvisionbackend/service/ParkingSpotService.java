@@ -39,13 +39,7 @@ public class ParkingSpotService {
     // get all parkingSpots but filter only these which have points
     public List<ParkingSpot> getAllParkingSpotsWithPoints() {
         List<ParkingSpot> parkingSpots = _parkingSpotRepository.findAll();
-        List<ParkingSpot> parkingSpotsWithPoints = new ArrayList<>();
-        for (ParkingSpot parkingSpot : parkingSpots) {
-            if (!parkingSpot.getPoints().isEmpty()) {
-                parkingSpotsWithPoints.add(parkingSpot);
-            }
-        }
-        return parkingSpotsWithPoints;
+        return getSpotsWithPoints(parkingSpots);
     }
 
     public Optional<ParkingSpot> getParkingSpotById(Long id) {
@@ -134,15 +128,19 @@ public class ParkingSpotService {
 
     public List<ParkingSpot> getParkingSpotsWithPoints(Parking parking) {
         List<ParkingSpot> parkingSpots = new ArrayList<>(_parkingSpotRepository.findByParkingId(parking.getId()));
+        List<ParkingSpot> parkingSpotsWithPoints = getSpotsWithPoints(parkingSpots);
+        return new ArrayList<>(parkingSpotsWithPoints);
+    }
+
+    private List<ParkingSpot> getSpotsWithPoints(List<ParkingSpot> parkingSpots) {
         List<ParkingSpot> parkingSpotsWithPoints = new ArrayList<>();
         for (ParkingSpot parkingSpot : parkingSpots) {
             List<Point> points = _pointService.getPointsByParkingSpotId(parkingSpot.getId());
             if(!points.isEmpty()) {
                 parkingSpotsWithPoints.add(parkingSpot);
             }
-
         }
-        return new ArrayList<>(parkingSpotsWithPoints);
+        return parkingSpotsWithPoints;
     }
 
     public List<ParkingSpot> getActiveParkingSpots(Parking parking) {

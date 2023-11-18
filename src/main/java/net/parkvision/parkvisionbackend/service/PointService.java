@@ -64,7 +64,4 @@ public class PointService {
     public void deletePoint(Long id) {
         _pointRepository.deleteById(id);
     }
-
-
-
 }
