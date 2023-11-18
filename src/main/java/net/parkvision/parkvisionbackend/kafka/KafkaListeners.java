@@ -2,6 +2,8 @@ package net.parkvision.parkvisionbackend.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.parkvision.parkvisionbackend.config.MessageEncryptor;
+import net.parkvision.parkvisionbackend.config.MessageEncryptor;
 import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.model.DroneMission;
 import net.parkvision.parkvisionbackend.model.MissionSpotResult;
@@ -40,6 +42,8 @@ public class KafkaListeners {
         System.out.println("Received Message from Drone " + droneId + ": " + message);
 
         try {
+            message = MessageEncryptor.decryptMessage(message, drone.get().getDroneKey());
+            System.out.println(message);
             Map result = new ObjectMapper().readValue(message, HashMap.class);
             if (result.get("command").equals("start")) {
                 DroneMission droneMission = new DroneMission();
@@ -64,7 +68,10 @@ public class KafkaListeners {
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        drone.ifPresent(value -> template.convertAndSend("/topic/parkings/" + value.getParking().getId(), message));
+        String finalMessage = message;
+        drone.ifPresent(value -> template.convertAndSend("/topic/parkings/" + value.getParking().getId(), finalMessage));
     }
 }

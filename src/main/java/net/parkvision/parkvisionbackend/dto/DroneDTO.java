@@ -9,4 +9,5 @@ public class DroneDTO {
     private String model;
     private String serialNumber;
     private ParkingDTO parkingDTO;
+    private String droneKey;
 }
