@@ -141,6 +141,7 @@ public class DroneController {
     public ResponseEntity<DroneDTO> createDrone(@RequestBody DroneDTO droneDto) throws ExecutionException,
             InterruptedException {
         ParkingModerator parkingModerator = getParkingModeratorFromRequest();
+
         if (!Objects.equals(parkingModerator.getParking().getId(), droneDto.getParkingDTO().getId())) {
             return ResponseEntity.badRequest().build();
         }

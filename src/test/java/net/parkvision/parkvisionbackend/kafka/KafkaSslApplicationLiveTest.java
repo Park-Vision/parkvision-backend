@@ -3,8 +3,13 @@ package net.parkvision.parkvisionbackend.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.parkvision.parkvisionbackend.ParkVisionBackendApplication;
+import net.parkvision.parkvisionbackend.config.MessageEncryptor;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotCoordinatesDTO;
+import net.parkvision.parkvisionbackend.model.Drone;
+import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.repository.DroneMissionRepository;
+import net.parkvision.parkvisionbackend.service.DroneService;
+import net.parkvision.parkvisionbackend.service.ParkingService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,13 +40,23 @@ class KafkaSslApplicationLiveTest {
     private KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
+    private DroneService droneService;
+    @Autowired
+    private ParkingService parkingService;
+
+    @Autowired
     private DroneMissionRepository droneMissionRepository;
 
     @Test
-    void givenSslIsConfigured_whenProducerSendsMessageOverSsl_thenConsumerReceivesOverSsl() throws JsonProcessingException, InterruptedException {
+    void givenSslIsConfigured_whenProducerSendsMessageOverSsl_thenConsumerReceivesOverSsl() throws Exception {
         String message = generateSampleMessage();
         //Thread.sleep(4000);
-        kafkaTemplate.send("drones-info", String.valueOf(1), message);
+        Drone drone = new Drone();
+
+        drone.setParking(parkingService.getParkingById(3L).get());
+
+        String encrypt = MessageEncryptor.encryptMessage(message, droneService.createDrone(drone).getDroneKey());
+        kafkaTemplate.send("drones-info", String.valueOf(3), encrypt);
         Thread.sleep(4000);
         assertEquals(droneMissionRepository.count(), 1);
 

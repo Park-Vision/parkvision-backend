@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ActiveProfiles("dev")
+//@ActiveProfiles("dev")
 @DirtiesContext
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -188,7 +188,7 @@ public class ParkingSpotControllerTest {
     }
 
 
-    private static String asJsonString(final Object obj) {
+    public static String asJsonString(final Object obj) {
         try {
             return new ObjectMapper().writeValueAsString(obj);
         } catch (Exception e) {
