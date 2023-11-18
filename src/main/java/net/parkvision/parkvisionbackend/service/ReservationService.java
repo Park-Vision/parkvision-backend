@@ -124,6 +124,7 @@ public class ReservationService {
         reservation.setRegistrationNumber(reservation.getRegistrationNumber());
         reservation.setUser(reservation.getUser());
         reservation.setParkingSpot(reservation.getParkingSpot());
+        reservation.setAmount(reservation.getAmount());
 
         return _reservationRepository.save(reservation);
     }
