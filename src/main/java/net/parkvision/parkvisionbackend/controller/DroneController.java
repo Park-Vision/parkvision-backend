@@ -54,6 +54,11 @@ public class DroneController {
         if (drone.isPresent()) {
             assert parkingModerator != null;
             if (Objects.equals(parkingModerator.getParking().getId(), drone.get().getParking().getId())) {
+                try {
+                    kafkaTopicConfig.createNewTopic("drone-" + id);
+                } catch (Exception ignored) {
+                }
+
                 System.out.println("drone-" + id);
                 // PRODUCTION
                 //kafkaTemplate.send("drone-" + id, command);
@@ -68,12 +73,14 @@ public class DroneController {
                     try {
                         String json = objectMapper.writeValueAsString(map);
                         System.out.println(json);
-                        kafkaTemplate.send("drones-info", String.valueOf(id), json);
+                        //kafkaTemplate.send("drones-info", String.valueOf(id), json);
+                        kafkaTemplate.send("drone-" + id, command);
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                     }
                 } else {
-                    kafkaTemplate.send("drones-info", String.valueOf(id), command);
+                    //kafkaTemplate.send("drones-info", String.valueOf(id), command);
+                    kafkaTemplate.send("drone-" + id, command);
                 }
 
                 return ResponseEntity.ok(convertToDTO(drone.get()));
