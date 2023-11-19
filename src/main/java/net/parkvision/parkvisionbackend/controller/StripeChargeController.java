@@ -50,6 +50,7 @@ public class StripeChargeController {
         Optional<StripeCharge> stripeCharge = _stripeChargeService.getStripeChargeById(id);
         return stripeCharge.map(charge -> ResponseEntity.ok(convertToDto(charge))).orElseGet(() -> ResponseEntity.notFound().build());
     }
+  
     @PreAuthorize("hasRole('USER')")
     @PostMapping
     public ResponseEntity<StripeChargeDTO> createStripeCharge(@RequestBody StripeChargeDTO stripeChargeDTO){

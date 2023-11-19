@@ -1,5 +1,6 @@
 package net.parkvision.parkvisionbackend.service;
 
+import jakarta.transaction.Transactional;
 import net.parkvision.parkvisionbackend.model.Point;
 import net.parkvision.parkvisionbackend.repository.ParkingSpotRepository;
 import net.parkvision.parkvisionbackend.repository.PointRepository;
@@ -59,8 +60,8 @@ public class PointService {
         return _pointRepository.save(point);
     }
 
+    @Transactional
     public void deletePoint(Long id) {
         _pointRepository.deleteById(id);
     }
-
 }

@@ -124,6 +124,7 @@ public class ReservationService {
         reservation.setRegistrationNumber(reservation.getRegistrationNumber());
         reservation.setUser(reservation.getUser());
         reservation.setParkingSpot(reservation.getParkingSpot());
+        reservation.setAmount(reservation.getAmount());
 
         return _reservationRepository.save(reservation);
     }
@@ -219,6 +220,23 @@ public class ReservationService {
         return _reservationRepository.findAll()
                 .stream()
                 .filter(reservation -> Objects.equals(reservation.getParkingSpot().getParking().getId(), id))
+                .sorted(Comparator.comparing(Reservation::getEndDate))
+                .toList();
+    }
+
+    public List<Reservation> getAllReservationsByParkingSpot(Long id) {
+        return _reservationRepository.findAll()
+                .stream()
+                .filter(reservation -> Objects.equals(reservation.getParkingSpot().getId(), id))
+                .sorted(Comparator.comparing(Reservation::getEndDate))
+                .toList();
+    }
+
+    public List<Reservation> getFutureReservationByParkingSpot(Long id) {
+        return _reservationRepository.findAll()
+                .stream()
+                .filter(reservation -> Objects.equals(reservation.getParkingSpot().getId(), id))
+                .filter(reservation -> reservation.getStartDate().isAfter(OffsetDateTime.now()))
                 .sorted(Comparator.comparing(Reservation::getEndDate))
                 .toList();
     }

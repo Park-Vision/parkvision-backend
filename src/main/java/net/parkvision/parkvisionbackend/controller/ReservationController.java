@@ -237,6 +237,7 @@ public class ReservationController {
     @PreAuthorize("hasRole('PARKING_MANAGER')")
     @GetMapping("/parking/{id}")
     public ResponseEntity<List<ReservationDTO>> getAllReservationsByParking(@PathVariable Long id) {
+
         User user = RequestContext.getUserFromRequest();
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (user != null && user.getRole().equals(Role.PARKING_MANAGER)) {
