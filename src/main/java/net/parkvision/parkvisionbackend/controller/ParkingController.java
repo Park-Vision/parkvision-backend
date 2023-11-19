@@ -126,6 +126,9 @@ public class ParkingController {
         User parkingModerator = _userService.getUserById(user.getId());
         if (parkingModerator.getRole().equals(Role.PARKING_MANAGER)) {
             ParkingModerator realParkingModerator = (ParkingModerator) parkingModerator;
+            if(realParkingModerator.getParking() != null){
+                return ResponseEntity.status(405).build();
+            }
             realParkingModerator.setParking(createdParking);
             _userService.updateUser(realParkingModerator);
         }
