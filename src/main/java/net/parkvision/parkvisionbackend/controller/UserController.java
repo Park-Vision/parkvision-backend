@@ -1,9 +1,12 @@
 package net.parkvision.parkvisionbackend.controller;
 
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
+import net.parkvision.parkvisionbackend.dto.PasswordResetDTO;
+import net.parkvision.parkvisionbackend.dto.SetPasswordResetDTO;
 import net.parkvision.parkvisionbackend.dto.UserDTO;
 import net.parkvision.parkvisionbackend.model.ParkingModerator;
 import net.parkvision.parkvisionbackend.model.User;
+import net.parkvision.parkvisionbackend.service.EmailSenderService;
 import net.parkvision.parkvisionbackend.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +22,15 @@ import java.util.stream.Collectors;
 public class UserController {
     private final UserService _userService;
     private final ModelMapper modelMapper;
+    private final EmailSenderService _emailSenderService;
 
     @Autowired
-    public UserController(UserService userService, ModelMapper modelMapper) {
+    public UserController(UserService userService,
+                          ModelMapper modelMapper,
+                          EmailSenderService emailSenderService) {
         _userService = userService;
         this.modelMapper = modelMapper;
+        _emailSenderService = emailSenderService;
     }
 
     private UserDTO convertToDto(User user) {
@@ -68,4 +75,46 @@ public class UserController {
         _userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<Void> resetPassword(
+            @RequestBody PasswordResetDTO passwordResetDTO
+    ) {
+        try {
+            User user = _userService.getUserByEmail(passwordResetDTO.getEmail());
+            // generate a special password reset token and set it to user
+            _userService.generatePasswordResetToken(user);
+            // send email to user with the token
+            _emailSenderService.sendHtmlEmailPasswordReset(
+                    user.getFirstname(),
+                    user.getLastname(),
+                    user.getEmail(),
+                    "ParkVision password reset",
+                    "Here is the link to reset your password: http://localhost:3000/reset-password/" + user.getPasswordResetToken()
+                    );
+            return ResponseEntity.ok().build();
+        }
+        catch (Exception e) {
+            return ResponseEntity.ok().build();
+        }
+    }
+
+    @PostMapping("/setPasswordFromReset")
+    public ResponseEntity<Void> resetPassword(
+            @RequestBody SetPasswordResetDTO setPasswordResetDTO
+    ) {
+        try {
+            User user = _userService.getUserByResetToken(setPasswordResetDTO.getToken());
+            if(user == null) {
+                return ResponseEntity.ok().build();
+            }
+            _userService.resetPassword(user, setPasswordResetDTO.getPassword());
+        }
+        catch (Exception e) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.ok().build();
+    }
+
+
 }

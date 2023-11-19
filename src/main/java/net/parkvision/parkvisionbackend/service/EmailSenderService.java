@@ -119,6 +119,21 @@ public class EmailSenderService {
         sendContextToUser(to, topic, context);
     }
 
+    @Async("emailTaskExecutor")
+    public void sendHtmlEmailPasswordReset(
+            String firstName,
+            String lastName,
+            String to,
+            String topic,
+            String description) throws Exception {
+        Context context = new Context();
+        context.setVariable("title", "Password reset link");
+        context.setVariable("description", description);
+        context.setVariable("name", firstName + " " + lastName);
+
+        sendContextToUser(to, topic, context);
+    }
+
     private void sendContextToUser(String to, String topic, Context context) throws MessagingException {
         String text = templateEngine.process(EMAIL_TEMPLATE, context);
         MimeMessage message = javaMailSender.createMimeMessage();

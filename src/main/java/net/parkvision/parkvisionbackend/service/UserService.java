@@ -64,4 +64,21 @@ public class UserService {
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
+
+    public void generatePasswordResetToken(User user) {
+        String token = passwordEncoder.encode(user.getEmail() + System.currentTimeMillis());
+        user.setPasswordResetToken(token);
+        userRepository.save(user);
+    }
+
+    public User getUserByResetToken(String token) {
+        return userRepository.findByPasswordResetToken(token)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public void resetPassword(User user, String password) {
+        user.setPassword(passwordEncoder.encode(password));
+        user.setPasswordResetToken(null);
+        userRepository.save(user);
+    }
 }

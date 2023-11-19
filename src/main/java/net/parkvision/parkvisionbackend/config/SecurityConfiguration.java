@@ -46,6 +46,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests()
                 .requestMatchers(HttpMethod.GET, "/api/parkings/**", "api/parkingspots/parking/**", "api/parkingspots" +
                         "/drone/**", "/ws/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "api/users/resetPassword").permitAll()
 //                .requestMatchers( "/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
