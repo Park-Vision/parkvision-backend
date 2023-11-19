@@ -138,7 +138,7 @@ public class DataSeeder {
             parkingModerator1.setLastname("Nowak");
             parkingModerator1.setEmail("Pmod@pv.pl");
             parkingModerator1.setPassword(new BCryptPasswordEncoder().encode("Pmod123!"));
-            parkingModerator1.setParking(_parkingRepository.getReferenceById(1L));
+//            parkingModerator1.setParking(_parkingRepository.getReferenceById(1L));
             parkingModerator1.setRole(Role.PARKING_MANAGER);
             _parkingModeratorRepository.save(parkingModerator1);
 
