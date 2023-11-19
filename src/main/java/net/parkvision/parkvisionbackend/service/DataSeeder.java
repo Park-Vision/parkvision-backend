@@ -167,6 +167,18 @@ public class DataSeeder {
             _parkingModeratorRepository.save(parkingModerator3);
 
             System.out.println("Added: " + parkingModerator3.getEmail() + " " + "Pmod123!");
+
+
+            ParkingModerator parkingModerator4 = new ParkingModerator();
+
+            parkingModerator4.setFirstname("Swagger");
+            parkingModerator4.setLastname("ParkingModerator");
+            parkingModerator4.setEmail("string2");
+            parkingModerator4.setPassword(new BCryptPasswordEncoder().encode("string"));
+            parkingModerator4.setParking(_parkingRepository.getReferenceById(4L));
+            parkingModerator4.setRole(Role.PARKING_MANAGER);
+            _parkingModeratorRepository.save(parkingModerator3);
+
             System.out.println("Data seeded.");
         } else {
             System.out.println("Data already exists.");

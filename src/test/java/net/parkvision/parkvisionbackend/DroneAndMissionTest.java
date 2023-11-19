@@ -102,4 +102,22 @@ public class DroneAndMissionTest {
         }
     }
 
+//    @Test
+//    public void commandStart() throws Exception {
+//
+//        Optional<User> parkingModerator = userRepository.findByEmail("string");
+//
+//        if (parkingModerator.isPresent()) {
+//
+//            ParkingModerator parkingModeratorReal = (ParkingModerator) parkingModerator.get();
+//            mockMvc.perform(post("/api/drones")
+//                            .param("id", String.valueOf(3))
+//                            .param("command", "start")
+//                            .with(user(parkingModeratorReal))
+//                            .contentType(MediaType.APPLICATION_JSON)).andDo(print())
+//                    .andExpect(status().isOk());
+//
+//        }
+//    }
+
 }

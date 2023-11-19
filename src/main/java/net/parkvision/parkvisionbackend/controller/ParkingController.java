@@ -54,13 +54,13 @@ public class ParkingController {
                 this::convertToDTO
         ).collect(Collectors.toList());
         User user = RequestContext.getUserFromRequest();
-        if( user == null || user.getRole().equals(Role.USER)){
+        if (user == null || user.getRole().equals(Role.USER)) {
             return ResponseEntity.ok(parkings);
         }
         List<ParkingDTO> filteredParking =
-        parkings.stream()
-                .filter(parkingDTO ->
-                        parkingDTO.getId().equals(((ParkingModerator) user).getParking().getId())).toList();
+                parkings.stream()
+                        .filter(parkingDTO ->
+                                parkingDTO.getId().equals(((ParkingModerator) user).getParking().getId())).toList();
         return ResponseEntity.ok(filteredParking);
     }
 
@@ -68,20 +68,17 @@ public class ParkingController {
     public ResponseEntity<ParkingDTO> getParkingById(@PathVariable Long id) {
         User user = RequestContext.getUserFromRequest();
         Optional<Parking> parking = _parkingService.getParkingById(id);
-        if( user == null || user.getRole().equals(Role.USER)){
+        if (user == null || user.getRole().equals(Role.USER)) {
             return parking.map(value -> ResponseEntity.ok(convertToDTO(value))).orElseGet(() -> ResponseEntity.notFound().build());
-        }
-        else if (user.getRole().equals(Role.PARKING_MANAGER)) {
-            if (parking.isPresent()){
+        } else if (user.getRole().equals(Role.PARKING_MANAGER)) {
+            if (parking.isPresent()) {
                 ParkingModerator parkingModerator = (ParkingModerator) user;
-                if((parkingModerator.getParking().getId().equals(parking.get().getId()))){
+                if ((parkingModerator.getParking().getId().equals(parking.get().getId()))) {
                     return ResponseEntity.ok(convertToDTO(parking.get()));
-                }
-                else{
+                } else {
                     return ResponseEntity.status(401).build();
                 }
-            }
-            else{
+            } else {
                 return ResponseEntity.notFound().build();
             }
         } else {
@@ -101,7 +98,8 @@ public class ParkingController {
     }
 
     @GetMapping("/{id}/free-spots-number")
-    public ResponseEntity<Integer> getFreeParkingSpotsNumber(@PathVariable Long id, @RequestParam OffsetDateTime startDate) {
+    public ResponseEntity<Integer> getFreeParkingSpotsNumber(@PathVariable Long id,
+                                                             @RequestParam OffsetDateTime startDate) {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (parking.isPresent()) {
             List<ParkingSpot> freeParkingSpots
@@ -119,34 +117,34 @@ public class ParkingController {
     @PostMapping
     public ResponseEntity<ParkingDTO> createParking(@RequestBody ParkingDTO parkingDTO) {
         User user = RequestContext.getUserFromRequest();
-        if(user == null ){
+        if (user == null) {
             return ResponseEntity.status(401).build();
         }
-        Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
         User parkingModerator = _userService.getUserById(user.getId());
         if (parkingModerator.getRole().equals(Role.PARKING_MANAGER)) {
             ParkingModerator realParkingModerator = (ParkingModerator) parkingModerator;
-            if(realParkingModerator.getParking() != null){
+            if (realParkingModerator.getParking() != null) {
                 return ResponseEntity.status(405).build();
             }
+
+            Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
             realParkingModerator.setParking(createdParking);
             _userService.updateUser(realParkingModerator);
+            return ResponseEntity.ok(convertToDTO(createdParking));
         }
-        else{
-            return ResponseEntity.status(401).build();
-        }
-        return ResponseEntity.ok(convertToDTO(createdParking));
+        return ResponseEntity.status(401).build();
+
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<ParkingDTO> updateParking(@RequestBody ParkingDTO parkingDTO) {
         User user = RequestContext.getUserFromRequest();
-        if(user == null ){
+        if (user == null) {
             return ResponseEntity.status(401).build();
         }
         ParkingModerator parkingModerator = (ParkingModerator) user;
-        if(!parkingModerator.getParking().getId().equals(parkingDTO.getId())){
+        if (!parkingModerator.getParking().getId().equals(parkingDTO.getId())) {
             return ResponseEntity.status(401).build();
         }
 
