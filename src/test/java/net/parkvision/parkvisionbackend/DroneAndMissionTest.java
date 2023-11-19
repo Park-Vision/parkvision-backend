@@ -5,8 +5,10 @@ import com.jayway.jsonpath.JsonPath;
 import net.parkvision.parkvisionbackend.dto.DroneDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.kafka.KafkaTopicConfig;
+import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.model.ParkingModerator;
 import net.parkvision.parkvisionbackend.model.User;
+import net.parkvision.parkvisionbackend.repository.DroneRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +22,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.Optional;
 
 import static net.parkvision.parkvisionbackend.controller.ParkingSpotControllerTest.asJsonString;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -38,6 +39,9 @@ public class DroneAndMissionTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DroneRepository droneRepository;
 
     @Autowired
     KafkaTopicConfig kafkaTopicConfig;
@@ -73,6 +77,11 @@ public class DroneAndMissionTest {
             Integer idValue = JsonPath.read(jsonResponse, "$.id");
 
             assertTrue(kafkaTopicConfig.checkIfTopicExists("drone-" + idValue));
+
+            Optional<Drone> byName = droneRepository.findByName(droneDTO.getName());
+
+            assertTrue(byName.isPresent());
+            assertEquals(byName.get().getParking().getName(), parkingModeratorReal.getParking().getName());
         }
 
     }
@@ -88,7 +97,7 @@ public class DroneAndMissionTest {
             ParkingDTO parkingDTO = new ParkingDTO();
             parkingDTO.setId(2L);
             droneDTO.setParkingDTO(parkingDTO);
-            droneDTO.setName("DroneDJ3");
+            droneDTO.setName("DroneDJ4");
             droneDTO.setModel("DJ3");
             droneDTO.setSerialNumber("87324637286432874");
 
@@ -98,6 +107,10 @@ public class DroneAndMissionTest {
                             .content(asJsonString(droneDTO))
                             .contentType(MediaType.APPLICATION_JSON)).andDo(print())
                     .andExpect(status().isBadRequest());
+
+            Optional<Drone> byName = droneRepository.findByName(droneDTO.getName());
+
+            assertFalse(byName.isPresent());
 
         }
     }

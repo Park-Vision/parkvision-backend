@@ -1,12 +1,11 @@
 package net.parkvision.parkvisionbackend;
 
 
-import com.jayway.jsonpath.JsonPath;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingModerator;
-import net.parkvision.parkvisionbackend.model.Role;
 import net.parkvision.parkvisionbackend.model.User;
+import net.parkvision.parkvisionbackend.repository.ParkingRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,14 +14,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.OffsetTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static net.parkvision.parkvisionbackend.controller.ParkingSpotControllerTest.asJsonString;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -39,6 +37,9 @@ public class CreateParkingTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ParkingRepository parkingRepository;
 
     @Test
     public void createParkingWithModerator() throws Exception {
@@ -65,8 +66,11 @@ public class CreateParkingTest {
                     .andExpect(jsonPath("$.longitude").value(parkingDTO.getLongitude()))
                     .andExpect(jsonPath("$.currency").value(parkingDTO.getCurrency()))
                     .andExpect(jsonPath("$.costRate").value(parkingDTO.getCostRate()));
-        }
+            Optional<Parking> byName = parkingRepository.findByName(getParkingDTO().getName());
 
+            assertTrue(byName.isPresent());
+            assertEquals(parkingModeratorReal.getParking().getId(), byName.get().getId());
+        }
     }
 
     private static ParkingDTO getParkingDTO() {
@@ -92,6 +96,7 @@ public class CreateParkingTest {
 
         if(parkingModerator.isPresent()){
             ParkingDTO parkingDTO = new ParkingDTO();
+            parkingDTO.setName("test");
 
             ParkingModerator parkingModeratorReal = (ParkingModerator) parkingModerator.get();
             mockMvc.perform(post("/api/parkings")
@@ -99,6 +104,11 @@ public class CreateParkingTest {
                             .content(asJsonString(parkingDTO))
                             .contentType(MediaType.APPLICATION_JSON)).andDo(print())
                     .andExpect(status().isMethodNotAllowed());
+
+            Optional<Parking> byName = parkingRepository.findByName(getParkingDTO().getName());
+
+            assertFalse(byName.isPresent());
+            assertNotEquals(parkingModeratorReal.getParking().getName(), parkingDTO.getName());
         }
     }
 }

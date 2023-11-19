@@ -1,42 +1,30 @@
 package net.parkvision.parkvisionbackend.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
-import net.parkvision.parkvisionbackend.dto.ParkingSpotCoordinatesDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
-import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
-import net.parkvision.parkvisionbackend.model.Point;
-import net.parkvision.parkvisionbackend.service.DroneService;
 import net.parkvision.parkvisionbackend.service.ParkingService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
-import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
-//import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -57,11 +45,9 @@ public class ParkingSpotControllerTest {
     @MockBean
     private ParkingService parkingService;
 
-    @MockBean
-    private DroneService droneService;
 
     @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
+    @WithMockUser(username = "testUser")
     public void getAllParkingSpots_ReturnsAllParkingSpots() throws Exception {
         // Mock data
         ParkingSpot parkingSpot = new ParkingSpot();
@@ -70,7 +56,7 @@ public class ParkingSpotControllerTest {
         parkingSpot.setPoints(new ArrayList<>());
         List<ParkingSpot> parkingSpotList = List.of(parkingSpot);
 
-        when(parkingSpotService.getAllParkingSpots()).thenReturn(parkingSpotList);
+        when(parkingSpotService.getAllParkingSpotsWithPoints()).thenReturn(parkingSpotList);
 
         mockMvc.perform(get("/api/parkingspots")
                         .contentType(MediaType.APPLICATION_JSON)).andDo(print())
@@ -95,7 +81,7 @@ public class ParkingSpotControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
+    @WithMockUser(username = "testUser")
     public void createParkingSpot_CreatesNewParkingSpotFailed() throws Exception {
         ParkingSpotDTO parkingSpotDTO = new ParkingSpotDTO();
         parkingSpotDTO.setActive(false);
@@ -110,7 +96,7 @@ public class ParkingSpotControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
+    @WithMockUser(username = "testUser")
     public void updateParkingSpot_UpdateParkingSpotFailed() throws Exception {
         ParkingSpotDTO parkingSpotDTO = new ParkingSpotDTO();
         parkingSpotDTO.setActive(false);
@@ -142,7 +128,7 @@ public class ParkingSpotControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testUser", roles = {"USER"})
+    @WithMockUser(username = "testUser")
     public void getSpotsByParkingId_ReturnsParkingSpots() throws Exception {
         Long parkingId = 1L;
         Parking parking = new Parking();
@@ -154,7 +140,7 @@ public class ParkingSpotControllerTest {
 
 
         when(parkingService.getParkingById(parkingId)).thenReturn(Optional.of(parking));
-        when(parkingSpotService.getParkingSpots(parking)).thenReturn(Collections.singletonList(parkingSpot));
+        when(parkingSpotService.getParkingSpotsWithPoints(parking)).thenReturn(Collections.singletonList(parkingSpot));
 
         mockMvc.perform(get("/api/parkingspots/parking/{id}", parkingId).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
