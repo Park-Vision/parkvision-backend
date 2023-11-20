@@ -21,12 +21,13 @@ public class DataSeeder {
     private final ClientRepository _clientRepository;
     private final CarRepository _carRepository;
     private final ReservationRepository _reservationRepository;
+    private final DroneMissionRepository _droneMissionRepository;
 
 
     public DataSeeder(DroneRepository _droneRepository, ParkingRepository _parkingRepository,
                       ParkingSpotRepository parkingSpotRepository,
                       ParkingModeratorRepository parkingModeratorRepository, PointRepository pointRepository,
-                      ClientRepository clientRepository, CarRepository carRepository, ReservationRepository reservationRepository) {
+                      ClientRepository clientRepository, CarRepository carRepository, ReservationRepository reservationRepository, DroneMissionRepository droneMissionRepository) {
         this._droneRepository = _droneRepository;
         this._parkingRepository = _parkingRepository;
         _parkingSpotRepository = parkingSpotRepository;
@@ -35,6 +36,7 @@ public class DataSeeder {
         _clientRepository = clientRepository;
         _carRepository = carRepository;
         _reservationRepository = reservationRepository;
+        _droneMissionRepository = droneMissionRepository;
     }
 
     public void seedData() {
@@ -102,12 +104,12 @@ public class DataSeeder {
 
 
         long droneCount = _droneRepository.count();
+        Drone drone1 = new Drone();
 
         if (droneCount == 0) {
 
             System.out.println("seedDroneData()");
 
-            Drone drone1 = new Drone();
             drone1.setName("DJI Mavic Mini");
             drone1.setModel("Mavic Mini");
             drone1.setSerialNumber("123456789");
@@ -126,6 +128,20 @@ public class DataSeeder {
             System.out.println("Data already exists.");
         }
 
+        long missionCount = _droneMissionRepository.count();
+
+        if (missionCount == 0){
+            System.out.println("seedMissionData()");
+            DroneMission droneMission1 = new DroneMission();
+            droneMission1.setMissionStartDate(OffsetDateTime.now());
+            droneMission1.setMissionEndDate(OffsetDateTime.now().plusHours(1));
+            droneMission1.setStatus("SUCCESS");
+            droneMission1.setMissionSpotResultList(null);
+            droneMission1.setParking(parking1);
+            droneMission1.setDrone(drone1);
+            _droneMissionRepository.save(droneMission1);
+        }
+
 
         long parkingModeratorCount = _parkingModeratorRepository.count();
 
@@ -138,7 +154,7 @@ public class DataSeeder {
             parkingModerator1.setLastname("Nowak");
             parkingModerator1.setEmail("Pmod@pv.pl");
             parkingModerator1.setPassword(new BCryptPasswordEncoder().encode("Pmod123!"));
-//            parkingModerator1.setParking(_parkingRepository.getReferenceById(1L));
+            parkingModerator1.setParking(_parkingRepository.getReferenceById(1L));
             parkingModerator1.setRole(Role.PARKING_MANAGER);
             _parkingModeratorRepository.save(parkingModerator1);
 
