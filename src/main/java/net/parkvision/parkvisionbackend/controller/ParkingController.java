@@ -118,24 +118,29 @@ public class ParkingController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ParkingDTO> createParking(@RequestBody ParkingDTO parkingDTO) {
-        User user = RequestContext.getUserFromRequest();
-        if(user == null ){
-            return ResponseEntity.status(401).build();
-        }
-        Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
-        User parkingModerator = _userService.getUserById(user.getId());
-        if (parkingModerator.getRole().equals(Role.PARKING_MANAGER)) {
-            ParkingModerator realParkingModerator = (ParkingModerator) parkingModerator;
-            if(realParkingModerator.getParking() != null){
-                return ResponseEntity.status(405).build();
+        try {
+            User user = RequestContext.getUserFromRequest();
+            if(user == null ){
+                return ResponseEntity.status(401).build();
             }
-            realParkingModerator.setParking(createdParking);
-            _userService.updateUser(realParkingModerator);
-        }
-        else{
+            Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
+            User parkingModerator = _userService.getUserById(user.getId());
+            if (parkingModerator.getRole().equals(Role.PARKING_MANAGER)) {
+                ParkingModerator realParkingModerator = (ParkingModerator) parkingModerator;
+                if(realParkingModerator.getParking() != null){
+                    return ResponseEntity.status(405).build();
+                }
+                realParkingModerator.setParking(createdParking);
+                _userService.updateUser(realParkingModerator);
+            }
+            else{
+                return ResponseEntity.status(401).build();
+            }
+            return ResponseEntity.ok(convertToDTO(createdParking));
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(401).build();
         }
-        return ResponseEntity.ok(convertToDTO(createdParking));
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")

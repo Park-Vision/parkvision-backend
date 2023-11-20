@@ -36,4 +36,5 @@ spring:
 park-vision:
   hour-rule: 2
   password-reset-hour-rule: 1
+  domain-ip: http://localhost:3000
 

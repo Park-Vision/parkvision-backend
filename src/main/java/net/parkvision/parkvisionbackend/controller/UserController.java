@@ -10,6 +10,7 @@ import net.parkvision.parkvisionbackend.service.EmailSenderService;
 import net.parkvision.parkvisionbackend.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,9 @@ public class UserController {
     private final UserService _userService;
     private final ModelMapper modelMapper;
     private final EmailSenderService _emailSenderService;
+
+    @Value("${park-vision.domain-ip}")
+    private String domainIp;
 
     @Autowired
     public UserController(UserService userService,
@@ -89,7 +93,7 @@ public class UserController {
                     user.getLastname(),
                     user.getEmail(),
                     "ParkVision password reset",
-                    "Here is the link to reset your password: http://localhost:3000/reset-password?token="
+                    "Here is the link to reset your password: " + domainIp + "/reset-password?token="
                             + user.getPasswordResetToken() + "&timestamp=" + timestamp
                     );
             return ResponseEntity.ok().build();

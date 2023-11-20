@@ -94,7 +94,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Scheduled(cron = "0 0 * * *") // every day at midnight
+    @Scheduled(cron = "0 0 * * * *") // every day at midnight
     public void clearPasswordResetToken() {
         getAllUsers().forEach(user -> {
             if(user.getPasswordResetToken() != null) {
