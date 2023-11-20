@@ -71,6 +71,9 @@ public class ReservationService {
         if (!isWithinParkingHours(startDate, endDate, parking)) {
             throw new IllegalArgumentException("Rezerwacja nie mieści się w godzinach otwarcia parkingu.");
         }
+        if (!checkTime(startDate, endDate)) {
+            throw new IllegalArgumentException("Rezerwacja niewlasciwa czasowo.");
+        }
 
         reservation.setStartDate(startDate);
         reservation.setEndDate(endDate);
@@ -78,6 +81,11 @@ public class ReservationService {
         Reservation createdReservation = _reservationRepository.save(reservation);
         createdReservation.getParkingSpot().setParking(parking);
         return createdReservation;
+    }
+
+    private boolean checkTime(OffsetDateTime start, OffsetDateTime end) {
+        return start.toLocalTime().isAfter(OffsetDateTime.now().withOffsetSameInstant(start.getOffset()).toLocalTime())
+                && start.toLocalTime().isBefore(end.toLocalTime());
     }
 
     private boolean isWithinParkingHours(OffsetDateTime start, OffsetDateTime end, Parking parking) {
