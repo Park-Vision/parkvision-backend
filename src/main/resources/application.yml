@@ -33,3 +33,4 @@ stripe:
     secret: sk_test_51O7dhAIrZoSsqF8F3LIcn6BlsxTxFk4n9PftCY9WFwuULCEtnGja8oPTI8YwT0fGSY9mu82hLlqJMEdyqOxsXroK002KIRuft5
 park-vision:
   hour-rule: 2
+  password-reset-hour-rule: 1

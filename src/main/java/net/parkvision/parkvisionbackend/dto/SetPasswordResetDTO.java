@@ -6,4 +6,5 @@ import lombok.Data;
 public class SetPasswordResetDTO {
     private String token;
     private String password;
+    private Long timestamp;
 }

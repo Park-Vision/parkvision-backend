@@ -35,4 +35,5 @@ spring:
           starttls.enable: true
 park-vision:
   hour-rule: 2
+  password-reset-hour-rule: 1
 

@@ -82,15 +82,15 @@ public class UserController {
     ) {
         try {
             User user = _userService.getUserByEmail(passwordResetDTO.getEmail());
-            // generate a special password reset token and set it to user
-            _userService.generatePasswordResetToken(user);
-            // send email to user with the token
+            Long timestamp = System.currentTimeMillis();
+            _userService.generatePasswordResetToken(user, timestamp);
             _emailSenderService.sendHtmlEmailPasswordReset(
                     user.getFirstname(),
                     user.getLastname(),
                     user.getEmail(),
                     "ParkVision password reset",
-                    "Here is the link to reset your password: http://localhost:3000/reset-password/" + user.getPasswordResetToken()
+                    "Here is the link to reset your password: http://localhost:3000/reset-password?token="
+                            + user.getPasswordResetToken() + "&timestamp=" + timestamp
                     );
             return ResponseEntity.ok().build();
         }
@@ -105,10 +105,11 @@ public class UserController {
     ) {
         try {
             User user = _userService.getUserByResetToken(setPasswordResetDTO.getToken());
+
             if(user == null) {
                 return ResponseEntity.ok().build();
             }
-            _userService.resetPassword(user, setPasswordResetDTO.getPassword());
+            _userService.resetPassword(user, setPasswordResetDTO);
         }
         catch (Exception e) {
             return ResponseEntity.ok().build();
