@@ -227,11 +227,6 @@ public class ParkingSpotController {
         return parkingSpotCoordinatesDTO;
     }
 
-    //i have parkingspot id and startdate and endtime also a reservation id
-    //i need to check if the parkingspot is free in that time filtering out my reservation
-    // wez przyszłe rezerwacje dotyczace miejsca parkingowego, nie bierz pod uwage swojej rezerwacji, sprawdz czy jest wolne
-
-
 
     @GetMapping("{id}/free-time/{reservationId}")
     public ResponseEntity<Boolean> checkIfParkingSpotIsFree(@PathVariable Long id,

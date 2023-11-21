@@ -179,7 +179,11 @@ public class ParkingSpotService {
     }
 
     public Boolean checkIfParkingSpotIsFree(ParkingSpot parkingSpot, OffsetDateTime startDate, OffsetDateTime endDate, Long reservationId) {
-        List<Reservation> reservations = _reservationService.getReservationsByParkingSpotId(parkingSpot.getId());
+        List<Reservation> reservations = _reservationService.getAllReservationsByParkingSpot(parkingSpot.getId());
+        Reservation tempReservation = new Reservation();
+        tempReservation.setStartDate(startDate);
+        tempReservation.setEndDate(endDate);
+        tempReservation.setParkingSpot(parkingSpot);
         if (reservations.isEmpty()) {
             return true;
         }
@@ -187,16 +191,7 @@ public class ParkingSpotService {
             if (reservation.getId().equals(reservationId)) {
                 continue;
             }
-            if (reservation.getStartDate().isBefore(startDate) && reservation.getEndDate().isAfter(startDate)) {
-                return false;
-            }
-            if (reservation.getStartDate().isBefore(endDate) && reservation.getEndDate().isAfter(endDate)) {
-                return false;
-            }
-            if (reservation.getStartDate().isAfter(startDate) && reservation.getEndDate().isBefore(endDate)) {
-                return false;
-            }
-            if (reservation.getStartDate().isEqual(startDate) || reservation.getEndDate().isEqual(endDate)) {
+            if(_reservationService.isDateRangeOverlap(reservation, tempReservation)){
                 return false;
             }
         }

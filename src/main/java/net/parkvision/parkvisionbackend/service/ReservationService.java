@@ -110,7 +110,7 @@ public class ReservationService {
         return true;
     }
 
-    private boolean isDateRangeOverlap(Reservation existingReservation, Reservation newReservation) {
+    public boolean isDateRangeOverlap(Reservation existingReservation, Reservation newReservation) {
 
         return newReservation.getStartDate().isBefore(existingReservation.getEndDate())
                 && newReservation.getEndDate().isAfter(existingReservation.getStartDate());
@@ -258,9 +258,5 @@ public class ReservationService {
                 .filter(reservation -> reservation.getStartDate().isAfter(OffsetDateTime.now()))
                 .sorted(Comparator.comparing(Reservation::getEndDate))
                 .toList();
-    }
-
-    public List<Reservation> getReservationsByParkingSpotId(Long id) {
-        return _reservationRepository.findByParkingSpotId(id);
     }
 }
