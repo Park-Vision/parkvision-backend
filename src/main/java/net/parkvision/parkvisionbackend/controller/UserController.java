@@ -101,10 +101,10 @@ public class UserController {
                     domainIp + "/reset-password?token="
                             + user.getPasswordResetToken() + "&timestamp=" + timestamp
                     );
-            return ResponseEntity.ok().build();
+            return ResponseEntity.accepted().build();
         }
         catch (Exception e) {
-            return ResponseEntity.ok().build();
+            return ResponseEntity.accepted().build();
         }
     }
 
@@ -121,9 +121,9 @@ public class UserController {
             _userService.resetPassword(user, setPasswordResetDTO);
         }
         catch (Exception e) {
-            return ResponseEntity.ok().build();
+            return ResponseEntity.accepted().build();
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.accepted().build();
     }
 
 

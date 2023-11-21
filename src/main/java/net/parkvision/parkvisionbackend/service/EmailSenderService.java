@@ -130,7 +130,7 @@ public class EmailSenderService {
         Context context = new Context();
         context.setVariable("title", "Password reset link");
         context.setVariable("description", description);
-        context.setVariable("body", link);
+        context.setVariable("body", "<b><a href=" + link+ ">Reset password</a></b>");
         context.setVariable("name", firstName + " " + lastName);
 
         sendContextToUser(to, topic, context);
