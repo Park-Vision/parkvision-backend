@@ -74,7 +74,7 @@ public class DroneController {
                         String json = objectMapper.writeValueAsString(map);
                         System.out.println(json);
                         //kafkaTemplate.send("drones-info", String.valueOf(id), json);
-                        kafkaTemplate.send("drone-" + id, command);
+                        kafkaTemplate.send("drone-" + id, json);
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                     }

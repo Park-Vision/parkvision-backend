@@ -37,7 +37,7 @@ public class KafkaListeners {
     @KafkaListener(topics = "drones-info", groupId = "parkVision")
     public void infoFromDrones(String message, @Header(KafkaHeaders.RECEIVED_KEY) Integer droneId) {
         Optional<Drone> drone = droneService.getDroneById(Long.valueOf(droneId));
-        System.out.println("Received Message from Drone " + droneId + ": " + message);
+        // System.out.println("Received Message from Drone " + droneId + ": " + message);
 
         drone.ifPresentOrElse(
             value -> template.convertAndSend("/topic/drones/" + droneId, message),
