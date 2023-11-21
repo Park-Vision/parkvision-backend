@@ -1,8 +1,10 @@
 package net.parkvision.parkvisionbackend.service;
 
 import lombok.RequiredArgsConstructor;
+import net.parkvision.parkvisionbackend.model.Client;
 import net.parkvision.parkvisionbackend.model.Role;
 import net.parkvision.parkvisionbackend.model.User;
+import net.parkvision.parkvisionbackend.repository.ClientRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,12 +14,22 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    private final ClientRepository clientRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public Client createClient(String email, String firstName, String lastName, String password) {
+        Client client = new Client();
+        client.setFirstname(firstName);
+        client.setEmail(email);
+        client.setLastname(lastName);
+        client.setPassword(passwordEncoder.encode(password));
+        return clientRepository.save(client);
     }
 
     public User createUser(String email, String firstName, String lastName, String password) {
