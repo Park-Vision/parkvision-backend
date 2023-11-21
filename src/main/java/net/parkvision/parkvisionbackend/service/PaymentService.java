@@ -7,6 +7,8 @@ import net.parkvision.parkvisionbackend.model.Payment;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.PaymentRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -53,18 +55,20 @@ public class PaymentService {
 
         Map<String, Object> params = new HashMap<>();
         params.put("card", card);
+        payment.setUser(user);
 
         try {
             Token token = Token.create(params);
             if (token != null && token.getId() != null) {
                 payment.setToken(token.getId());
-                payment.setUser(user);
             }
-            _paymentRepository.save(payment);
-            return payment;
         } catch (StripeException exception) {
-            throw new RuntimeException(exception.getMessage());
+            payment.setToken(null);
+            Logger logger = LoggerFactory.getLogger(this.getClass());
+            logger.error("An error occurred while creating a Stripe token", exception);
         }
+        _paymentRepository.save(payment);
+        return payment;
     }
 
     public Payment updatePayment(Payment payment) {
