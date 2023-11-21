@@ -84,7 +84,7 @@ public class ReservationService {
     }
 
     private boolean checkTime(OffsetDateTime start, OffsetDateTime end) {
-        return start.toLocalTime().isAfter(OffsetDateTime.now().withOffsetSameInstant(start.getOffset()).toLocalTime())
+        return start.toLocalTime().isAfter(OffsetDateTime.now().withOffsetSameInstant(start.getOffset()).minusMinutes(15).toLocalTime())
                 && start.toLocalTime().isBefore(end.toLocalTime());
     }
 
