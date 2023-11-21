@@ -24,7 +24,7 @@ public class AuthenticationService {
     public AuthenticationResponse register(RegisterRequest registerRequest) {
 
         return buildAuthenticationResponse(
-                userService.createUser(
+                userService.createClient(
                         registerRequest.getEmail(),
                         registerRequest.getFirstName(),
                         registerRequest.getLastName(),
