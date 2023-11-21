@@ -125,10 +125,12 @@ public class EmailSenderService {
             String lastName,
             String to,
             String topic,
-            String description) throws Exception {
+            String description,
+            String link) throws Exception {
         Context context = new Context();
         context.setVariable("title", "Password reset link");
         context.setVariable("description", description);
+        context.setVariable("body", link);
         context.setVariable("name", firstName + " " + lastName);
 
         sendContextToUser(to, topic, context);

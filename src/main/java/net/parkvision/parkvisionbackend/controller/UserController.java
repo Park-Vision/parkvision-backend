@@ -28,6 +28,9 @@ public class UserController {
     @Value("${park-vision.domain-ip}")
     private String domainIp;
 
+    @Value("${park-vision.password-reset-hour-rule}")
+    private int passwordResetHourRule;
+
     @Autowired
     public UserController(UserService userService,
                           ModelMapper modelMapper,
@@ -93,7 +96,9 @@ public class UserController {
                     user.getLastname(),
                     user.getEmail(),
                     "ParkVision password reset",
-                    "Here is the link to reset your password: " + domainIp + "/reset-password?token="
+                    "Here is the link to reset your password. "
+                            + "This link will expire in " +passwordResetHourRule + " hour.",
+                    domainIp + "/reset-password?token="
                             + user.getPasswordResetToken() + "&timestamp=" + timestamp
                     );
             return ResponseEntity.ok().build();
