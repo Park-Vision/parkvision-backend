@@ -259,4 +259,8 @@ public class ReservationService {
                 .sorted(Comparator.comparing(Reservation::getEndDate))
                 .toList();
     }
+
+    public List<Reservation> getReservationsByParkingSpotId(Long id) {
+        return _reservationRepository.findByParkingSpotId(id);
+    }
 }

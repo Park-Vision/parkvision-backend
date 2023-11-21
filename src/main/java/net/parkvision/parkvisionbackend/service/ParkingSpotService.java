@@ -177,4 +177,29 @@ public class ParkingSpotService {
         return new ArrayList<>(_parkingSpotRepository.findByParkingId(drone.getParking().getId()).stream().filter(parkingSpot ->
                 !parkingSpot.getPoints().isEmpty() && parkingSpot.isActive()).toList());
     }
+
+    public Boolean checkIfParkingSpotIsFree(ParkingSpot parkingSpot, OffsetDateTime startDate, OffsetDateTime endDate, Long reservationId) {
+        List<Reservation> reservations = _reservationService.getReservationsByParkingSpotId(parkingSpot.getId());
+        if (reservations.isEmpty()) {
+            return true;
+        }
+        for (Reservation reservation : reservations) {
+            if (reservation.getId().equals(reservationId)) {
+                continue;
+            }
+            if (reservation.getStartDate().isBefore(startDate) && reservation.getEndDate().isAfter(startDate)) {
+                return false;
+            }
+            if (reservation.getStartDate().isBefore(endDate) && reservation.getEndDate().isAfter(endDate)) {
+                return false;
+            }
+            if (reservation.getStartDate().isAfter(startDate) && reservation.getEndDate().isBefore(endDate)) {
+                return false;
+            }
+            if (reservation.getStartDate().isEqual(startDate) || reservation.getEndDate().isEqual(endDate)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -146,9 +146,6 @@ public class ReservationController {
 
         if (reservation.isPresent() && user.getRole().equals(Role.PARKING_MANAGER)) {
             ParkingModerator parkingManager = (ParkingModerator) user;
-
-
-
             if (!reservation.get().getParkingSpot().getParking().getId().equals(parkingManager.getParking().getId())) {
                 return ResponseEntity.badRequest().body("Parking manager does not have permission to delete this " +
                         "reservation.");
@@ -161,14 +158,18 @@ public class ReservationController {
             if (reservation.get().getUser().getId().equals(user.getId())) {
                 _reservationService.deleteReservation(id);
             } else {
-                _reservationService.cancelReservation(id);
+                if (reservation.get().getStartDate().isBefore(now.plusHours(hourRule))) {
+                    _reservationService.deleteReservation(id);
+                } else {
+                    _reservationService.cancelReservation(id);
+                }
                 try {
                     emailSenderService.sendHtmlEmailReservation(
                             reservation.get().getUser().getFirstname(),
                             reservation.get().getUser().getLastname(),
                             reservation.get().getUser().getEmail(),
                             "Reservation cancellation confirmation",
-                            "Here is the confirmation of the reservation cancellation you made in our system. ",
+                            "Parking Manager canceled your reservation. ",
                             reservation.get().getParkingSpot().getParking(),
                             reservation.get(), "ParkVision reservation cancellation confirmation");
                 } catch (Exception e) {
@@ -176,7 +177,8 @@ public class ReservationController {
                 }
             }
             return ResponseEntity.ok().build();
-        } else if (reservation.isPresent() && user.getRole().equals(Role.USER)) {
+        }
+        else if (reservation.isPresent() && user.getRole().equals(Role.USER)) {
             if (!reservation.get().getUser().getId().equals(user.getId())) {
                 return ResponseEntity.badRequest().body("User does not have permission to cancel this reservation.");
             }
