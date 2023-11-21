@@ -29,6 +29,7 @@ public class UserService {
         client.setEmail(email);
         client.setLastname(lastName);
         client.setPassword(passwordEncoder.encode(password));
+        client.setRole(Role.USER);
         return clientRepository.save(client);
     }
 
