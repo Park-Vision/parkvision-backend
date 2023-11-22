@@ -9,6 +9,7 @@ import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.util.*;
@@ -83,20 +84,39 @@ public class ReservationService {
         return createdReservation;
     }
 
-    private boolean checkTime(OffsetDateTime start, OffsetDateTime end) {
-        return start.toLocalTime().isAfter(OffsetDateTime.now().withOffsetSameInstant(start.getOffset()).minusMinutes(15).toLocalTime())
-                && start.toLocalTime().isBefore(end.toLocalTime());
+    public boolean checkTime(OffsetDateTime start, OffsetDateTime end) {
+        OffsetDateTime currentDateTime = OffsetDateTime.now();
+        OffsetDateTime adjustedStart = currentDateTime.withOffsetSameInstant(start.getOffset()).minusMinutes(15);
+
+        LocalTime startLocalTime = start.toLocalTime();
+        LocalTime endLocalTime = end.toLocalTime();
+
+        boolean isAfterAdjustedStart = start.isAfter(adjustedStart);
+        boolean isBeforeEnd = startLocalTime.isBefore(endLocalTime);
+
+        return isAfterAdjustedStart && isBeforeEnd;
     }
 
-    private boolean isWithinParkingHours(OffsetDateTime start, OffsetDateTime end, Parking parking) {
+    public boolean isWithinParkingHours(OffsetDateTime start, OffsetDateTime end, Parking parking) {
         OffsetTime parkingStart = parking.getStartTime();
         OffsetTime parkingEnd = parking.getEndTime();
 
-        return start.toLocalTime().isAfter(parkingStart.toLocalTime())
-                && start.toLocalTime().isBefore(parkingEnd.toLocalTime())
-                && end.toLocalTime().isAfter(parkingStart.toLocalTime())
-                && end.toLocalTime().isBefore(parkingEnd.toLocalTime());
+        LocalTime startLocalTime = start.toLocalTime();
+        LocalTime endLocalTime = end.toLocalTime();
+        LocalTime parkingStartLocalTime = parkingStart.toLocalTime();
+        LocalTime parkingEndLocalTime = parkingEnd.toLocalTime();
+
+        boolean isStartAfterParkingStart = startLocalTime.isAfter(parkingStartLocalTime) || startLocalTime.equals(parkingStartLocalTime);
+        boolean isStartBeforeParkingEnd = startLocalTime.isBefore(parkingEndLocalTime);
+        boolean isEndAfterParkingStart = endLocalTime.isAfter(parkingStartLocalTime);
+        boolean isEndBeforeParkingEnd = endLocalTime.isBefore(parkingEndLocalTime) || endLocalTime.equals(parkingEndLocalTime);
+
+        return isStartAfterParkingStart
+                && isStartBeforeParkingEnd
+                && isEndAfterParkingStart
+                && isEndBeforeParkingEnd;
     }
+
 
 
     public boolean isParkingSpotFree(Reservation reservation) {

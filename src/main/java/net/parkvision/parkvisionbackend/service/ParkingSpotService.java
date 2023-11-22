@@ -191,7 +191,10 @@ public class ParkingSpotService {
             if (reservation.getId().equals(reservationId)) {
                 continue;
             }
-            if(_reservationService.isDateRangeOverlap(reservation, tempReservation)){
+            if (
+                    _reservationService.isDateRangeOverlap(reservation, tempReservation)
+                    || !_reservationService.isWithinParkingHours(tempReservation.getStartDate(), tempReservation.getEndDate(), parkingSpot.getParking())
+                    || !_reservationService.checkTime(tempReservation.getStartDate(), tempReservation.getEndDate())) {
                 return false;
             }
         }
