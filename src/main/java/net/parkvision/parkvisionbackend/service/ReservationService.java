@@ -9,14 +9,9 @@ import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.util.*;
-
-import static java.lang.Float.parseFloat;
 
 @Service
 public class ReservationService {
@@ -64,7 +59,7 @@ public class ReservationService {
         }
 
         if (!isParkingSpotFree(reservation)) {
-            throw new ReservationConflictException("Konflikt datowy z istniejącą rezerwacją.");
+            throw new ReservationConflictException("Conflict with existing reservation.");
         }
 
         ParkingSpot parkingSpot = _parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId());
@@ -73,6 +68,13 @@ public class ReservationService {
         OffsetDateTime startDate = reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone());
         OffsetDateTime endDate = reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone());
 
+        if (!isWithinParkingHours(startDate, endDate, parking)) {
+            throw new IllegalArgumentException("Reservation not included in Parking's available hours.");
+        }
+        if (!checkTime(startDate, endDate)) {
+            throw new IllegalArgumentException("Reservation invalid.");
+        }
+
         reservation.setStartDate(startDate);
         reservation.setEndDate(endDate);
 
@@ -80,6 +82,22 @@ public class ReservationService {
         createdReservation.getParkingSpot().setParking(parking);
         return createdReservation;
     }
+
+    private boolean checkTime(OffsetDateTime start, OffsetDateTime end) {
+        return start.toLocalTime().isAfter(OffsetDateTime.now().withOffsetSameInstant(start.getOffset()).minusMinutes(15).toLocalTime())
+                && start.toLocalTime().isBefore(end.toLocalTime());
+    }
+
+    private boolean isWithinParkingHours(OffsetDateTime start, OffsetDateTime end, Parking parking) {
+        OffsetTime parkingStart = parking.getStartTime();
+        OffsetTime parkingEnd = parking.getEndTime();
+
+        return start.toLocalTime().isAfter(parkingStart.toLocalTime())
+                && start.toLocalTime().isBefore(parkingEnd.toLocalTime())
+                && end.toLocalTime().isAfter(parkingStart.toLocalTime())
+                && end.toLocalTime().isBefore(parkingEnd.toLocalTime());
+    }
+
 
     public boolean isParkingSpotFree(Reservation reservation) {
         List<Reservation> existingReservations =
@@ -171,7 +189,8 @@ public class ReservationService {
                 parkingSpot.getParking().getStartTime().getOffset()
         );
 
-        OffsetDateTime earliestAvailableTime = OffsetDateTime.of(date.toLocalDateTime(), parkingSpot.getParking().getTimeZone());
+        OffsetDateTime earliestAvailableTime = OffsetDateTime.of(date.toLocalDateTime(),
+                parkingSpot.getParking().getTimeZone());
         if (earliestAvailableTime.isBefore(parkingStartTime)) {
             earliestAvailableTime = parkingStartTime;
         }
