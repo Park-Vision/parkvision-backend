@@ -59,7 +59,7 @@ public class ReservationService {
         }
 
         if (!isParkingSpotFree(reservation)) {
-            throw new ReservationConflictException("Konflikt datowy z istniejącą rezerwacją.");
+            throw new ReservationConflictException("Conflict with existing reservation.");
         }
 
         ParkingSpot parkingSpot = _parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId());
@@ -69,10 +69,10 @@ public class ReservationService {
         OffsetDateTime endDate = reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone());
 
         if (!isWithinParkingHours(startDate, endDate, parking)) {
-            throw new IllegalArgumentException("Rezerwacja nie mieści się w godzinach otwarcia parkingu.");
+            throw new IllegalArgumentException("Reservation not included in Parking's available hours.");
         }
         if (!checkTime(startDate, endDate)) {
-            throw new IllegalArgumentException("Rezerwacja niewlasciwa czasowo.");
+            throw new IllegalArgumentException("Reservation invalid.");
         }
 
         reservation.setStartDate(startDate);
