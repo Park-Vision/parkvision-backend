@@ -15,6 +15,6 @@ public class Point {
     private Long id;
     private double latitude;
     private double longitude;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ParkingSpot parkingSpot;
 }
