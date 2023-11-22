@@ -123,20 +123,22 @@ public class ParkingController {
             if(user == null ){
                 return ResponseEntity.status(401).build();
             }
-            Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
             User parkingModerator = _userService.getUserById(user.getId());
-            if (parkingModerator.getRole().equals(Role.PARKING_MANAGER)) {
-                ParkingModerator realParkingModerator = (ParkingModerator) parkingModerator;
-                if(realParkingModerator.getParking() != null){
-                    return ResponseEntity.status(405).build();
-                }
-                realParkingModerator.setParking(createdParking);
-                _userService.updateUser(realParkingModerator);
-            }
-            else{
+            if (!parkingModerator.getRole().equals(Role.PARKING_MANAGER)) {
                 return ResponseEntity.status(401).build();
             }
+
+            ParkingModerator realParkingModerator = (ParkingModerator) parkingModerator;
+            if(realParkingModerator.getParking() != null){
+                return ResponseEntity.status(405).build();
+            }
+
+            Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
+            realParkingModerator.setParking(createdParking);
+            _userService.updateUser(realParkingModerator);
+
             return ResponseEntity.ok(convertToDTO(createdParking));
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(401).build();
