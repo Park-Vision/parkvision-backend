@@ -19,12 +19,10 @@ public class ParkingSpot {
     private Long id;
     private String spotNumber;
     private boolean active;
-
     @OneToMany(cascade = CascadeType.ALL)
     private List<Point> points;
-
     @OneToMany
-    private List<Reservation> reservations; // One-to-many relationship
+    private List<Reservation> reservations;
     @ManyToOne
-    private Parking parking; // Many-to-one relationship
+    private Parking parking;
 }

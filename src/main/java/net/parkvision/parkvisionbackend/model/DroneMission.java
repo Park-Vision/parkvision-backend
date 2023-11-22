@@ -28,7 +28,7 @@ public class DroneMission {
     @OneToMany(cascade = CascadeType.ALL)
     private List<MissionSpotResult> missionSpotResultList;
     @ManyToOne
-    private Parking parking; // Many-to-one relationship
+    private Parking parking;
     @ManyToOne
-    private Drone drone; // Many-to-one relationship
+    private Drone drone;
 }

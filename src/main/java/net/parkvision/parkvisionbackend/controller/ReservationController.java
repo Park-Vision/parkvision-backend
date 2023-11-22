@@ -145,7 +145,7 @@ public class ReservationController {
 
 
         if (reservation.isPresent() && user.getRole().equals(Role.PARKING_MANAGER)) {
-            ParkingModerator parkingManager = (ParkingModerator) user;
+            ParkingManager parkingManager = (ParkingManager) user;
 
 
 
@@ -242,8 +242,8 @@ public class ReservationController {
         Optional<Parking> parking = _parkingService.getParkingById(id);
         if (user != null && user.getRole().equals(Role.PARKING_MANAGER)) {
             if (parking.isPresent()){
-                ParkingModerator parkingModerator = (ParkingModerator) user;
-                if((parkingModerator.getParking().getId().equals(parking.get().getId()))){
+                ParkingManager parkingManager = (ParkingManager) user;
+                if((parkingManager.getParking().getId().equals(parking.get().getId()))){
                     List<ReservationDTO> reservations = _reservationService.getAllReservationsByParking(id).stream().map(
                             this::convertToDto
                     ).collect(Collectors.toList());

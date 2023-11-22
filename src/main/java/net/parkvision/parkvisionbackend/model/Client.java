@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 public class Client extends User {
     @OneToMany
-    private List<Car> cars; // One-to-many relationship
+    private List<Car> cars;
     @OneToMany
-    private List<Reservation> reservations; // One-to-many relationship
+    private List<Reservation> reservations;
 }

@@ -6,10 +6,9 @@ import net.parkvision.parkvisionbackend.config.MessageEncryptor;
 import net.parkvision.parkvisionbackend.dto.DroneDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotCoordinatesDTO;
-import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
 import net.parkvision.parkvisionbackend.kafka.KafkaTopicConfig;
 import net.parkvision.parkvisionbackend.model.Drone;
-import net.parkvision.parkvisionbackend.model.ParkingModerator;
+import net.parkvision.parkvisionbackend.model.ParkingManager;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.service.DroneService;
 import net.parkvision.parkvisionbackend.service.RequestContext;
@@ -51,10 +50,10 @@ public class DroneController {
     public ResponseEntity<DroneDTO> startDrone(@PathVariable Long id, @PathVariable String command) {
         User user = RequestContext.getUserFromRequest();
         Optional<Drone> drone = droneService.getDroneById(id);
-        ParkingModerator parkingModerator = (ParkingModerator) user;
+        ParkingManager parkingManager = (ParkingManager) user;
         if (drone.isPresent()) {
-            assert parkingModerator != null;
-            if (Objects.equals(parkingModerator.getParking().getId(), drone.get().getParking().getId())) {
+            assert parkingManager != null;
+            if (Objects.equals(parkingManager.getParking().getId(), drone.get().getParking().getId())) {
                 System.out.println("drone-" + id);
                 // PRODUCTION
                 //kafkaTemplate.send("drone-" + id, command);
@@ -108,8 +107,8 @@ public class DroneController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @GetMapping("/parking/{id}")
     public ResponseEntity<List<DroneDTO>> getAllDronesByParkingId(@PathVariable Long id) {
-        ParkingModerator parkingModerator = getParkingModeratorFromRequest();
-        if (!Objects.equals(parkingModerator.getParking().getId(), id)) {
+        ParkingManager parkingManager = getParkingManagerFromRequest();
+        if (!Objects.equals(parkingManager.getParking().getId(), id)) {
             return ResponseEntity.badRequest().build();
         }
         List<DroneDTO> drones = droneService.getAllDronesByParkingId(id).stream().map(
@@ -121,14 +120,14 @@ public class DroneController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<DroneDTO> getDroneById(@PathVariable Long id) {
-        ParkingModerator parkingModerator = getParkingModeratorFromRequest();
-        if (parkingModerator == null) {
+        ParkingManager parkingManager = getParkingManagerFromRequest();
+        if (parkingManager == null) {
             return ResponseEntity.badRequest().build();
         }
 
         Optional<Drone> drone = droneService.getDroneById(id);
         if (drone.isPresent()) {
-            if (!Objects.equals(parkingModerator.getParking().getId(), drone.get().getParking().getId())) {
+            if (!Objects.equals(parkingManager.getParking().getId(), drone.get().getParking().getId())) {
                 return ResponseEntity.badRequest().build();
             }
             return ResponseEntity.ok(convertToDTO(drone.get()));
@@ -140,8 +139,8 @@ public class DroneController {
     @PostMapping
     public ResponseEntity<DroneDTO> createDrone(@RequestBody DroneDTO droneDto) throws ExecutionException,
             InterruptedException {
-        ParkingModerator parkingModerator = getParkingModeratorFromRequest();
-        if (!Objects.equals(parkingModerator.getParking().getId(), droneDto.getParkingDTO().getId())) {
+        ParkingManager parkingManager = getParkingManagerFromRequest();
+        if (!Objects.equals(parkingManager.getParking().getId(), droneDto.getParkingDTO().getId())) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -170,13 +169,13 @@ public class DroneController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDrone(@PathVariable Long id) {
-        ParkingModerator parkingModerator = getParkingModeratorFromRequest();
-        if (parkingModerator == null) {
+        ParkingManager parkingManager = getParkingManagerFromRequest();
+        if (parkingManager == null) {
             return ResponseEntity.badRequest().build();
         }
 
         Optional<Drone> drone = droneService.getDroneById(id);
-        if (!Objects.equals(parkingModerator.getParking().getId(), drone.get().getParking().getId())) {
+        if (!Objects.equals(parkingManager.getParking().getId(), drone.get().getParking().getId())) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -185,10 +184,10 @@ public class DroneController {
         return ResponseEntity.noContent().build();
     }
 
-    private ParkingModerator getParkingModeratorFromRequest() {
+    private ParkingManager getParkingManagerFromRequest() {
         User user = RequestContext.getUserFromRequest();
-        if (user instanceof ParkingModerator) {
-            return (ParkingModerator) user;
+        if (user instanceof ParkingManager) {
+            return (ParkingManager) user;
         }
         return null;
     }

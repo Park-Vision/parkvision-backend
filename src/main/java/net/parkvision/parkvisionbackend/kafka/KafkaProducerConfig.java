@@ -23,8 +23,6 @@ public class KafkaProducerConfig {
     private String truststorePassword;
     @Value(value = "${spring.kafka.ssl.trust-store-location}")
     private String truststoreLocation;
-
-
     @Value(value = "${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 

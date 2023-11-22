@@ -58,7 +58,7 @@ public class ParkingController {
         List<ParkingDTO> filteredParking =
         parkings.stream()
                 .filter(parkingDTO ->
-                        parkingDTO.getId().equals(((ParkingModerator) user).getParking().getId())).toList();
+                        parkingDTO.getId().equals(((ParkingManager) user).getParking().getId())).toList();
         return ResponseEntity.ok(filteredParking);
     }
 
@@ -71,8 +71,8 @@ public class ParkingController {
         }
         else if (user.getRole().equals(Role.PARKING_MANAGER)) {
             if (parking.isPresent()){
-                ParkingModerator parkingModerator = (ParkingModerator) user;
-                if((parkingModerator.getParking().getId().equals(parking.get().getId()))){
+                ParkingManager parkingManager = (ParkingManager) user;
+                if((parkingManager.getParking().getId().equals(parking.get().getId()))){
                     return ResponseEntity.ok(convertToDTO(parking.get()));
                 }
                 else{
@@ -121,19 +121,19 @@ public class ParkingController {
             if(user == null ){
                 return ResponseEntity.status(401).build();
             }
-            User parkingModerator = _userService.getUserById(user.getId());
-            if (!parkingModerator.getRole().equals(Role.PARKING_MANAGER)) {
+            User parkingManager = _userService.getUserById(user.getId());
+            if (!parkingManager.getRole().equals(Role.PARKING_MANAGER)) {
                 return ResponseEntity.status(401).build();
             }
 
-            ParkingModerator realParkingModerator = (ParkingModerator) parkingModerator;
-            if(realParkingModerator.getParking() != null){
+            ParkingManager realParkingManager = (ParkingManager) parkingManager;
+            if(realParkingManager.getParking() != null){
                 return ResponseEntity.status(405).build();
             }
 
             Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
-            realParkingModerator.setParking(createdParking);
-            _userService.updateUser(realParkingModerator);
+            realParkingManager.setParking(createdParking);
+            _userService.updateUser(realParkingManager);
 
             return ResponseEntity.ok(convertToDTO(createdParking));
 
@@ -150,8 +150,8 @@ public class ParkingController {
         if(user == null ){
             return ResponseEntity.status(401).build();
         }
-        ParkingModerator parkingModerator = (ParkingModerator) user;
-        if(!parkingModerator.getParking().getId().equals(parkingDTO.getId())){
+        ParkingManager parkingManager = (ParkingManager) user;
+        if(!parkingManager.getParking().getId().equals(parkingDTO.getId())){
             return ResponseEntity.status(401).build();
         }
 

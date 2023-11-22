@@ -10,7 +10,7 @@ spring:
       key-store-password: maciek
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/compose-postgres
+    url: jdbc:postgresql://localhost:54311/compose-postgres
     username: compose-postgres
     password: compose-postgres
     driver-class-name: org.postgresql.Driver

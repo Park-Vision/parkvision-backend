@@ -4,7 +4,7 @@ import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.dto.PasswordResetDTO;
 import net.parkvision.parkvisionbackend.dto.SetPasswordResetDTO;
 import net.parkvision.parkvisionbackend.dto.UserDTO;
-import net.parkvision.parkvisionbackend.model.ParkingModerator;
+import net.parkvision.parkvisionbackend.model.ParkingManager;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
 import net.parkvision.parkvisionbackend.service.UserService;
@@ -44,8 +44,8 @@ public class UserController {
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
 
         // if user is an instance of ParkingManager then set parkingDTO
-        if (user instanceof ParkingModerator) {
-            userDTO.setParkingDTO(((ParkingModerator) user).getParking() == null ? null : modelMapper.map(((ParkingModerator) user).getParking(), ParkingDTO.class));
+        if (user instanceof ParkingManager) {
+            userDTO.setParkingDTO(((ParkingManager) user).getParking() == null ? null : modelMapper.map(((ParkingManager) user).getParking(), ParkingDTO.class));
         }
 
         return userDTO;

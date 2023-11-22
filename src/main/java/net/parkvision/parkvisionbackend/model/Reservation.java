@@ -9,7 +9,6 @@ import org.hibernate.annotations.TimeZoneStorage;
 import org.hibernate.annotations.TimeZoneStorageType;
 
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Data
@@ -27,7 +26,6 @@ public class Reservation {
     private OffsetDateTime endDate;
     private String registrationNumber;
     private double amount;
-
     @ManyToOne
     private User user;
     @ManyToOne

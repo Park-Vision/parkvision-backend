@@ -15,7 +15,7 @@ public class DataSeeder {
 
     private final ParkingSpotRepository _parkingSpotRepository;
 
-    private final ParkingModeratorRepository _parkingModeratorRepository;
+    private final ParkingManagerRepository _parkingManagerRepository;
 
     private final PointRepository _pointRepository;
     private final ClientRepository _clientRepository;
@@ -25,12 +25,12 @@ public class DataSeeder {
 
     public DataSeeder(DroneRepository _droneRepository, ParkingRepository _parkingRepository,
                       ParkingSpotRepository parkingSpotRepository,
-                      ParkingModeratorRepository parkingModeratorRepository, PointRepository pointRepository,
+                      ParkingManagerRepository parkingManagerRepository, PointRepository pointRepository,
                       ClientRepository clientRepository, CarRepository carRepository, ReservationRepository reservationRepository) {
         this._droneRepository = _droneRepository;
         this._parkingRepository = _parkingRepository;
         _parkingSpotRepository = parkingSpotRepository;
-        _parkingModeratorRepository = parkingModeratorRepository;
+        _parkingManagerRepository = parkingManagerRepository;
         _pointRepository = pointRepository;
         _clientRepository = clientRepository;
         _carRepository = carRepository;
@@ -127,46 +127,46 @@ public class DataSeeder {
         }
 
 
-        long parkingModeratorCount = _parkingModeratorRepository.count();
+        long parkingManagerCount = _parkingManagerRepository.count();
 
-        if (parkingModeratorCount == 0) {
-            System.out.println("SeedParkingModeratorData()");
+        if (parkingManagerCount == 0) {
+            System.out.println("SeedParkingManagerData()");
 
-            ParkingModerator parkingModerator1 = new ParkingModerator();
+            ParkingManager parkingManager1 = new ParkingManager();
 
-            parkingModerator1.setFirstname("Anna");
-            parkingModerator1.setLastname("Nowak");
-            parkingModerator1.setEmail("Pmod@pv.pl");
-            parkingModerator1.setPassword(new BCryptPasswordEncoder().encode("Pmod123!"));
-//            parkingModerator1.setParking(_parkingRepository.getReferenceById(1L));
-            parkingModerator1.setRole(Role.PARKING_MANAGER);
-            _parkingModeratorRepository.save(parkingModerator1);
+            parkingManager1.setFirstname("Anna");
+            parkingManager1.setLastname("Nowak");
+            parkingManager1.setEmail("Pmod@pv.pl");
+            parkingManager1.setPassword(new BCryptPasswordEncoder().encode("Pmod123!"));
+//            parkingManager1.setParking(_parkingRepository.getReferenceById(1L));
+            parkingManager1.setRole(Role.PARKING_MANAGER);
+            _parkingManagerRepository.save(parkingManager1);
 
-            System.out.println("Added: " + parkingModerator1.getEmail() + " " + "Pmod123");
+            System.out.println("Added: " + parkingManager1.getEmail() + " " + "Pmod123");
 
-            ParkingModerator parkingModerator2 = new ParkingModerator();
+            ParkingManager parkingManager2 = new ParkingManager();
 
-            parkingModerator2.setFirstname("Jan");
-            parkingModerator2.setLastname("Nowak");
-            parkingModerator2.setEmail("Pmod2@pv.pl");
-            parkingModerator2.setPassword(new BCryptPasswordEncoder().encode("Pmod123!"));
-            parkingModerator2.setParking(_parkingRepository.getReferenceById(1L));
-            parkingModerator2.setRole(Role.PARKING_MANAGER);
-            _parkingModeratorRepository.save(parkingModerator2);
+            parkingManager2.setFirstname("Jan");
+            parkingManager2.setLastname("Nowak");
+            parkingManager2.setEmail("Pmod2@pv.pl");
+            parkingManager2.setPassword(new BCryptPasswordEncoder().encode("Pmod123!"));
+            parkingManager2.setParking(_parkingRepository.getReferenceById(1L));
+            parkingManager2.setRole(Role.PARKING_MANAGER);
+            _parkingManagerRepository.save(parkingManager2);
 
-            System.out.println("Added: " + parkingModerator2.getEmail() + " " + "Pmod123!");
+            System.out.println("Added: " + parkingManager2.getEmail() + " " + "Pmod123!");
 
-            ParkingModerator parkingModerator3 = new ParkingModerator();
+            ParkingManager parkingManager3 = new ParkingManager();
 
-            parkingModerator3.setFirstname("Swagger");
-            parkingModerator3.setLastname("ParkingModerator");
-            parkingModerator3.setEmail("string");
-            parkingModerator3.setPassword(new BCryptPasswordEncoder().encode("string"));
-            parkingModerator3.setParking(_parkingRepository.getReferenceById(3L));
-            parkingModerator3.setRole(Role.PARKING_MANAGER);
-            _parkingModeratorRepository.save(parkingModerator3);
+            parkingManager3.setFirstname("Swagger");
+            parkingManager3.setLastname("ParkingManager");
+            parkingManager3.setEmail("string");
+            parkingManager3.setPassword(new BCryptPasswordEncoder().encode("string"));
+            parkingManager3.setParking(_parkingRepository.getReferenceById(3L));
+            parkingManager3.setRole(Role.PARKING_MANAGER);
+            _parkingManagerRepository.save(parkingManager3);
 
-            System.out.println("Added: " + parkingModerator3.getEmail() + " " + "Pmod123!");
+            System.out.println("Added: " + parkingManager3.getEmail() + " " + "Pmod123!");
             System.out.println("Data seeded.");
         } else {
             System.out.println("Data already exists.");
