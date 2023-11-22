@@ -65,7 +65,7 @@ public class PaymentService {
         } catch (StripeException exception) {
             payment.setToken(null);
             Logger logger = LoggerFactory.getLogger(this.getClass());
-            logger.error("An error occurred while creating a Stripe token", exception);
+            logger.error(exception.getMessage());
         }
         _paymentRepository.save(payment);
         return payment;
