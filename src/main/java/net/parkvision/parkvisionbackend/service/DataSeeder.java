@@ -160,8 +160,8 @@ public class DataSeeder {
 
             parkingModerator3.setFirstname("Swagger");
             parkingModerator3.setLastname("ParkingModerator");
-            parkingModerator3.setEmail("string");
-            parkingModerator3.setPassword(new BCryptPasswordEncoder().encode("string"));
+            parkingModerator3.setEmail("string@wp.pl");
+            parkingModerator3.setPassword(new BCryptPasswordEncoder().encode("String123!"));
             parkingModerator3.setParking(_parkingRepository.getReferenceById(3L));
             parkingModerator3.setRole(Role.PARKING_MANAGER);
             _parkingModeratorRepository.save(parkingModerator3);

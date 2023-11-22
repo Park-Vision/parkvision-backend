@@ -71,9 +71,9 @@ public class DroneController {
 
                         String json = objectMapper.writeValueAsString(map);
                         System.out.println(json);
-                        encrypt = MessageEncryptor.encryptMessage(json, drone.get().getDroneKey());
-                        System.out.println(encrypt);
-                        kafkaTemplate.send("drones-info", String.valueOf(id), encrypt);
+                        //encrypt = MessageEncryptor.encryptMessage(json, drone.get().getDroneKey());
+                        //System.out.println(encrypt);
+                        kafkaTemplate.send("drone-" + id, json);
                     }
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();

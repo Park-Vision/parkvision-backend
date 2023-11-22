@@ -175,6 +175,6 @@ public class ParkingSpotService {
 
     public List<ParkingSpot> getParkingSpots(Drone drone) {
         return new ArrayList<>(_parkingSpotRepository.findByParkingId(drone.getParking().getId()).stream().filter(parkingSpot ->
-                !parkingSpot.getPoints().isEmpty() && parkingSpot.isActive()).toList());
+                !_pointService.getPointsByParkingSpotId(parkingSpot.getId()).isEmpty() && parkingSpot.isActive()).toList());
     }
 }
