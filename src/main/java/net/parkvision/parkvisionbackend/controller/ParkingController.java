@@ -10,12 +10,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -118,24 +116,31 @@ public class ParkingController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ParkingDTO> createParking(@RequestBody ParkingDTO parkingDTO) {
-        User user = RequestContext.getUserFromRequest();
-        if(user == null ){
-            return ResponseEntity.status(401).build();
-        }
-        Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
-        User parkingModerator = _userService.getUserById(user.getId());
-        if (parkingModerator.getRole().equals(Role.PARKING_MANAGER)) {
+        try {
+            User user = RequestContext.getUserFromRequest();
+            if(user == null ){
+                return ResponseEntity.status(401).build();
+            }
+            User parkingModerator = _userService.getUserById(user.getId());
+            if (!parkingModerator.getRole().equals(Role.PARKING_MANAGER)) {
+                return ResponseEntity.status(401).build();
+            }
+
             ParkingModerator realParkingModerator = (ParkingModerator) parkingModerator;
             if(realParkingModerator.getParking() != null){
                 return ResponseEntity.status(405).build();
             }
+
+            Parking createdParking = _parkingService.createParking(convertToEntity(parkingDTO));
             realParkingModerator.setParking(createdParking);
             _userService.updateUser(realParkingModerator);
-        }
-        else{
+
+            return ResponseEntity.ok(convertToDTO(createdParking));
+
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(401).build();
         }
-        return ResponseEntity.ok(convertToDTO(createdParking));
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
