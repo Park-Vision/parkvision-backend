@@ -1,12 +1,11 @@
 package net.parkvision.parkvisionbackend.controller;
 
-import net.parkvision.parkvisionbackend.dto.ParkingDTO;
-import net.parkvision.parkvisionbackend.dto.PasswordResetDTO;
-import net.parkvision.parkvisionbackend.dto.SetPasswordResetDTO;
-import net.parkvision.parkvisionbackend.dto.UserDTO;
+import net.parkvision.parkvisionbackend.dto.*;
+import net.parkvision.parkvisionbackend.model.Car;
 import net.parkvision.parkvisionbackend.model.ParkingModerator;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
+import net.parkvision.parkvisionbackend.service.RequestContext;
 import net.parkvision.parkvisionbackend.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -69,12 +70,27 @@ public class UserController {
         return ResponseEntity.ok(convertToDto(user));
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
+    @PreAuthorize("hasRole('USER')")
     @PutMapping
     public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO) {
-        User user = convertToEntity(userDTO);
-        User updatedUser = _userService.updateUser(user);
-        return ResponseEntity.ok(convertToDto(updatedUser));
+        User client = RequestContext.getUserFromRequest();
+        if(client == null){
+            return ResponseEntity.badRequest().build();
+        }
+        Optional<User> user = _userService.getCurrentUserById(userDTO.getId());
+        if(!user.isPresent()){
+            return ResponseEntity.notFound().build();
+        } else {
+            if(!user.get().getId().equals(client.getId())){
+                return ResponseEntity.badRequest().build();
+            }
+        }
+        try {
+            User userUpdated = _userService.updateUser(convertToEntity(userDTO));
+            return ResponseEntity.ok(convertToDto(userUpdated));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -126,5 +142,31 @@ public class UserController {
         return ResponseEntity.accepted().build();
     }
 
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/updatePassword")
+    public ResponseEntity<UserDTO> updatePassword(
+            @RequestBody SetNewPasswordDTO setNewPasswordDTO
+            ) {
+        User user = _userService.getUserById(setNewPasswordDTO.getId());
+        if(user == null) {
+            return ResponseEntity.ok().build();
+        }
+        _userService.updatePassword(user, setNewPasswordDTO);
+        return ResponseEntity.ok(convertToDto(user));
+    }
 
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/updateName")
+    public ResponseEntity<UserDTO> updateName(
+            @RequestBody SetNewNameDTO setNewNameDTO
+    ) {
+        User user = _userService.getUserById(setNewNameDTO.getId());
+        if(user == null) {
+            return ResponseEntity.ok().build();
+        }
+        user.setFirstname(setNewNameDTO.getFirstName());
+        user.setLastname(setNewNameDTO.getLastName());
+        _userService.updateUser(user);
+        return ResponseEntity.ok(convertToDto(user));
+    }
 }

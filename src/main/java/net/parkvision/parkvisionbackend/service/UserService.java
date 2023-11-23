@@ -1,6 +1,8 @@
 package net.parkvision.parkvisionbackend.service;
 
 import lombok.RequiredArgsConstructor;
+import net.parkvision.parkvisionbackend.dto.SetNewNameDTO;
+import net.parkvision.parkvisionbackend.dto.SetNewPasswordDTO;
 import net.parkvision.parkvisionbackend.dto.SetPasswordResetDTO;
 import net.parkvision.parkvisionbackend.model.Client;
 import net.parkvision.parkvisionbackend.model.Role;
@@ -13,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,10 @@ public class UserService {
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public Optional<User> getCurrentUserById(Long id){
+        return userRepository.findById(id);
     }
 
     public Client createClient(String email, String firstName, String lastName, String password) {
@@ -91,6 +98,11 @@ public class UserService {
         }
         user.setPassword(passwordEncoder.encode(setPasswordResetDTO.getPassword()));
         user.setPasswordResetToken(null);
+        userRepository.save(user);
+    }
+
+    public void updatePassword(User user, SetNewPasswordDTO setNewPasswordDTO){
+        user.setPassword(passwordEncoder.encode(setNewPasswordDTO.getPassword()));
         userRepository.save(user);
     }
 
