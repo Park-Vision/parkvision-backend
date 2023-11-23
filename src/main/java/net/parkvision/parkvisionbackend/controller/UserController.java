@@ -169,4 +169,19 @@ public class UserController {
         _userService.updateUser(user);
         return ResponseEntity.ok(convertToDto(user));
     }
+
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/disableUser/{id}")
+    public ResponseEntity<Void> disableUser(
+            @PathVariable Long id
+    ) {
+        User user = _userService.getUserById(id);
+        if(user == null) {
+            return ResponseEntity.ok().build();
+        }
+        user.setEmail(null);
+        _userService.updateUser(user);
+        return ResponseEntity.accepted().build();
+    }
+
 }
