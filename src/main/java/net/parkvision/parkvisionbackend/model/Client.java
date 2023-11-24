@@ -10,8 +10,8 @@ import java.util.List;
 @Data
 @Entity
 public class Client extends User {
-    @OneToMany
-    private List<Car> cars; // One-to-many relationship
-    @OneToMany
-    private List<Reservation> reservations; // One-to-many relationship
+    @OneToMany(mappedBy = "client")
+    private List<Car> cars;
+    @OneToMany(mappedBy = "user")
+    private List<Reservation> reservations;
 }
