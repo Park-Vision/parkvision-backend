@@ -232,11 +232,11 @@ public class ParkingSpotController {
                                                             @PathVariable Long reservationId,
                                                             @RequestParam OffsetDateTime startDate,
                                                             @RequestParam OffsetDateTime endDate) {
-        Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(id);
+        Optional<ParkingSpot> parkingSpot = parkingSpotService.getParkingSpotById(id);
         if (parkingSpot.isPresent()) {
             startDate = startDate.withOffsetSameInstant(parkingSpot.get().getParking().getTimeZone());
             endDate = endDate.withOffsetSameInstant(parkingSpot.get().getParking().getTimeZone());
-            Boolean isFree = _parkingSpotService.checkIfParkingSpotIsFree(parkingSpot.get(), startDate, endDate, reservationId);
+            Boolean isFree = parkingSpotService.checkIfParkingSpotIsFree(parkingSpot.get(), startDate, endDate, reservationId);
             return ResponseEntity.ok(isFree);
         } else {
             return ResponseEntity.notFound().build();

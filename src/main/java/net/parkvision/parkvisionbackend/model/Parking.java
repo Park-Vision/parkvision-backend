@@ -36,7 +36,7 @@ public class Parking {
     private String currency;
 
     @OneToMany(mappedBy = "parking")
-    private List<ParkingManager> parkingManager;
+    private List<ParkingManager> parkingManagers;
 
     @OneToMany(mappedBy = "parking")
     private List<ParkingSpot> parkingSpots;
