@@ -23,6 +23,6 @@ public class Drone {
     private String droneKey;
     @ManyToOne
     private Parking parking;
-    @OneToMany
+    @OneToMany(mappedBy = "drone")
     private List<DroneMission> droneMission;
 }

@@ -34,12 +34,14 @@ public class Parking {
     private double longitude;
     private ZoneOffset timeZone;
     private String currency;
-    @OneToMany
+
+    @OneToMany(mappedBy = "parking")
     private List<ParkingManager> parkingManager;
-    @OneToMany
+
+    @OneToMany(mappedBy = "parking")
     private List<ParkingSpot> parkingSpots;
-    @OneToMany
+    @OneToMany(mappedBy = "parking")
     private List<DroneMission> droneMissions;
-    @OneToMany
+    @OneToMany(mappedBy = "parking")
     private List<Drone> drones;
 }

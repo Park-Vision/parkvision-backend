@@ -10,8 +10,8 @@ import java.util.List;
 @Data
 @Entity
 public class Client extends User {
-    @OneToMany
+    @OneToMany(mappedBy = "client")
     private List<Car> cars;
-    @OneToMany
+    @OneToMany(mappedBy = "user")
     private List<Reservation> reservations;
 }

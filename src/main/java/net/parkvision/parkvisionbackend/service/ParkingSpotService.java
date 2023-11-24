@@ -170,4 +170,27 @@ public class ParkingSpotService {
         return new ArrayList<>(_parkingSpotRepository.findByParkingId(drone.getParking().getId()).stream().filter(parkingSpot ->
                 !parkingSpot.getPoints().isEmpty() && parkingSpot.isActive()).toList());
     }
+
+    public Boolean checkIfParkingSpotIsFree(ParkingSpot parkingSpot, OffsetDateTime startDate, OffsetDateTime endDate, Long reservationId) {
+        List<Reservation> reservations = _reservationService.getAllReservationsByParkingSpot(parkingSpot.getId());
+        Reservation tempReservation = new Reservation();
+        tempReservation.setStartDate(startDate);
+        tempReservation.setEndDate(endDate);
+        tempReservation.setParkingSpot(parkingSpot);
+        if (reservations.isEmpty()) {
+            return true;
+        }
+        for (Reservation reservation : reservations) {
+            if (reservation.getId().equals(reservationId)) {
+                continue;
+            }
+            if (
+                    _reservationService.isDateRangeOverlap(reservation, tempReservation)
+                    || !_reservationService.isWithinParkingHours(tempReservation.getStartDate(), tempReservation.getEndDate(), parkingSpot.getParking())
+                    || !_reservationService.checkTime(tempReservation.getStartDate(), tempReservation.getEndDate())) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

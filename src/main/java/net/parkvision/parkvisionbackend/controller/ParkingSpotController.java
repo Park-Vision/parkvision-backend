@@ -225,4 +225,21 @@ public class ParkingSpotController {
         parkingSpotCoordinatesDTO.setCenterLatitude(centerLatitude);
         return parkingSpotCoordinatesDTO;
     }
+
+
+    @GetMapping("{id}/free-time/{reservationId}")
+    public ResponseEntity<Boolean> checkIfParkingSpotIsFree(@PathVariable Long id,
+                                                            @PathVariable Long reservationId,
+                                                            @RequestParam OffsetDateTime startDate,
+                                                            @RequestParam OffsetDateTime endDate) {
+        Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(id);
+        if (parkingSpot.isPresent()) {
+            startDate = startDate.withOffsetSameInstant(parkingSpot.get().getParking().getTimeZone());
+            endDate = endDate.withOffsetSameInstant(parkingSpot.get().getParking().getTimeZone());
+            Boolean isFree = _parkingSpotService.checkIfParkingSpotIsFree(parkingSpot.get(), startDate, endDate, reservationId);
+            return ResponseEntity.ok(isFree);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

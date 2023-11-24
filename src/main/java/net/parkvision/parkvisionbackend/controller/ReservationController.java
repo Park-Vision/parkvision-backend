@@ -117,7 +117,7 @@ public class ReservationController {
                             updatedReservation.getUser().getLastname(),
                             updatedReservation.getUser().getEmail(),
                             "Reservation update confirmation",
-                            "Here is the confirmation of the reservation update you made in our system. ",
+                            "Here is the confirmation of the reservation update in our system. ",
                             parkingSpot.get().getParking(),
                             updatedReservation, "ParkVision reservation update confirmation");
                 } catch (Exception e) {
@@ -161,14 +161,18 @@ public class ReservationController {
             if (reservation.get().getUser().getId().equals(user.getId())) {
                 _reservationService.deleteReservation(id);
             } else {
-                _reservationService.cancelReservation(id);
+                if (reservation.get().getStartDate().isBefore(now.plusHours(hourRule))) {
+                    _reservationService.deleteReservation(id);
+                } else {
+                    _reservationService.cancelReservation(id);
+                }
                 try {
                     emailSenderService.sendHtmlEmailReservation(
                             reservation.get().getUser().getFirstname(),
                             reservation.get().getUser().getLastname(),
                             reservation.get().getUser().getEmail(),
                             "Reservation cancellation confirmation",
-                            "Here is the confirmation of the reservation cancellation you made in our system. ",
+                            "Parking Manager canceled your reservation. ",
                             reservation.get().getParkingSpot().getParking(),
                             reservation.get(), "ParkVision reservation cancellation confirmation");
                 } catch (Exception e) {
