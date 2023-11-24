@@ -38,7 +38,7 @@ public class KafkaConsumerConfig {
         props.put("ssl.keystore.location", keystoreLocation);
         props.put("ssl.truststore.password", truststorePassword);
         props.put("ssl.truststore.location", truststoreLocation);
-        props.put("ssl.key.password", "maciek");
+        props.put("ssl.key.password", keystorePassword);
         props.put("ssl.protocol", "TLSv1.2");
         props.put("security.protocol", "SSL");
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);

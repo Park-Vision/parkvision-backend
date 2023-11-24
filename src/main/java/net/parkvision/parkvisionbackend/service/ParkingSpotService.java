@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
@@ -17,7 +16,6 @@ public class ParkingSpotService {
     private final ParkingSpotRepository _parkingSpotRepository;
     private final ParkingRepository _parkingRepository;
     private final ReservationService _reservationService;
-
     private final PointService _pointService;
 
     @Autowired
@@ -25,7 +23,7 @@ public class ParkingSpotService {
                               ParkingRepository parkingRepository,
                               ReservationService reservationService,
                               PointService pointService) {
-        this._parkingSpotRepository = parkingSpotRepository;
+        _parkingSpotRepository = parkingSpotRepository;
         _parkingRepository = parkingRepository;
         _reservationService = reservationService;
         _pointService = pointService;
@@ -36,7 +34,6 @@ public class ParkingSpotService {
         return _parkingSpotRepository.findAll();
     }
 
-    // get all parkingSpots but filter only these which have points
     public List<ParkingSpot> getAllParkingSpotsWithPoints() {
         List<ParkingSpot> parkingSpots = _parkingSpotRepository.findAll();
         return getSpotsWithPoints(parkingSpots);
@@ -69,7 +66,7 @@ public class ParkingSpotService {
                     "exist.");
         }
         parkingSpot.setPoints(parkingSpot.getPoints());
-        // edit each point
+
         for (int i = 0; i < parkingSpot.getPoints().size(); i++) {
             parkingSpot.getPoints().get(i).setParkingSpot(parkingSpot);
             _pointService.updatePoint(parkingSpot.getPoints().get(i));
@@ -82,17 +79,14 @@ public class ParkingSpotService {
         return _parkingSpotRepository.save(parkingSpot);
     }
 
-    // so we will use soft delete instead of hard delete
     @Transactional
     public void softDeleteParkingSpot(Long id) {
         _parkingSpotRepository.findById(id).ifPresent(parkingSpot -> {
-            // check if parkingspot has any future reservations
-            List<Reservation> futureReservations = _reservationService.getFutureReservationByParkingSpot(id);
+            List<Reservation> futureReservations = _reservationService.getFutureReservationByParkingSpotId(id);
             if(!futureReservations.isEmpty()){
                 throw new IllegalArgumentException("ParkingSpot with ID " + id + " has future reservations.");
             }
             parkingSpot.setActive(false);
-            //get all points and set them to inactive
             List<Point> points = _pointService.getPointsByParkingSpotId(id);
             for (Point point : points) {
                 _pointService.deletePoint(point.getId());
@@ -163,8 +157,7 @@ public class ParkingSpotService {
         Map<Long, Map<String, OffsetDateTime>> parkingSpotsWhenFree = new HashMap<>();
         List<ParkingSpot> activeParkingSpotList = getActiveParkingSpots(parking);
 
-        date = date.withOffsetSameInstant(parking.getTimeZone());//TODO reduntant
-
+        date = date.withOffsetSameInstant(parking.getTimeZone()); //TODO redundant
 
         for (ParkingSpot parkingSpot : activeParkingSpotList) {
             parkingSpotsWhenFree.put(parkingSpot.getId(),

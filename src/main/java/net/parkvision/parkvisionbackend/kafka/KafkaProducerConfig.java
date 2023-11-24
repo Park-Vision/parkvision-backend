@@ -34,7 +34,7 @@ public class KafkaProducerConfig {
         configProps.put("ssl.keystore.location", keystoreLocation);
         configProps.put("ssl.truststore.password", truststorePassword);
         configProps.put("ssl.truststore.location", truststoreLocation);
-        configProps.put("ssl.key.password", "maciek");
+        configProps.put("ssl.key.password", keystorePassword);
         configProps.put("ssl.protocol", "TLSv1.2");
         configProps.put("security.protocol", "SSL");
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);

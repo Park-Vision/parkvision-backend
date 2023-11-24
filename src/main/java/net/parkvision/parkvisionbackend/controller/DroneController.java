@@ -20,7 +20,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/drones")
@@ -108,6 +107,7 @@ public class DroneController {
     @GetMapping("/parking/{id}")
     public ResponseEntity<List<DroneDTO>> getAllDronesByParkingId(@PathVariable Long id) {
         ParkingManager parkingManager = getParkingManagerFromRequest();
+        assert parkingManager != null;
         if (!Objects.equals(parkingManager.getParking().getId(), id)) {
             return ResponseEntity.badRequest().build();
         }
@@ -137,9 +137,9 @@ public class DroneController {
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
-    public ResponseEntity<DroneDTO> createDrone(@RequestBody DroneDTO droneDto) throws ExecutionException,
-            InterruptedException {
+    public ResponseEntity<DroneDTO> createDrone(@RequestBody DroneDTO droneDto) {
         ParkingManager parkingManager = getParkingManagerFromRequest();
+        assert parkingManager != null;
         if (!Objects.equals(parkingManager.getParking().getId(), droneDto.getParkingDTO().getId())) {
             return ResponseEntity.badRequest().build();
         }
@@ -157,7 +157,6 @@ public class DroneController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PutMapping()
     public ResponseEntity<DroneDTO> updateDrone(@RequestBody DroneDTO droneDto) {
-        // TODO: can parking manager change parking of a drone?? - noooo!
         try {
             Drone updatedDrone = droneService.updateDrone(convertToEntity(droneDto));
             return ResponseEntity.ok(convertToDTO(updatedDrone));
@@ -175,12 +174,12 @@ public class DroneController {
         }
 
         Optional<Drone> drone = droneService.getDroneById(id);
-        if (!Objects.equals(parkingManager.getParking().getId(), drone.get().getParking().getId())) {
-            return ResponseEntity.badRequest().build();
+        if(drone.isPresent()){
+            if (!Objects.equals(parkingManager.getParking().getId(), drone.get().getParking().getId())) {
+                return ResponseEntity.badRequest().build();
+            }
+            droneService.deleteDrone(id);
         }
-
-
-        droneService.deleteDrone(id);
         return ResponseEntity.noContent().build();
     }
 

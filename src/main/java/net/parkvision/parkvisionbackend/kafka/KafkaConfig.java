@@ -25,6 +25,7 @@ public class KafkaConfig {
     @Value(value = "${spring.kafka.ssl.trust-store-location}")
     private String truststoreLocation;
 
+
     @Bean
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> props = new HashMap<>(kafkaProperties.buildAdminProperties());
@@ -34,7 +35,7 @@ public class KafkaConfig {
         props.put("ssl.keystore.location", keystoreLocation);
         props.put("ssl.truststore.password", truststorePassword);
         props.put("ssl.truststore.location", truststoreLocation);
-        props.put("ssl.key.password", "maciek");
+        props.put("ssl.key.password", keystorePassword);
         props.put("security.protocol", "SSL");
 
         KafkaAdmin kafkaAdmin = new KafkaAdmin(props);

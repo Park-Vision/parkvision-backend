@@ -37,18 +37,6 @@ public class UserService {
         return clientRepository.save(client);
     }
 
-    public User createUser(String email, String firstName, String lastName, String password) {
-        return userRepository.save(
-                User.builder()
-                        .firstname(firstName)
-                        .lastname(lastName)
-                        .email(email)
-                        .password(passwordEncoder.encode(password))
-                        .role(Role.USER)
-                        .build()
-        );
-    }
-
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -81,12 +69,12 @@ public class UserService {
     }
 
     public void resetPassword(User user, SetPasswordResetDTO setPasswordResetDTO) {
-        String provided = passwordEncoder.encode(user.getEmail() + setPasswordResetDTO.getTimestamp());
-        boolean isValid = passwordEncoder.matches(user.getEmail() + setPasswordResetDTO.getTimestamp(), user.getPasswordResetToken());
-        if(!isValid){
+        boolean isValid = passwordEncoder.matches(user.getEmail() + setPasswordResetDTO.getTimestamp(),
+                user.getPasswordResetToken());
+        if (!isValid) {
             throw new RuntimeException("Invalid token");
         }
-        if(System.currentTimeMillis() - setPasswordResetDTO.getTimestamp() > 1000L * 60 * 60 * passwordResetHourRule) {
+        if (System.currentTimeMillis() - setPasswordResetDTO.getTimestamp() > 1000L * 60 * 60 * passwordResetHourRule) {
             throw new RuntimeException("Token expired");
         }
         user.setPassword(passwordEncoder.encode(setPasswordResetDTO.getPassword()));
@@ -97,7 +85,7 @@ public class UserService {
     @Scheduled(cron = "0 0 * * * *") // every day at midnight
     public void clearPasswordResetToken() {
         getAllUsers().forEach(user -> {
-            if(user.getPasswordResetToken() != null) {
+            if (user.getPasswordResetToken() != null) {
                 user.setPasswordResetToken(null);
                 userRepository.save(user);
             }

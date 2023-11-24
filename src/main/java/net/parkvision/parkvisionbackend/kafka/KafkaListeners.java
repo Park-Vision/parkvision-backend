@@ -1,6 +1,5 @@
 package net.parkvision.parkvisionbackend.kafka;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.parkvision.parkvisionbackend.config.MessageEncryptor;
 import net.parkvision.parkvisionbackend.config.MessageEncryptor;
@@ -66,8 +65,6 @@ public class KafkaListeners {
                 droneMissionService.createDroneMission(droneMission);
             }
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

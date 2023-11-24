@@ -244,7 +244,7 @@ public class ReservationController {
             if (parking.isPresent()){
                 ParkingManager parkingManager = (ParkingManager) user;
                 if((parkingManager.getParking().getId().equals(parking.get().getId()))){
-                    List<ReservationDTO> reservations = _reservationService.getAllReservationsByParking(id).stream().map(
+                    List<ReservationDTO> reservations = _reservationService.getAllReservationsByParkingId(id).stream().map(
                             this::convertToDto
                     ).collect(Collectors.toList());
                     return ResponseEntity.ok(reservations);

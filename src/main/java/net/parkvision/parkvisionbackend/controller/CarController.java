@@ -47,11 +47,12 @@ public class CarController {
                 ).collect(Collectors.toList());
         return ResponseEntity.ok(cars);
     }
+
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/client")
     public ResponseEntity<List<CarDTO>> getAllCarsByClientId() {
         User client = RequestContext.getUserFromRequest();
-        if(client == null){
+        if (client == null) {
             return ResponseEntity.badRequest().build();
         }
         List<CarDTO> cars =
@@ -66,18 +67,21 @@ public class CarController {
     public ResponseEntity<CarDTO> getCarById(@PathVariable Long id) {
         User client = RequestContext.getUserFromRequest();
         Optional<Car> car = carService.getCarById(id);
-        if (car.isPresent() && client.getId().equals(car.get().getClient().getId())) {
-            return ResponseEntity.ok(convertToDTO(car.get()));
+        if (car.isPresent()) {
+            assert client != null;
+            if (client.getId().equals(car.get().getClient().getId())) {
+                return ResponseEntity.ok(convertToDTO(car.get()));
+            }
         }
         return ResponseEntity.notFound().build();
     }
-
 
     @PreAuthorize("hasRole('USER')")
     @PostMapping
     public ResponseEntity<CarDTO> createCar(@RequestBody CarDTO carDTO) {
         User client = RequestContext.getUserFromRequest();
-        if(!client.getId().equals(carDTO.getClientDTO().getId())){
+        assert client != null;
+        if (!client.getId().equals(carDTO.getClientDTO().getId())) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -90,15 +94,15 @@ public class CarController {
     public ResponseEntity<CarDTO> updateCar(@RequestBody CarDTO carDTO) {
 
         User client = RequestContext.getUserFromRequest();
-        if(client == null){
+        if (client == null) {
             return ResponseEntity.badRequest().build();
         }
 
         Optional<Car> car = carService.getCarById(carDTO.getId());
-        if(!car.isPresent()){
+        if (car.isEmpty()) {
             return ResponseEntity.notFound().build();
         } else {
-            if(!car.get().getClient().getId().equals(client.getId())){
+            if (!car.get().getClient().getId().equals(client.getId())) {
                 return ResponseEntity.badRequest().build();
             }
         }
@@ -116,15 +120,15 @@ public class CarController {
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
 
         User client = RequestContext.getUserFromRequest();
-        if(client == null){
+        if (client == null) {
             return ResponseEntity.badRequest().build();
         }
 
         Optional<Car> car = carService.getCarById(id);
-        if(!car.isPresent()){
+        if (car.isEmpty()) {
             return ResponseEntity.notFound().build();
         } else {
-            if(!car.get().getClient().getId().equals(client.getId())){
+            if (!car.get().getClient().getId().equals(client.getId())) {
                 return ResponseEntity.badRequest().build();
             }
         }
