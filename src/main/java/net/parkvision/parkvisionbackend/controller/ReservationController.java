@@ -117,7 +117,7 @@ public class ReservationController {
                             updatedReservation.getUser().getLastname(),
                             updatedReservation.getUser().getEmail(),
                             "Reservation update confirmation",
-                            "Here is the confirmation of the reservation update you made in our system. ",
+                            "Here is the confirmation of the reservation update in our system. ",
                             parkingSpot.get().getParking(),
                             updatedReservation, "ParkVision reservation update confirmation");
                 } catch (Exception e) {
