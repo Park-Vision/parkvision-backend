@@ -143,7 +143,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('USER')")
-    @PostMapping("/updatePassword")
+    @PutMapping("/updatePassword")
     public ResponseEntity<UserDTO> updatePassword(
             @RequestBody SetNewPasswordDTO setNewPasswordDTO
             ) {
@@ -156,7 +156,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('USER')")
-    @PostMapping("/updateName")
+    @PutMapping("/updateName")
     public ResponseEntity<UserDTO> updateName(
             @RequestBody SetNewNameDTO setNewNameDTO
     ) {
@@ -171,7 +171,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('USER')")
-    @PostMapping("/disableUser/{id}")
+    @PutMapping("/disableUser/{id}")
     public ResponseEntity<Void> disableUser(
             @PathVariable Long id
     ) {
