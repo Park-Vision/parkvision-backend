@@ -1,11 +1,14 @@
 package net.parkvision.parkvisionbackend.service;
 
 import lombok.RequiredArgsConstructor;
+import net.parkvision.parkvisionbackend.dto.SetPasswordResetDTO;
 import net.parkvision.parkvisionbackend.model.Client;
 import net.parkvision.parkvisionbackend.model.Role;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.ClientRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +20,8 @@ public class UserService {
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
+    @Value("${park-vision.password-reset-hour-rule}")
+    private int passwordResetHourRule;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -31,18 +35,6 @@ public class UserService {
         client.setPassword(passwordEncoder.encode(password));
         client.setRole(Role.USER);
         return clientRepository.save(client);
-    }
-
-    public User createUser(String email, String firstName, String lastName, String password) {
-        return userRepository.save(
-                User.builder()
-                        .firstname(firstName)
-                        .lastname(lastName)
-                        .email(email)
-                        .password(passwordEncoder.encode(password))
-                        .role(Role.USER)
-                        .build()
-        );
     }
 
     public User getUserByEmail(String email) {
@@ -63,5 +55,40 @@ public class UserService {
 
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+    }
+
+    public void generatePasswordResetToken(User user, Long timestamp) {
+        String token = passwordEncoder.encode(user.getEmail() + timestamp);
+        user.setPasswordResetToken(token);
+        userRepository.save(user);
+    }
+
+    public User getUserByResetToken(String token) {
+        return userRepository.findByPasswordResetToken(token)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public void resetPassword(User user, SetPasswordResetDTO setPasswordResetDTO) {
+        boolean isValid = passwordEncoder.matches(user.getEmail() + setPasswordResetDTO.getTimestamp(),
+                user.getPasswordResetToken());
+        if (!isValid) {
+            throw new RuntimeException("Invalid token");
+        }
+        if (System.currentTimeMillis() - setPasswordResetDTO.getTimestamp() > 1000L * 60 * 60 * passwordResetHourRule) {
+            throw new RuntimeException("Token expired");
+        }
+        user.setPassword(passwordEncoder.encode(setPasswordResetDTO.getPassword()));
+        user.setPasswordResetToken(null);
+        userRepository.save(user);
+    }
+
+    @Scheduled(cron = "0 0 * * * *") // every day at midnight
+    public void clearPasswordResetToken() {
+        getAllUsers().forEach(user -> {
+            if (user.getPasswordResetToken() != null) {
+                user.setPasswordResetToken(null);
+                userRepository.save(user);
+            }
+        });
     }
 }

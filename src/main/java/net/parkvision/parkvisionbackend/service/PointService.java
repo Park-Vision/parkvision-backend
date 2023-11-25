@@ -12,43 +12,43 @@ import java.util.Optional;
 @Service
 public class PointService {
 
-    private final PointRepository _pointRepository;
-    private final ParkingSpotRepository _parkingSpotRepository;
+    private final PointRepository pointRepository;
+    private final ParkingSpotRepository parkingSpotRepository;
 
     public PointService(PointRepository pointRepository, ParkingSpotRepository parkingSpotRepository) {
-        _pointRepository = pointRepository;
-        _parkingSpotRepository = parkingSpotRepository;
+        this.pointRepository = pointRepository;
+        this.parkingSpotRepository = parkingSpotRepository;
     }
 
     public List<Point> getAllPoints() {
-        return _pointRepository.findAll();
+        return pointRepository.findAll();
     }
 
     public Optional<Point> getPointById(Long id) {
-        return _pointRepository.findById(id);
+        return pointRepository.findById(id);
     }
 
     public List<Point> getPointsByParkingSpotId(Long parkingSpotId) {
-        List<Point> points = _pointRepository.findByParkingSpotId(parkingSpotId);
+        List<Point> points = pointRepository.findByParkingSpotId(parkingSpotId);
         points.sort((p1, p2) -> (int) (p1.getId() - p2.getId()));
         return points;
     }
 
     public Point createPoint(Point point) {
-        if (!_parkingSpotRepository.existsById(point.getParkingSpot().getId())) {
+        if (!parkingSpotRepository.existsById(point.getParkingSpot().getId())) {
             throw new IllegalArgumentException("ParkingSpot with ID " + point.getParkingSpot().getId() + " does not " +
                     "exist.");
         }
 
-        return _pointRepository.save(point);
+        return pointRepository.save(point);
     }
 
     public Point updatePoint(Point point) {
-        if (!_pointRepository.existsById(point.getId())) {
+        if (!pointRepository.existsById(point.getId())) {
             throw new IllegalArgumentException("Point with ID " + point.getId() + " does not exist.");
         }
 
-        if (!_parkingSpotRepository.existsById(point.getParkingSpot().getId())) {
+        if (!parkingSpotRepository.existsById(point.getParkingSpot().getId())) {
             throw new IllegalArgumentException("ParkingSpot with ID " + point.getParkingSpot().getId() + " does not " +
                     "exist.");
         }
@@ -57,11 +57,11 @@ public class PointService {
         point.setLongitude(point.getLongitude());
         point.setParkingSpot(point.getParkingSpot());
 
-        return _pointRepository.save(point);
+        return pointRepository.save(point);
     }
 
     @Transactional
     public void deletePoint(Long id) {
-        _pointRepository.deleteById(id);
+        pointRepository.deleteById(id);
     }
 }

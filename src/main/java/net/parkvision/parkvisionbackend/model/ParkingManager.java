@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-public class ParkingModerator extends User {
+public class ParkingManager extends User {
     @ManyToOne
-    private Parking parking; // One-to-one relationship
+    private Parking parking;
 }

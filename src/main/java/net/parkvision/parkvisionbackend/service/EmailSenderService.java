@@ -4,20 +4,15 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import net.parkvision.parkvisionbackend.model.Parking;
-import net.parkvision.parkvisionbackend.model.Payment;
 import net.parkvision.parkvisionbackend.model.Reservation;
 import net.parkvision.parkvisionbackend.model.StripeCharge;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
-import java.io.File;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -32,38 +27,6 @@ public class EmailSenderService {
     @Autowired
     private final TemplateEngine templateEngine;
 
-
-    public void sendEmail(String to, String body, String topic) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("${spring.mail.username}");
-        message.setTo(to);
-        message.setText(body);
-        message.setSubject(topic);
-
-        javaMailSender.send(message);
-        System.out.println("Email sent to " + to);
-    }
-
-    public void sendMessageWithAttachment(
-            String to, String subject, String text, String pathToAttachment) throws Exception {
-
-        MimeMessage message = javaMailSender.createMimeMessage();
-
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-        helper.setFrom("${spring.mail.username}");
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(text);
-
-        FileSystemResource file
-                = new FileSystemResource(new File(pathToAttachment));
-        helper.addAttachment("parking.png", file);
-
-        javaMailSender.send(message);
-        System.out.println("Email sent to " + to);
-    }
-
     @Async("emailTaskExecutor")
     public void sendHtmlEmailReservation(
             String firstName,
@@ -76,7 +39,7 @@ public class EmailSenderService {
             String topic) throws Exception {
         Context context = new Context();
         context.setVariable("title", title);
-        context.setVariable("description",  description +
+        context.setVariable("description", description +
                 "Dates and times are based on parking time zone " + parking.getTimeZone() + " compared to UTC.");
         context.setVariable("name", firstName + " " + lastName);
         String htmlTable = generateHTMLTable(reservation, parking);
@@ -97,7 +60,7 @@ public class EmailSenderService {
             String topic) throws Exception {
         Context context = new Context();
         context.setVariable("title", title);
-        context.setVariable("description",  description);
+        context.setVariable("description", description);
         context.setVariable("name", firstName + " " + lastName);
         String htmlTable = generateHTMLTable(reservation, stripeCharge);
         context.setVariable("body", htmlTable);
@@ -114,6 +77,23 @@ public class EmailSenderService {
         Context context = new Context();
         context.setVariable("title", "Registration confirmation");
         context.setVariable("description", "Here is the confirmation of the registration you made in our system:");
+        context.setVariable("name", firstName + " " + lastName);
+
+        sendContextToUser(to, topic, context);
+    }
+
+    @Async("emailTaskExecutor")
+    public void sendHtmlEmailPasswordReset(
+            String firstName,
+            String lastName,
+            String to,
+            String topic,
+            String description,
+            String link) throws Exception {
+        Context context = new Context();
+        context.setVariable("title", "Password reset link");
+        context.setVariable("description", description);
+        context.setVariable("body", "<b><a href=" + link + ">Reset password</a></b>");
         context.setVariable("name", firstName + " " + lastName);
 
         sendContextToUser(to, topic, context);
@@ -144,80 +124,62 @@ public class EmailSenderService {
                 reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone()).format(formatter);
         String formattedAmount = String.format("%.2f", reservation.getAmount());
 
-        StringBuilder htmlTable = new StringBuilder();
-        htmlTable.append("<table style=\"width: 100%\">");
+        return "<table style=\"width: 100%\">" +
 
-        // Create rows for Reservation fields
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Reservation number</th>");
-        htmlTable.append("<td>").append(reservation.getId()).append("</td>");
-        htmlTable.append("</tr>");
-
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Start date</th>");
-        htmlTable.append("<td>").append(formattedStartDateTime).append("</td>");
-        htmlTable.append("</tr>");
-
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>End date</th>");
-        htmlTable.append("<td>").append(formattedEndDateTime).append("</td>");
-        htmlTable.append("</tr>");
-
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Registration number</th>");
-        htmlTable.append("<td>").append(reservation.getRegistrationNumber()).append("</td>");
-        htmlTable.append("</tr>");
-
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Parking</th>");
-        htmlTable.append("<td>").append(parking.getName()).append(", ").append(parking.getStreet())
-                .append(", ").append(parking.getCity()).append("</td>");
-        htmlTable.append("</tr>");
-
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Parking spot number</th>");
-        htmlTable.append("<td>").append(reservation.getParkingSpot().getId()).append("</td>");
-        htmlTable.append("</tr>");
-
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Amount</th>");
-        htmlTable.append("<td>").append(formattedAmount)
-                .append(" ")
-                .append(parking.getCurrency()).append("</td>");
-        htmlTable.append("</tr>");
-
-        htmlTable.append("</table>");
-
-        return htmlTable.toString();
+                // Create rows for Reservation fields
+                "<tr>" +
+                "<th>Reservation number</th>" +
+                "<td>" + reservation.getId() + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<th>Start date</th>" +
+                "<td>" + formattedStartDateTime + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<th>End date</th>" +
+                "<td>" + formattedEndDateTime + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<th>Registration number</th>" +
+                "<td>" + reservation.getRegistrationNumber() + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<th>Parking</th>" +
+                "<td>" + parking.getName() + ", " + parking.getStreet() +
+                ", " + parking.getCity() + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<th>Parking spot number</th>" +
+                "<td>" + reservation.getParkingSpot().getId() + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<th>Amount</th>" +
+                "<td>" + formattedAmount +
+                " " +
+                parking.getCurrency() + "</td>" +
+                "</tr>" +
+                "</table>";
     }
 
     public String generateHTMLTable(Reservation reservation, StripeCharge charge) {
 
         String formattedAmount = String.format("%.2f", reservation.getAmount());
 
-        StringBuilder htmlTable = new StringBuilder();
-        htmlTable.append("<table style=\"width: 100%\">");
-
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Reservation number</th>");
-        htmlTable.append("<td>").append(reservation.getId()).append("</td>");
-        htmlTable.append("</tr>");
-
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Amount</th>");
-        htmlTable.append("<td>").append(formattedAmount)
-                .append(" ")
-                .append(reservation.getParkingSpot().getParking().getCurrency()).append("</td>");
-        htmlTable.append("</tr>");
-
-        htmlTable.append("<tr>");
-        htmlTable.append("<th>Payment ID</th>");
-        htmlTable.append("<td>").append(charge.getId());
-        htmlTable.append("</tr>");
-
-        htmlTable.append("</table>");
-
-        return htmlTable.toString();
+        return "<table style=\"width: 100%\">" +
+                "<tr>" +
+                "<th>Reservation number</th>" +
+                "<td>" + reservation.getId() + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<th>Amount</th>" +
+                "<td>" + formattedAmount +
+                " " +
+                reservation.getParkingSpot().getParking().getCurrency() + "</td>" +
+                "</tr>" +
+                "<tr>" +
+                "<th>Payment ID</th>" +
+                "<td>" + charge.getId() +
+                "</tr>" +
+                "</table>";
     }
-
 }

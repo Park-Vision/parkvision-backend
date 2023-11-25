@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenAPI30Configuration {
+
     @Bean
     public OpenAPI customizeOpenAPI() {
         final String securitySchemeName = "bearerAuth";

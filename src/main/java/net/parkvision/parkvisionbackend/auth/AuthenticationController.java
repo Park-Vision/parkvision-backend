@@ -20,14 +20,14 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
-            @RequestBody RegisterRequest request
+            @RequestBody RegisterRequest registerRequest
     ) {
-        AuthenticationResponse register = authenticationService.register(request);
+        AuthenticationResponse register = authenticationService.register(registerRequest);
         try {
             emailSenderService.sendHtmlEmailRegistrationCreated(
-                    request.getFirstName(),
-                    request.getLastName(),
-                    request.getEmail(),
+                    registerRequest.getFirstName(),
+                    registerRequest.getLastName(),
+                    registerRequest.getEmail(),
                     "ParkVision registration confirmation");
         } catch (Exception e) {
             e.printStackTrace();
@@ -38,19 +38,19 @@ public class AuthenticationController {
 
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody AuthenticationRequest request
+            @RequestBody AuthenticationRequest authenticationRequest
     ) {
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+        return ResponseEntity.ok(authenticationService.authenticate(authenticationRequest));
     }
 
     @PostMapping("/refreshToken")
     public ResponseEntity<?> refreshToken(
-            @RequestBody RefreshTokenDTO token
+            @RequestBody RefreshTokenDTO refreshTokenDTO
     ) {
-        AuthenticationResponse authenticationResponse = authenticationService.refresh(token.getToken());
+        AuthenticationResponse authenticationResponse = authenticationService.refreshToken(refreshTokenDTO.getToken());
         if (authenticationResponse != null) {
             return ResponseEntity.ok(authenticationResponse);
         }
-        return new ResponseEntity<>("Too late", HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>("Too late for refresh", HttpStatus.UNAUTHORIZED);
     }
 }

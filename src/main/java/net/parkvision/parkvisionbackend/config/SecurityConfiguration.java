@@ -15,12 +15,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
@@ -28,10 +28,8 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-                .cors().and()
-                .csrf().disable()
-                .authorizeHttpRequests()
+        http.cors().and()
+                .csrf().disable().authorizeHttpRequests()
                 .requestMatchers(
                         "/api/auth/**",
                         "/swagger-ui.html",
@@ -42,14 +40,13 @@ public class SecurityConfiguration {
                         "/swagger-ui/**",
                         "/websocket"
                 ).permitAll()
-                .and()
-                .authorizeHttpRequests()
+                .and().authorizeHttpRequests()
                 .requestMatchers(HttpMethod.GET, "/api/parkings/**", "api/parkingspots/parking/**", "api/parkingspots" +
                         "/drone/**", "/ws/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "api/users/resetPassword", "api/users/setPasswordFromReset").permitAll()
 //                .requestMatchers( "/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
-                .and()
-                .sessionManagement()
+                .and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authenticationProvider(authenticationProvider)
@@ -63,9 +60,9 @@ public class SecurityConfiguration {
 
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("*"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import net.parkvision.parkvisionbackend.model.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,12 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "4815eda9a2c18870c21789bbca2a59c23b1fa0d587ab7f2773f404d73b8f3ee5";
-
-    public String generateToken(User userDetails) {
-        return generateToken(Map.of(), userDetails);
-    }
+    @Value(value = "${park-vision.jwt_secret}")
+    private String SECRET_KEY;
+    @Value(value = "${park-vision.jwt_expiration}")
+    private int JWT_EXPIRATION;
+    @Value(value = "${park-vision.jwt_expiration_refresh}")
+    private int JWT_EXPIRATION_REFRESH;
 
     public String generateToken(
             Map<String, Object> extraClaims,
@@ -33,7 +35,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -43,16 +45,16 @@ public class JwtService {
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
-    public boolean isTokenValidRefresh(String token, UserDetails userDetails) {
+    public boolean isTokenValidForRefresh(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpiredRefresh(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpiredForRefresh(token);
     }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    private  <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
@@ -75,21 +77,21 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public boolean isTokenExpired(String token) {
+    private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    public boolean isTokenExpiredRefresh(String token) {
+    private boolean isTokenExpiredForRefresh(String token) {
         long expirationInSeconds = extractExpiration(token).getTime() / 1000;
         // One day
-        long oneDayInSeconds = 24 * 60 * 60;
+        long oneDayInSeconds = JWT_EXPIRATION_REFRESH / 1000;
         long updatedExpirationInSeconds = expirationInSeconds + oneDayInSeconds;
         Date updatedExpirationDate = new Date(updatedExpirationInSeconds * 1000);
 
         return updatedExpirationDate.before(new Date());
     }
 
-    public Date extractExpiration(String token) {
+    private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 }
