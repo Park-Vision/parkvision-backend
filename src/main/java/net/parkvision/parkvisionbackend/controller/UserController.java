@@ -3,6 +3,8 @@ package net.parkvision.parkvisionbackend.controller;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.dto.PasswordResetDTO;
 import net.parkvision.parkvisionbackend.dto.SetPasswordResetDTO;
+import net.parkvision.parkvisionbackend.dto.SetNewPasswordDTO;
+import net.parkvision.parkvisionbackend.dto.SetNewNameDTO;
 import net.parkvision.parkvisionbackend.dto.UserDTO;
 import net.parkvision.parkvisionbackend.model.ParkingManager;
 import net.parkvision.parkvisionbackend.model.User;
@@ -80,7 +82,7 @@ public class UserController {
         if(client == null){
             return ResponseEntity.badRequest().build();
         }
-        Optional<User> user = _userService.getCurrentUserById(userDTO.getId());
+        Optional<User> user = userService.getCurrentUserById(userDTO.getId());
         if(!user.isPresent()){
             return ResponseEntity.notFound().build();
         } else {
@@ -89,7 +91,7 @@ public class UserController {
             }
         }
         try {
-            User userUpdated = _userService.updateUser(convertToEntity(userDTO));
+            User userUpdated = userService.updateUser(convertToEntity(userDTO));
             return ResponseEntity.ok(convertToDto(userUpdated));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
@@ -148,11 +150,11 @@ public class UserController {
     public ResponseEntity<UserDTO> updatePassword(
             @RequestBody SetNewPasswordDTO setNewPasswordDTO
             ) {
-        User user = _userService.getUserById(setNewPasswordDTO.getId());
+        User user = userService.getUserById(setNewPasswordDTO.getId());
         if(user == null) {
             return ResponseEntity.ok().build();
         }
-        _userService.updatePassword(user, setNewPasswordDTO);
+        userService.updatePassword(user, setNewPasswordDTO);
         return ResponseEntity.ok(convertToDto(user));
     }
 
@@ -161,13 +163,13 @@ public class UserController {
     public ResponseEntity<UserDTO> updateName(
             @RequestBody SetNewNameDTO setNewNameDTO
     ) {
-        User user = _userService.getUserById(setNewNameDTO.getId());
+        User user = userService.getUserById(setNewNameDTO.getId());
         if(user == null) {
             return ResponseEntity.ok().build();
         }
         user.setFirstname(setNewNameDTO.getFirstName());
         user.setLastname(setNewNameDTO.getLastName());
-        _userService.updateUser(user);
+        userService.updateUser(user);
         return ResponseEntity.ok(convertToDto(user));
     }
 
@@ -176,12 +178,12 @@ public class UserController {
     public ResponseEntity<Void> disableUser(
             @PathVariable Long id
     ) {
-        User user = _userService.getUserById(id);
+        User user = userService.getUserById(id);
         if(user == null) {
             return ResponseEntity.ok().build();
         }
         user.setEmail(null);
-        _userService.updateUser(user);
+        userService.updateUser(user);
         return ResponseEntity.accepted().build();
     }
 }
