@@ -21,13 +21,14 @@ public class DataSeeder {
     private final ClientRepository clientRepository;
     private final CarRepository carRepository;
     private final ReservationRepository reservationRepository;
+    private final AdminRepository adminRepository;
 
 
     public DataSeeder(DroneRepository droneRepository, ParkingRepository parkingRepository,
                       ParkingSpotRepository parkingSpotRepository,
                       ParkingManagerRepository parkingManagerRepository, PointRepository pointRepository,
                       ClientRepository clientRepository, CarRepository carRepository,
-                      ReservationRepository reservationRepository) {
+                      ReservationRepository reservationRepository, AdminRepository adminRepository) {
         this.droneRepository = droneRepository;
         this.parkingRepository = parkingRepository;
         this.parkingSpotRepository = parkingSpotRepository;
@@ -36,6 +37,7 @@ public class DataSeeder {
         this.clientRepository = clientRepository;
         this.carRepository = carRepository;
         this.reservationRepository = reservationRepository;
+        this.adminRepository = adminRepository;
     }
 
     public void seedData() {
@@ -129,6 +131,23 @@ public class DataSeeder {
             System.out.println("Data already exists.");
         }
 
+        long adminCount = adminRepository.count();
+
+        if (adminCount == 0){
+            System.out.println("SeedAdminData()");
+
+            User user = new User();
+            user.setFirstname("Admin");
+            user.setLastname("Moderator");
+            user.setEmail("parkvision.info@gmail.com");
+            user.setPassword(new BCryptPasswordEncoder().encode("Admin123!"));
+            user.setRole(Role.ADMIN);
+
+            System.out.println("Added: " + user.getEmail() + " " + "Admin123!");
+
+            adminRepository.save(user);
+
+        }
 
         long parkingManagerCount = parkingManagerRepository.count();
 

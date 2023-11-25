@@ -68,6 +68,15 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/managers")
+    public ResponseEntity<List<UserDTO>> getAllManagers() {
+        List<UserDTO> managers = userService.getAllManagers().stream().map(
+                this::convertToDto
+        ).collect(Collectors.toList());
+        return ResponseEntity.ok(managers);
+    }
+
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
