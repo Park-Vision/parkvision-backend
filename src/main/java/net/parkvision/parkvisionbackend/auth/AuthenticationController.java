@@ -53,11 +53,6 @@ public class AuthenticationController {
     ) {
         authenticationService.registerManager(registerRequest);
         try {
-            emailSenderService.sendHtmlEmailRegistrationCreated(
-                    registerRequest.getFirstName(),
-                    registerRequest.getLastName(),
-                    registerRequest.getEmail(),
-                    "ParkVision registration confirmation");
             User user = userService.getUserByEmail(registerRequest.getEmail());
             Long timestamp = System.currentTimeMillis();
             if (user != null){
@@ -66,6 +61,7 @@ public class AuthenticationController {
                         user.getFirstname(),
                         user.getLastname(),
                         user.getEmail(),
+                        "Manager registration, reset your password",
                         "ParkVision manager registration",
                         "Reset your password using link in the message. " +
                                 "After setting your new password you will be able to log in our system."

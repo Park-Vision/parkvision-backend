@@ -125,6 +125,7 @@ public class UserController {
                     user.getFirstname(),
                     user.getLastname(),
                     user.getEmail(),
+                    "Password reset link",
                     "ParkVision password reset",
                     "Here is the link to reset your password. "
                             + "This link will expire in " + passwordResetHourRule + " hour.",
