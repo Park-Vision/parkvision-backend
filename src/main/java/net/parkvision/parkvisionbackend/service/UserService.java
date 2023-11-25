@@ -41,6 +41,15 @@ public class UserService {
                 .toList();
     }
 
+    public List<User> getAllManagersByParking(Long parkingId) {
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user instanceof ParkingManager &&
+                        ((ParkingManager) user).getParking() != null &&
+                        ((ParkingManager) user).getParking().getId().equals(parkingId))
+                .toList();
+    }
+
     public Optional<User> getCurrentUserById(Long id){
         return userRepository.findById(id);
     }

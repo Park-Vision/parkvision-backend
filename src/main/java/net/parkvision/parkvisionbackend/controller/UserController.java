@@ -106,8 +106,26 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        if(user == null) {
+            return ResponseEntity.ok().build();
+        }
+        if (!user.getRole().equals(Role.PARKING_MANAGER)){
+            return ResponseEntity.ok().build();
+        }
+        ParkingManager parkingManager = (ParkingManager) user;
+        if (parkingManager.getParking() != null){
+            long parkingId = parkingManager.getParking().getId();
+            List<User> managers = userService.getAllManagersByParking(parkingId);
+            if (managers.size() == 1){
+                parkingManager.setParking(null);
+                userService.updateUser(parkingManager);
+                parkingService.deleteParking(parkingId);
+            }
+        }
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
@@ -182,7 +200,7 @@ public class UserController {
         return ResponseEntity.ok(convertToDto(user));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PutMapping("/disableUser/{id}")
     public ResponseEntity<Void> disableUser(
             @PathVariable Long id
