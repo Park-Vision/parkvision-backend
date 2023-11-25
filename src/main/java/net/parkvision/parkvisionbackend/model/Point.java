@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = { "parkingSpot" })
+@ToString(exclude = {"parkingSpot"})
 @Entity
 public class Point {
     @Id

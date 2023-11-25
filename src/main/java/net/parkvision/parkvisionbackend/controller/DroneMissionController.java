@@ -3,7 +3,6 @@ package net.parkvision.parkvisionbackend.controller;
 import net.parkvision.parkvisionbackend.dto.*;
 import net.parkvision.parkvisionbackend.model.DroneMission;
 import net.parkvision.parkvisionbackend.model.MissionSpotResult;
-import net.parkvision.parkvisionbackend.model.Point;
 import net.parkvision.parkvisionbackend.service.DroneMissionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,13 +18,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/drone-missions")
 public class DroneMissionController {
 
-    private final DroneMissionService _droneMissionService;
-
+    private final DroneMissionService droneMissionService;
     private final ModelMapper modelMapper;
 
     @Autowired
     public DroneMissionController(DroneMissionService droneMissionService, ModelMapper modelMapper) {
-        _droneMissionService = droneMissionService;
+        this.droneMissionService = droneMissionService;
         this.modelMapper = modelMapper;
     }
 
@@ -57,7 +54,7 @@ public class DroneMissionController {
     @GetMapping
     public ResponseEntity<List<DroneMissionDTO>> getAllDroneMissions() {
         List<DroneMissionDTO> droneMissions
-                = _droneMissionService.getAllDroneMissions().stream().map(
+                = droneMissionService.getAllDroneMissions().stream().map(
                 this::convertToDTO
         ).collect(Collectors.toList());
         return ResponseEntity.ok(droneMissions);
@@ -66,18 +63,14 @@ public class DroneMissionController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<DroneMissionDTO> getDroneMissionById(@PathVariable Long id) {
-        Optional<DroneMission> droneMission = _droneMissionService.getDroneMissionById(id);
-        if (droneMission.isPresent()) {
-            return ResponseEntity.ok(convertToDTO(droneMission.get()));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<DroneMission> droneMission = droneMissionService.getDroneMissionById(id);
+        return droneMission.map(mission -> ResponseEntity.ok(convertToDTO(mission))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<DroneMissionDTO> createDroneMission(@RequestBody DroneMissionDTO droneMissionDto) {
-        DroneMission createdDroneMission = _droneMissionService.createDroneMission(convertToEntity(droneMissionDto));
+        DroneMission createdDroneMission = droneMissionService.createDroneMission(convertToEntity(droneMissionDto));
         return ResponseEntity.ok(convertToDTO(createdDroneMission));
     }
 
@@ -86,7 +79,7 @@ public class DroneMissionController {
     public ResponseEntity<DroneMissionDTO> updateDroneMission(@RequestBody DroneMissionDTO droneMissionDto) {
         try {
             DroneMission updatedDroneMission =
-                    _droneMissionService.updateDroneMission(convertToEntity(droneMissionDto));
+                    droneMissionService.updateDroneMission(convertToEntity(droneMissionDto));
             return ResponseEntity.ok(convertToDTO(updatedDroneMission));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
@@ -96,7 +89,7 @@ public class DroneMissionController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDroneMission(@PathVariable Long id) {
-        _droneMissionService.deleteDroneMission(id);
+        droneMissionService.deleteDroneMission(id);
         return ResponseEntity.noContent().build();
     }
 }

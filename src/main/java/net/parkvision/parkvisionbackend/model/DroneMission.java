@@ -25,10 +25,10 @@ public class DroneMission {
     @TimeZoneStorage(TimeZoneStorageType.COLUMN)
     private OffsetDateTime missionEndDate;
     private String status;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "droneMission")
     private List<MissionSpotResult> missionSpotResultList;
     @ManyToOne
-    private Parking parking; // Many-to-one relationship
+    private Parking parking;
     @ManyToOne
-    private Drone drone; // Many-to-one relationship
+    private Drone drone;
 }

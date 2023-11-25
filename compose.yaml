@@ -14,8 +14,8 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-#    ports:
-#      - "2181:2181"
+  #    ports:
+  #      - "2181:2181"
   kafka:
     image: wurstmeister/kafka
     ports:

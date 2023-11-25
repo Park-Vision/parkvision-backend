@@ -1,10 +1,8 @@
 package net.parkvision.parkvisionbackend.dto;
 
 import lombok.Data;
-import net.parkvision.parkvisionbackend.model.MissionSpotResult;
 
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Data

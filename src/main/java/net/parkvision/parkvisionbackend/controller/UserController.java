@@ -1,8 +1,10 @@
 package net.parkvision.parkvisionbackend.controller;
 
-import net.parkvision.parkvisionbackend.dto.*;
-import net.parkvision.parkvisionbackend.model.Car;
-import net.parkvision.parkvisionbackend.model.ParkingModerator;
+import net.parkvision.parkvisionbackend.dto.ParkingDTO;
+import net.parkvision.parkvisionbackend.dto.PasswordResetDTO;
+import net.parkvision.parkvisionbackend.dto.SetPasswordResetDTO;
+import net.parkvision.parkvisionbackend.dto.UserDTO;
+import net.parkvision.parkvisionbackend.model.ParkingManager;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
 import net.parkvision.parkvisionbackend.service.RequestContext;
@@ -22,9 +24,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private final UserService _userService;
+    private final UserService userService;
     private final ModelMapper modelMapper;
-    private final EmailSenderService _emailSenderService;
+    private final EmailSenderService emailSenderService;
 
     @Value("${park-vision.domain-ip}")
     private String domainIp;
@@ -36,17 +38,17 @@ public class UserController {
     public UserController(UserService userService,
                           ModelMapper modelMapper,
                           EmailSenderService emailSenderService) {
-        _userService = userService;
+        this.userService = userService;
         this.modelMapper = modelMapper;
-        _emailSenderService = emailSenderService;
+        this.emailSenderService = emailSenderService;
     }
 
     private UserDTO convertToDto(User user) {
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
 
-        // if user is an instance of ParkingManager then set parkingDTO
-        if (user instanceof ParkingModerator) {
-            userDTO.setParkingDTO(((ParkingModerator) user).getParking() == null ? null : modelMapper.map(((ParkingModerator) user).getParking(), ParkingDTO.class));
+        if (user instanceof ParkingManager) {
+            userDTO.setParkingDTO(((ParkingManager) user).getParking() == null ? null :
+                    modelMapper.map(((ParkingManager) user).getParking(), ParkingDTO.class));
         }
 
         return userDTO;
@@ -58,15 +60,16 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
-        List<UserDTO> users = _userService.getAllUsers().stream().map(
+        List<UserDTO> users = userService.getAllUsers().stream().map(
                 this::convertToDto
         ).collect(Collectors.toList());
         return ResponseEntity.ok(users);
     }
+
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-        User user = _userService.getUserById(id);
+        User user = userService.getUserById(id);
         return ResponseEntity.ok(convertToDto(user));
     }
 
@@ -95,7 +98,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        _userService.deleteUser(id);
+        userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -104,22 +107,21 @@ public class UserController {
             @RequestBody PasswordResetDTO passwordResetDTO
     ) {
         try {
-            User user = _userService.getUserByEmail(passwordResetDTO.getEmail());
+            User user = userService.getUserByEmail(passwordResetDTO.getEmail());
             Long timestamp = System.currentTimeMillis();
-            _userService.generatePasswordResetToken(user, timestamp);
-            _emailSenderService.sendHtmlEmailPasswordReset(
+            userService.generatePasswordResetToken(user, timestamp);
+            emailSenderService.sendHtmlEmailPasswordReset(
                     user.getFirstname(),
                     user.getLastname(),
                     user.getEmail(),
                     "ParkVision password reset",
                     "Here is the link to reset your password. "
-                            + "This link will expire in " +passwordResetHourRule + " hour.",
+                            + "This link will expire in " + passwordResetHourRule + " hour.",
                     domainIp + "/reset-password?token="
                             + user.getPasswordResetToken() + "&timestamp=" + timestamp
-                    );
+            );
             return ResponseEntity.accepted().build();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.accepted().build();
         }
     }
@@ -129,14 +131,13 @@ public class UserController {
             @RequestBody SetPasswordResetDTO setPasswordResetDTO
     ) {
         try {
-            User user = _userService.getUserByResetToken(setPasswordResetDTO.getToken());
+            User user = userService.getUserByResetToken(setPasswordResetDTO.getToken());
 
-            if(user == null) {
+            if (user == null) {
                 return ResponseEntity.ok().build();
             }
-            _userService.resetPassword(user, setPasswordResetDTO);
-        }
-        catch (Exception e) {
+            userService.resetPassword(user, setPasswordResetDTO);
+        } catch (Exception e) {
             return ResponseEntity.accepted().build();
         }
         return ResponseEntity.accepted().build();
@@ -183,5 +184,4 @@ public class UserController {
         _userService.updateUser(user);
         return ResponseEntity.accepted().build();
     }
-
 }

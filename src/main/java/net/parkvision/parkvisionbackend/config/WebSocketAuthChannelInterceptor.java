@@ -34,9 +34,7 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
                 throw new RuntimeException("Received no or incorrect token");
             }
             final String jwt = authHeader.substring(7);
-
             final String userEmail = jwtService.extractUsername(jwt);
-
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
             if (userDetails == null) {
