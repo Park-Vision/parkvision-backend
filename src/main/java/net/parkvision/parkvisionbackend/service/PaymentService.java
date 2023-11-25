@@ -20,32 +20,32 @@ import java.util.Optional;
 
 @Service
 public class PaymentService {
-    private final PaymentRepository _paymentRepository;
-    private final UserRepository _userRepository;
+    private final PaymentRepository paymentRepository;
+    private final UserRepository userRepository;
 
     @Value("${stripe.key.publishable}")
     private String stripeKey;
 
     @Autowired
     public PaymentService(PaymentRepository paymentRepository, UserRepository userRepository) {
-        this._paymentRepository = paymentRepository;
-        this._userRepository = userRepository;
+        this.paymentRepository = paymentRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Payment> getAllPayments() {
-        return _paymentRepository.findAll();
+        return paymentRepository.findAll();
     }
 
     public Optional<Payment> getPaymentById(Long id) {
-        return _paymentRepository.findById(id);
+        return paymentRepository.findById(id);
     }
 
     public Payment createPayment(Payment payment) {
-        if (!_userRepository.existsById(payment.getUser().getId())) {
+        if (!userRepository.existsById(payment.getUser().getId())) {
             throw new IllegalArgumentException("User with ID " + payment.getUser().getId() + " does not exist.");
         }
         Stripe.apiKey = stripeKey;
-        User user = _userRepository.getReferenceById(payment.getUser().getId());
+        User user = userRepository.getReferenceById(payment.getUser().getId());
 
         Map<String, Object> card = new HashMap<>();
         card.put("number", payment.getCardNumber());
@@ -67,20 +67,18 @@ public class PaymentService {
             Logger logger = LoggerFactory.getLogger(this.getClass());
             logger.error(exception.getMessage());
         }
-        _paymentRepository.save(payment);
+        paymentRepository.save(payment);
         return payment;
     }
 
     public Payment updatePayment(Payment payment) {
-        if (!_paymentRepository.existsById(payment.getId())) {
+        if (!paymentRepository.existsById(payment.getId())) {
             throw new IllegalArgumentException("Payment with ID " + payment.getId() + " does not exist.");
         }
-        return _paymentRepository.save(payment);
+        return paymentRepository.save(payment);
     }
 
     public void deletePayment(Long id) {
-        _paymentRepository.deleteById(id);
+        paymentRepository.deleteById(id);
     }
-
-
 }

@@ -2,7 +2,6 @@ package net.parkvision.parkvisionbackend;
 
 import jakarta.annotation.PostConstruct;
 import net.parkvision.parkvisionbackend.service.DataSeeder;
-import net.parkvision.parkvisionbackend.service.EmailSenderService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -25,9 +24,6 @@ public class ParkVisionBackendApplication {
     }
 
     @Autowired
-    private EmailSenderService emailSenderService;
-
-    @Autowired
     private DataSeeder dataSeeder;
 
     public static void main(String[] args) {
@@ -35,7 +31,7 @@ public class ParkVisionBackendApplication {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void triggerWhenStarts() throws Exception {
+    public void triggerWhenStarts() {
         System.out.println("Application started ...");
     }
 

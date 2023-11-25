@@ -11,35 +11,34 @@ import java.util.Optional;
 @Service
 public class ParkingService {
 
-    private final ParkingRepository _parkingRepository;
+    private final ParkingRepository parkingRepository;
 
     @Autowired
     public ParkingService(ParkingRepository parkingRepository) {
-        this._parkingRepository = parkingRepository;
+        this.parkingRepository = parkingRepository;
     }
 
     public List<Parking> getAllParkings() {
-        return _parkingRepository.findAll();
+        return parkingRepository.findAll();
     }
 
     public Optional<Parking> getParkingById(Long id) {
-        return _parkingRepository.findById(id);
+        return parkingRepository.findById(id);
     }
 
     public Parking createParking(Parking parking) {
-        return _parkingRepository.save(parking);
+        return parkingRepository.save(parking);
     }
 
     public Parking updateParking(Parking parking) {
-        if (!_parkingRepository.existsById(parking.getId())) {
+        if (!parkingRepository.existsById(parking.getId())) {
             throw new IllegalArgumentException("Parking with ID " + parking.getId() + " does not exist.");
         }
 
-        return _parkingRepository.save(parking);
+        return parkingRepository.save(parking);
     }
 
     public void deleteParking(Long id) {
-        _parkingRepository.deleteById(id);
+        parkingRepository.deleteById(id);
     }
-
 }

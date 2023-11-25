@@ -37,3 +37,6 @@ park-vision:
   hour-rule: 2
   password-reset-hour-rule: 1
   domain-ip: http://localhost:3000
+  jwt_secret: 4815eda9a2c18870c21789bbca2a59c23b1fa0d587ab7f2773f404d73b8f3ee5
+  jwt_expiration: 3600000
+  jwt_expiration_refresh: 86400000

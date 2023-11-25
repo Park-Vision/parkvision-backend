@@ -21,8 +21,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
 
-    public AuthenticationResponse register(RegisterRequest registerRequest) {
-
+    protected AuthenticationResponse register(RegisterRequest registerRequest) {
         return buildAuthenticationResponse(
                 userService.createClient(
                         registerRequest.getEmail(),
@@ -33,7 +32,7 @@ public class AuthenticationService {
         );
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
+    protected AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authenticationRequest.getEmail(),
@@ -52,13 +51,13 @@ public class AuthenticationService {
                 .build();
     }
 
-    public AuthenticationResponse refresh(String token) {
-        User user = userService.getUserByEmail(jwtService.extractUsername(token));
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(user.getEmail());
-        if (jwtService.isTokenValidRefresh(token, userDetails)){
+    protected AuthenticationResponse refreshToken(String tokenForRefresh) {
+        User user = userService.getUserByEmail(jwtService.extractUsername(tokenForRefresh));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        if (jwtService.isTokenValidForRefresh(tokenForRefresh, userDetails)) {
             return buildAuthenticationResponse(user);
         }
-        System.out.println("can't refresh");
+        System.out.println("Unable to refresh token.");
         return null;
     }
 }

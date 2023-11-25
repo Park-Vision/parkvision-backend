@@ -26,21 +26,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
+            @NonNull HttpServletRequest httpRequest,
+            @NonNull HttpServletResponse httpResponse,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
+        final String authHeader = httpRequest.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             final String jwt = authHeader.substring(7);
-            setSecurityContext(request, jwt);
+            setSecurityContext(httpRequest, jwt);
         }
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(httpRequest, httpResponse);
     }
 
-    private void setSecurityContext(@NonNull HttpServletRequest request, String jwt) {
+    private void setSecurityContext(@NonNull HttpServletRequest httpRequest, String jwt) {
         try {
             final String userEmail = jwtService.extractUsername(jwt);
 
@@ -54,14 +54,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             userDetails.getAuthorities()
                     );
                     authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
+                            new WebAuthenticationDetailsSource().buildDetails(httpRequest)
                     );
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
-
             }
         } catch (ExpiredJwtException ignored) {
-
         }
     }
 }
