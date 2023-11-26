@@ -1,7 +1,13 @@
 package net.parkvision.parkvisionbackend.controller;
 
-import net.parkvision.parkvisionbackend.dto.*;
 import net.parkvision.parkvisionbackend.model.Parking;
+import net.parkvision.parkvisionbackend.dto.AssignParkingDTO;
+import net.parkvision.parkvisionbackend.dto.ParkingDTO;
+import net.parkvision.parkvisionbackend.dto.PasswordResetDTO;
+import net.parkvision.parkvisionbackend.dto.SetPasswordResetDTO;
+import net.parkvision.parkvisionbackend.dto.SetNewPasswordDTO;
+import net.parkvision.parkvisionbackend.dto.SetNewNameDTO;
+import net.parkvision.parkvisionbackend.dto.UserDTO;
 import net.parkvision.parkvisionbackend.model.ParkingManager;
 import net.parkvision.parkvisionbackend.model.Role;
 import net.parkvision.parkvisionbackend.model.User;
@@ -16,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -199,6 +206,7 @@ public class UserController {
         userService.updateUser(user);
         return ResponseEntity.ok(convertToDto(user));
     }
+
 
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping("/disableUser/{id}")
