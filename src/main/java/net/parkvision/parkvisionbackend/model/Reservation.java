@@ -30,6 +30,6 @@ public class Reservation {
     private User user;
     @ManyToOne
     private ParkingSpot parkingSpot;
-    @OneToMany
+    @OneToMany(mappedBy = "reservation")
     private List<Payment> payment;
 }

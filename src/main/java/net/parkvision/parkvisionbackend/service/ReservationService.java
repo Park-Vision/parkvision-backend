@@ -69,7 +69,7 @@ public class ReservationService {
         OffsetDateTime startDate = reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone());
         OffsetDateTime endDate = reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone());
 
-        if (!isWithinParkingHours(startDate, endDate, parking)) {
+        if (!isParking24h(parking) && !isWithinParkingHours(startDate, endDate, parking)) {
             throw new IllegalArgumentException("Reservation not included in Parking's available hours.");
         }
         if (!checkTime(startDate, endDate)) {
@@ -88,13 +88,17 @@ public class ReservationService {
         OffsetDateTime currentDateTime = OffsetDateTime.now();
         OffsetDateTime adjustedStart = currentDateTime.withOffsetSameInstant(start.getOffset()).minusMinutes(15);
 
-        LocalTime startLocalTime = start.toLocalTime();
-        LocalTime endLocalTime = end.toLocalTime();
-
         boolean isAfterAdjustedStart = start.isAfter(adjustedStart);
-        boolean isBeforeEnd = startLocalTime.isBefore(endLocalTime);
+        boolean isBeforeEnd = start.isBefore(end);
 
         return isAfterAdjustedStart && isBeforeEnd;
+    }
+
+    public boolean isParking24h(Parking parking) {
+        OffsetTime parkingStart = parking.getStartTime();
+        OffsetTime parkingEnd = parking.getEndTime();
+
+        return parkingStart.equals(parkingEnd);
     }
 
     public boolean isWithinParkingHours(OffsetDateTime start, OffsetDateTime end, Parking parking) {
@@ -157,6 +161,13 @@ public class ReservationService {
         OffsetDateTime startDate = reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone());
         OffsetDateTime endDate = reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone());
 
+        if (!isParking24h(parking) && !isWithinParkingHours(startDate, endDate, parking)) {
+            throw new IllegalArgumentException("Reservation not included in Parking's available hours.");
+        }
+        if (!checkTime(startDate, endDate)) {
+            throw new IllegalArgumentException("Reservation invalid.");
+        }
+
         reservation.setStartDate(startDate);
         reservation.setEndDate(endDate);
         reservation.setRegistrationNumber(reservation.getRegistrationNumber());
@@ -188,13 +199,19 @@ public class ReservationService {
         return null;
     }
 
+    public void cancelReservationWithoutRefund(Long id) {
+        Optional<StripeCharge> stripeCharge = stripeChargeService.getStripeChargeByReservationId(id);
+        if(stripeCharge.isPresent()){
+            stripeCharge.get().setReservation(null);
+                reservationRepository.getReferenceById(id);
+                deleteReservation(id);
+        }
+    }
+
     public Map<String, OffsetDateTime> getEarliestAvailableTime(ParkingSpot parkingSpot, OffsetDateTime date) {
         List<Reservation> reservations = reservationRepository.findByParkingSpotId(parkingSpot.getId())
                 .stream()
                 .filter(reservation -> reservation.getEndDate().isAfter(date))
-                .filter(reservation -> reservation.getEndDate().getDayOfMonth() == date.getDayOfMonth())
-                .filter(reservation -> reservation.getEndDate().getMonth() == date.getMonth())
-                .filter(reservation -> reservation.getEndDate().getYear() == date.getYear())
                 .sorted(Comparator.comparing(Reservation::getEndDate)).toList();
 
         OffsetDateTime parkingEndTime = OffsetDateTime.of(
@@ -224,6 +241,11 @@ public class ReservationService {
                 return map;
             }
             earliestAvailableTime = reservation.getEndDate();
+        }
+        if(isParking24h(parkingSpot.getParking())){
+            Map<String, OffsetDateTime> map = new HashMap<>();
+            map.put("earliestStart", earliestAvailableTime);
+            return map;
         }
         if (earliestAvailableTime.isBefore(parkingEndTime)) {
             Map<String, OffsetDateTime> map = new HashMap<>();

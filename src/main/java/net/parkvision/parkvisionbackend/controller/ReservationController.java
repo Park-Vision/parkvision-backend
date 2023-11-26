@@ -160,7 +160,7 @@ public class ReservationController {
                 reservationService.deleteReservation(id);
             } else {
                 if (reservation.get().getStartDate().isBefore(now.plusHours(hourRule))) {
-                    reservationService.deleteReservation(id);
+                    reservationService.cancelReservationWithoutRefund(id);
                 } else {
                     reservationService.cancelReservation(id);
                 }
