@@ -32,6 +32,17 @@ public class AuthenticationService {
         );
     }
 
+    protected AuthenticationResponse registerManager(RegisterRequest registerRequest) {
+        return buildAuthenticationResponse(
+                userService.createManager(
+                        registerRequest.getEmail(),
+                        registerRequest.getFirstName(),
+                        registerRequest.getLastName(),
+                        registerRequest.getPassword()
+                )
+        );
+    }
+
     protected AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

@@ -1,5 +1,7 @@
 package net.parkvision.parkvisionbackend.controller;
 
+import net.parkvision.parkvisionbackend.model.Parking;
+import net.parkvision.parkvisionbackend.dto.AssignParkingDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.dto.PasswordResetDTO;
 import net.parkvision.parkvisionbackend.dto.SetPasswordResetDTO;
@@ -7,8 +9,10 @@ import net.parkvision.parkvisionbackend.dto.SetNewPasswordDTO;
 import net.parkvision.parkvisionbackend.dto.SetNewNameDTO;
 import net.parkvision.parkvisionbackend.dto.UserDTO;
 import net.parkvision.parkvisionbackend.model.ParkingManager;
+import net.parkvision.parkvisionbackend.model.Role;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.service.EmailSenderService;
+import net.parkvision.parkvisionbackend.service.ParkingService;
 import net.parkvision.parkvisionbackend.service.RequestContext;
 import net.parkvision.parkvisionbackend.service.UserService;
 import org.modelmapper.ModelMapper;
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/users")
 public class UserController {
     private final UserService userService;
+    private final ParkingService parkingService;
     private final ModelMapper modelMapper;
     private final EmailSenderService emailSenderService;
 
@@ -38,9 +43,10 @@ public class UserController {
 
     @Autowired
     public UserController(UserService userService,
-                          ModelMapper modelMapper,
+                          ParkingService parkingService, ModelMapper modelMapper,
                           EmailSenderService emailSenderService) {
         this.userService = userService;
+        this.parkingService = parkingService;
         this.modelMapper = modelMapper;
         this.emailSenderService = emailSenderService;
     }
@@ -66,6 +72,15 @@ public class UserController {
                 this::convertToDto
         ).collect(Collectors.toList());
         return ResponseEntity.ok(users);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/managers")
+    public ResponseEntity<List<UserDTO>> getAllManagers() {
+        List<UserDTO> managers = userService.getAllManagers().stream().map(
+                this::convertToDto
+        ).collect(Collectors.toList());
+        return ResponseEntity.ok(managers);
     }
 
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
@@ -98,8 +113,26 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        if(user == null) {
+            return ResponseEntity.ok().build();
+        }
+        if (!user.getRole().equals(Role.PARKING_MANAGER)){
+            return ResponseEntity.ok().build();
+        }
+        ParkingManager parkingManager = (ParkingManager) user;
+        if (parkingManager.getParking() != null){
+            long parkingId = parkingManager.getParking().getId();
+            List<User> managers = userService.getAllManagersByParking(parkingId);
+            if (managers.size() == 1){
+                parkingManager.setParking(null);
+                userService.updateUser(parkingManager);
+                parkingService.deleteParking(parkingId);
+            }
+        }
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
@@ -116,6 +149,7 @@ public class UserController {
                     user.getFirstname(),
                     user.getLastname(),
                     user.getEmail(),
+                    "Password reset link",
                     "ParkVision password reset",
                     "Here is the link to reset your password. "
                             + "This link will expire in " + passwordResetHourRule + " hour.",
@@ -145,7 +179,7 @@ public class UserController {
         return ResponseEntity.accepted().build();
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping("/updatePassword")
     public ResponseEntity<UserDTO> updatePassword(
             @RequestBody SetNewPasswordDTO setNewPasswordDTO
@@ -158,7 +192,7 @@ public class UserController {
         return ResponseEntity.ok(convertToDto(user));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping("/updateName")
     public ResponseEntity<UserDTO> updateName(
             @RequestBody SetNewNameDTO setNewNameDTO
@@ -173,7 +207,8 @@ public class UserController {
         return ResponseEntity.ok(convertToDto(user));
     }
 
-    @PreAuthorize("hasRole('USER')")
+
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping("/disableUser/{id}")
     public ResponseEntity<Void> disableUser(
             @PathVariable Long id
@@ -185,5 +220,24 @@ public class UserController {
         user.setEmail(null);
         userService.updateUser(user);
         return ResponseEntity.accepted().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/assignParking")
+    public ResponseEntity<UserDTO> updateName(
+            @RequestBody AssignParkingDTO assignParkingDTO
+    ) {
+        User user = userService.getUserById(assignParkingDTO.getUserId());
+        if(user == null) {
+            return ResponseEntity.ok().build();
+        }
+        if (!user.getRole().equals(Role.PARKING_MANAGER)){
+            return ResponseEntity.ok().build();
+        }
+        ParkingManager parkingManager = (ParkingManager) user;
+        Optional<Parking> parking = parkingService.getParkingById(assignParkingDTO.getParkingId());
+        parking.ifPresent(parkingManager::setParking);
+        userService.updateUser(parkingManager);
+        return ResponseEntity.ok(convertToDto(user));
     }
 }

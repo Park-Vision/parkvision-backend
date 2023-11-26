@@ -23,7 +23,7 @@ public class ParkingSpot {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parkingSpot")
     private List<Point> points;
 
-    @OneToMany(mappedBy = "parkingSpot")
+    @OneToMany(mappedBy = "parkingSpot", cascade = CascadeType.REMOVE)
     private List<Reservation> reservations;
     @ManyToOne
     private Parking parking; // Many-to-one relationship

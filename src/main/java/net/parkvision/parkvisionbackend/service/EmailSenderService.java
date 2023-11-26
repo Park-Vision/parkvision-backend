@@ -87,11 +87,12 @@ public class EmailSenderService {
             String firstName,
             String lastName,
             String to,
+            String title,
             String topic,
             String description,
             String link) throws Exception {
         Context context = new Context();
-        context.setVariable("title", "Password reset link");
+        context.setVariable("title", title);
         context.setVariable("description", description);
         context.setVariable("body", "<b><a href=" + link + ">Reset password</a></b>");
         context.setVariable("name", firstName + " " + lastName);
