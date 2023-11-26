@@ -172,7 +172,7 @@ public class UserController {
         return ResponseEntity.accepted().build();
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping("/updatePassword")
     public ResponseEntity<UserDTO> updatePassword(
             @RequestBody SetNewPasswordDTO setNewPasswordDTO
@@ -185,7 +185,7 @@ public class UserController {
         return ResponseEntity.ok(convertToDto(user));
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping("/updateName")
     public ResponseEntity<UserDTO> updateName(
             @RequestBody SetNewNameDTO setNewNameDTO
@@ -200,7 +200,7 @@ public class UserController {
         return ResponseEntity.ok(convertToDto(user));
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PutMapping("/disableUser/{id}")
     public ResponseEntity<Void> disableUser(
             @PathVariable Long id
