@@ -52,7 +52,7 @@ public class ParkingController {
                 this::convertToDTO
         ).collect(Collectors.toList());
         User user = RequestContext.getUserFromRequest();
-        if (user == null || user.getRole().equals(Role.USER)) {
+        if (user == null || user.getRole().equals(Role.USER) || user.getRole().equals(Role.ADMIN)) {
             return ResponseEntity.ok(parkings);
         }
         List<ParkingDTO> filteredParking =

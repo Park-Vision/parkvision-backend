@@ -1,11 +1,15 @@
 package net.parkvision.parkvisionbackend.service;
 
 import lombok.RequiredArgsConstructor;
+import net.parkvision.parkvisionbackend.dto.SetNewNameDTO;
+import net.parkvision.parkvisionbackend.dto.SetNewPasswordDTO;
 import net.parkvision.parkvisionbackend.dto.SetPasswordResetDTO;
 import net.parkvision.parkvisionbackend.model.Client;
+import net.parkvision.parkvisionbackend.model.ParkingManager;
 import net.parkvision.parkvisionbackend.model.Role;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.ClientRepository;
+import net.parkvision.parkvisionbackend.repository.ParkingManagerRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,11 +26,32 @@ public class UserService {
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ParkingManagerRepository parkingManagerRepository;
     @Value("${park-vision.password-reset-hour-rule}")
     private int passwordResetHourRule;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public List<User> getAllManagers() {
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user.getRole().equals(Role.PARKING_MANAGER))
+                .toList();
+    }
+
+    public List<User> getAllManagersByParking(Long parkingId) {
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user instanceof ParkingManager &&
+                        ((ParkingManager) user).getParking() != null &&
+                        ((ParkingManager) user).getParking().getId().equals(parkingId))
+                .toList();
+    }
+
+    public Optional<User> getCurrentUserById(Long id){
+        return userRepository.findById(id);
     }
 
     public Client createClient(String email, String firstName, String lastName, String password) {
@@ -35,6 +62,16 @@ public class UserService {
         client.setPassword(passwordEncoder.encode(password));
         client.setRole(Role.USER);
         return clientRepository.save(client);
+    }
+
+    public ParkingManager createManager(String email, String firstName, String lastName, String password) {
+        ParkingManager parkingManager = new ParkingManager();
+        parkingManager.setFirstname(firstName);
+        parkingManager.setEmail(email);
+        parkingManager.setLastname(lastName);
+        parkingManager.setPassword(passwordEncoder.encode(password));
+        parkingManager.setRole(Role.PARKING_MANAGER);
+        return parkingManagerRepository.save(parkingManager);
     }
 
     public User getUserByEmail(String email) {
@@ -79,6 +116,11 @@ public class UserService {
         }
         user.setPassword(passwordEncoder.encode(setPasswordResetDTO.getPassword()));
         user.setPasswordResetToken(null);
+        userRepository.save(user);
+    }
+
+    public void updatePassword(User user, SetNewPasswordDTO setNewPasswordDTO){
+        user.setPassword(passwordEncoder.encode(setNewPasswordDTO.getPassword()));
         userRepository.save(user);
     }
 
