@@ -72,7 +72,7 @@ services:
       - "9092:9092"
 
   sitl:
-    image: ardupilot-sitl-parkvision
+    image: wnt3rmute/ardupilot-sitl
     network_mode: "host"
     stdin_open: true
     tty: true
@@ -80,4 +80,4 @@ services:
       - DISPLAY
     # Possible options: --console, --map, -L <location>
     # ParkVision custom locations: Legnicka, Janiszewskiego, Wronskiego
-    command: ./sim_vehicle.py -L Wronskiego -v ArduCopter -N
+    command: ./sim_vehicle.py -l 51.10891,17.05562,120,0 --map -v ArduCopter -N
