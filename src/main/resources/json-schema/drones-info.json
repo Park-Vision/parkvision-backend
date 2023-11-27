@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "status": { "type": "string", "enum": ["FINISHED","INTERRUPTED"] },
+    "start_timestamp": { "type": "integer" },
+    "end_timestamp": { "type": "integer" },
+    "free_spots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "parking_spot_id": { "type": "integer" },
+          "occupied": { "type": "boolean" }
+        },
+        "required": ["parking_spot_id", "occupied"]
+      }
+    }
+  },
+  "required": ["status", "start_timestamp", "end_timestamp", "free_spots"]
+}
