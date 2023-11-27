@@ -168,7 +168,7 @@ public class ParkingSpotService {
 
     public List<ParkingSpot> getParkingSpots(Drone drone) {
         return new ArrayList<>(parkingSpotRepository.findByParkingId(drone.getParking().getId()).stream().filter(parkingSpot ->
-                !parkingSpot.getPoints().isEmpty() && parkingSpot.isActive()).toList());
+                !pointService.getPointsByParkingSpotId(parkingSpot.getId()).isEmpty() && parkingSpot.isActive()).toList());
     }
 
     public Boolean checkIfParkingSpotIsFree(ParkingSpot parkingSpot, OffsetDateTime startDate, OffsetDateTime endDate, Long reservationId) {
