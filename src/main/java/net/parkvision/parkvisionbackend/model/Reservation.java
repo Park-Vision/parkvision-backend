@@ -28,7 +28,7 @@ public class Reservation {
     private double amount;
     @ManyToOne
     private User user;
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     private ParkingSpot parkingSpot;
     @OneToMany(mappedBy = "reservation")
     private List<Payment> payment;
