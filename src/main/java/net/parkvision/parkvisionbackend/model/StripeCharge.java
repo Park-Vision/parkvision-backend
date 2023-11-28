@@ -7,9 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -29,5 +26,4 @@ public class StripeCharge {
     private Payment payment;
     @ManyToOne
     private Reservation reservation;
-
 }

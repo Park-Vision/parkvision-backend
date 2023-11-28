@@ -9,81 +9,123 @@ import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.time.Duration;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.util.*;
-
-import static java.lang.Float.parseFloat;
 
 @Service
 public class ReservationService {
 
-    private final ReservationRepository _reservationRepository;
+    private final ReservationRepository reservationRepository;
 
-    private final ParkingRepository _parkingRepository;
+    private final ParkingRepository parkingRepository;
 
-    private final UserRepository _userRepository;
-    private final ParkingSpotRepository _parkingSpotRepository;
-    private final StripeChargeService _stripeChargeService;
+    private final UserRepository userRepository;
+    private final ParkingSpotRepository parkingSpotRepository;
+    private final StripeChargeService stripeChargeService;
 
     @Autowired
     public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository,
                               ParkingSpotRepository parkingSpotRepository, ParkingRepository parkingRepository,
                               StripeChargeService stripeChargeService) {
-        _reservationRepository = reservationRepository;
-        _userRepository = userRepository;
-        _parkingSpotRepository = parkingSpotRepository;
-        _parkingRepository = parkingRepository;
-        _stripeChargeService = stripeChargeService;
+        this.reservationRepository = reservationRepository;
+        this.userRepository = userRepository;
+        this.parkingSpotRepository = parkingSpotRepository;
+        this.parkingRepository = parkingRepository;
+        this.stripeChargeService = stripeChargeService;
     }
 
     public List<Reservation> getAllReservations() {
-        return _reservationRepository.findAll();
+        return reservationRepository.findAll();
     }
 
     public Optional<Reservation> getReservationById(Long id) {
-        return _reservationRepository.findById(id);
+        return reservationRepository.findById(id);
     }
 
     public Reservation createReservation(Reservation reservation) throws ReservationConflictException {
-        if (!_userRepository.existsById(reservation.getUser().getId())) {
+        if (!userRepository.existsById(reservation.getUser().getId())) {
             throw new IllegalArgumentException("User with ID " + reservation.getUser().getId() + " does not exist.");
         }
 
-        if (!_parkingSpotRepository.existsById(reservation.getParkingSpot().getId())) {
+        if (!parkingSpotRepository.existsById(reservation.getParkingSpot().getId())) {
             throw new IllegalArgumentException("ParkingSpot with ID " + reservation.getParkingSpot().getId() + " does" +
                     " not exist.");
         }
 
-        if (!_parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId()).isActive()) {
+        if (!parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId()).isActive()) {
             throw new IllegalArgumentException("ParkingSpot with ID " + reservation.getParkingSpot().getId() +
                     " is not active.");
         }
 
         if (!isParkingSpotFree(reservation)) {
-            throw new ReservationConflictException("Konflikt datowy z istniejącą rezerwacją.");
+            throw new ReservationConflictException("Conflict with existing reservation.");
         }
 
-        ParkingSpot parkingSpot = _parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId());
+        ParkingSpot parkingSpot = parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId());
 
-        Parking parking = _parkingRepository.getReferenceById(parkingSpot.getParking().getId());
+        Parking parking = parkingRepository.getReferenceById(parkingSpot.getParking().getId());
         OffsetDateTime startDate = reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone());
         OffsetDateTime endDate = reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone());
+
+        if (!isParking24h(parking) && !isWithinParkingHours(startDate, endDate, parking)) {
+            throw new IllegalArgumentException("Reservation not included in Parking's available hours.");
+        }
+        if (!checkTime(startDate, endDate)) {
+            throw new IllegalArgumentException("Reservation invalid.");
+        }
 
         reservation.setStartDate(startDate);
         reservation.setEndDate(endDate);
 
-        Reservation createdReservation = _reservationRepository.save(reservation);
+        Reservation createdReservation = reservationRepository.save(reservation);
         createdReservation.getParkingSpot().setParking(parking);
         return createdReservation;
     }
 
+    public boolean checkTime(OffsetDateTime start, OffsetDateTime end) {
+        OffsetDateTime currentDateTime = OffsetDateTime.now();
+        OffsetDateTime adjustedStart = currentDateTime.withOffsetSameInstant(start.getOffset()).minusMinutes(15);
+
+        boolean isAfterAdjustedStart = start.isAfter(adjustedStart);
+        boolean isBeforeEnd = start.isBefore(end);
+
+        return isAfterAdjustedStart && isBeforeEnd;
+    }
+
+    public boolean isParking24h(Parking parking) {
+        OffsetTime parkingStart = parking.getStartTime();
+        OffsetTime parkingEnd = parking.getEndTime();
+
+        return parkingStart.equals(parkingEnd);
+    }
+
+    public boolean isWithinParkingHours(OffsetDateTime start, OffsetDateTime end, Parking parking) {
+        OffsetTime parkingStart = parking.getStartTime();
+        OffsetTime parkingEnd = parking.getEndTime();
+
+        LocalTime startLocalTime = start.toLocalTime();
+        LocalTime endLocalTime = end.toLocalTime();
+        LocalTime parkingStartLocalTime = parkingStart.toLocalTime();
+        LocalTime parkingEndLocalTime = parkingEnd.toLocalTime();
+
+        boolean isStartAfterParkingStart = startLocalTime.isAfter(parkingStartLocalTime) || startLocalTime.equals(parkingStartLocalTime);
+        boolean isStartBeforeParkingEnd = startLocalTime.isBefore(parkingEndLocalTime);
+        boolean isEndAfterParkingStart = endLocalTime.isAfter(parkingStartLocalTime);
+        boolean isEndBeforeParkingEnd = endLocalTime.isBefore(parkingEndLocalTime) || endLocalTime.equals(parkingEndLocalTime);
+
+        return isStartAfterParkingStart
+                && isStartBeforeParkingEnd
+                && isEndAfterParkingStart
+                && isEndBeforeParkingEnd;
+    }
+
+
+
     public boolean isParkingSpotFree(Reservation reservation) {
         List<Reservation> existingReservations =
-                _reservationRepository.findByParkingSpotId(reservation.getParkingSpot().getId());
+                reservationRepository.findByParkingSpotId(reservation.getParkingSpot().getId());
         for (Reservation existingReservation : existingReservations) {
             if (isDateRangeOverlap(existingReservation, reservation)) {
                 return false;
@@ -92,32 +134,39 @@ public class ReservationService {
         return true;
     }
 
-    private boolean isDateRangeOverlap(Reservation existingReservation, Reservation newReservation) {
+    public boolean isDateRangeOverlap(Reservation existingReservation, Reservation newReservation) {
 
         return newReservation.getStartDate().isBefore(existingReservation.getEndDate())
                 && newReservation.getEndDate().isAfter(existingReservation.getStartDate());
     }
 
     public Reservation updateReservation(Reservation reservation) {
-        if (!_reservationRepository.existsById(reservation.getId())) {
+        if (!reservationRepository.existsById(reservation.getId())) {
             throw new IllegalArgumentException("Reservation with ID " + reservation.getId() + " does not exist.");
         }
 
-        if (!_userRepository.existsById(reservation.getUser().getId())) {
+        if (!userRepository.existsById(reservation.getUser().getId())) {
             throw new IllegalArgumentException("Client with ID " + reservation.getUser().getId() + " does not exist.");
         }
 
-        if (!_parkingSpotRepository.existsById(reservation.getParkingSpot().getId())) {
+        if (!parkingSpotRepository.existsById(reservation.getParkingSpot().getId())) {
             throw new IllegalArgumentException("ParkingSpot with ID " + reservation.getParkingSpot().getId() + " does" +
                     " not exist.");
         }
 
-        ParkingSpot parkingSpot = _parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId());
+        ParkingSpot parkingSpot = parkingSpotRepository.getReferenceById(reservation.getParkingSpot().getId());
 
-        Parking parking = _parkingRepository.getReferenceById(parkingSpot.getParking().getId());
+        Parking parking = parkingRepository.getReferenceById(parkingSpot.getParking().getId());
 
         OffsetDateTime startDate = reservation.getStartDate().withOffsetSameInstant(parking.getTimeZone());
         OffsetDateTime endDate = reservation.getEndDate().withOffsetSameInstant(parking.getTimeZone());
+
+        if (!isParking24h(parking) && !isWithinParkingHours(startDate, endDate, parking)) {
+            throw new IllegalArgumentException("Reservation not included in Parking's available hours.");
+        }
+        if (!checkTime(startDate, endDate)) {
+            throw new IllegalArgumentException("Reservation invalid.");
+        }
 
         reservation.setStartDate(startDate);
         reservation.setEndDate(endDate);
@@ -126,22 +175,22 @@ public class ReservationService {
         reservation.setParkingSpot(reservation.getParkingSpot());
         reservation.setAmount(reservation.getAmount());
 
-        return _reservationRepository.save(reservation);
+        return reservationRepository.save(reservation);
     }
 
     public void deleteReservation(Long id) {
-        _reservationRepository.deleteById(id);
+        reservationRepository.deleteById(id);
     }
 
     public Reservation cancelReservation(Long id) {
-        Optional<StripeCharge> stripeCharge = _stripeChargeService.getStripeChargeByReservationId(id);
+        Optional<StripeCharge> stripeCharge = stripeChargeService.getStripeChargeByReservationId(id);
         if (stripeCharge.isPresent()) {
-            StripeCharge refundedCharge = _stripeChargeService.refundCharge(stripeCharge.get().getId());
+            StripeCharge refundedCharge = stripeChargeService.refundCharge(stripeCharge.get().getId());
             if (refundedCharge.getSuccess()) {
                 refundedCharge.setReservation(null);
-                StripeCharge updatedCharge = _stripeChargeService.updateStripeCharge(refundedCharge);
+                StripeCharge updatedCharge = stripeChargeService.updateStripeCharge(refundedCharge);
                 if (updatedCharge.getReservation() == null) {
-                    Reservation canceledReservation = _reservationRepository.getReferenceById(id);
+                    Reservation canceledReservation = reservationRepository.getReferenceById(id);
                     deleteReservation(id);
                     return canceledReservation;
                 }
@@ -150,13 +199,19 @@ public class ReservationService {
         return null;
     }
 
+    public void cancelReservationWithoutRefund(Long id) {
+        Optional<StripeCharge> stripeCharge = stripeChargeService.getStripeChargeByReservationId(id);
+        if(stripeCharge.isPresent()){
+            stripeCharge.get().setReservation(null);
+                reservationRepository.getReferenceById(id);
+                deleteReservation(id);
+        }
+    }
+
     public Map<String, OffsetDateTime> getEarliestAvailableTime(ParkingSpot parkingSpot, OffsetDateTime date) {
-        List<Reservation> reservations = _reservationRepository.findByParkingSpotId(parkingSpot.getId())
+        List<Reservation> reservations = reservationRepository.findByParkingSpotId(parkingSpot.getId())
                 .stream()
                 .filter(reservation -> reservation.getEndDate().isAfter(date))
-                .filter(reservation -> reservation.getEndDate().getDayOfMonth() == date.getDayOfMonth())
-                .filter(reservation -> reservation.getEndDate().getMonth() == date.getMonth())
-                .filter(reservation -> reservation.getEndDate().getYear() == date.getYear())
                 .sorted(Comparator.comparing(Reservation::getEndDate)).toList();
 
         OffsetDateTime parkingEndTime = OffsetDateTime.of(
@@ -171,7 +226,8 @@ public class ReservationService {
                 parkingSpot.getParking().getStartTime().getOffset()
         );
 
-        OffsetDateTime earliestAvailableTime = OffsetDateTime.of(date.toLocalDateTime(), parkingSpot.getParking().getTimeZone());
+        OffsetDateTime earliestAvailableTime = OffsetDateTime.of(date.toLocalDateTime(),
+                parkingSpot.getParking().getTimeZone());
         if (earliestAvailableTime.isBefore(parkingStartTime)) {
             earliestAvailableTime = parkingStartTime;
         }
@@ -186,6 +242,11 @@ public class ReservationService {
             }
             earliestAvailableTime = reservation.getEndDate();
         }
+        if(isParking24h(parkingSpot.getParking())){
+            Map<String, OffsetDateTime> map = new HashMap<>();
+            map.put("earliestStart", earliestAvailableTime);
+            return map;
+        }
         if (earliestAvailableTime.isBefore(parkingEndTime)) {
             Map<String, OffsetDateTime> map = new HashMap<>();
             map.put("earliestStart", earliestAvailableTime);
@@ -197,7 +258,7 @@ public class ReservationService {
     }
 
     public Map<String, List<Reservation>> getSortedReservationsByClient(User client) {
-        List<Reservation> clientReservations = _reservationRepository.findByUserId(client.getId());
+        List<Reservation> clientReservations = reservationRepository.findByUserId(client.getId());
         Map<String, List<Reservation>> clientSortedReservations = new HashMap<>();
         clientSortedReservations.put("Pending", new ArrayList<>());
         clientSortedReservations.put("Archived", new ArrayList<>());
@@ -216,24 +277,24 @@ public class ReservationService {
         return clientSortedReservations;
     }
 
-    public List<Reservation> getAllReservationsByParking(Long id) {
-        return _reservationRepository.findAll()
+    public List<Reservation> getAllReservationsByParkingId(Long id) {
+        return reservationRepository.findAll()
                 .stream()
                 .filter(reservation -> Objects.equals(reservation.getParkingSpot().getParking().getId(), id))
                 .sorted(Comparator.comparing(Reservation::getEndDate))
                 .toList();
     }
 
-    public List<Reservation> getAllReservationsByParkingSpot(Long id) {
-        return _reservationRepository.findAll()
+    public List<Reservation> getAllReservationsByParkingSpotId(Long id) {
+        return reservationRepository.findAll()
                 .stream()
                 .filter(reservation -> Objects.equals(reservation.getParkingSpot().getId(), id))
                 .sorted(Comparator.comparing(Reservation::getEndDate))
                 .toList();
     }
 
-    public List<Reservation> getFutureReservationByParkingSpot(Long id) {
-        return _reservationRepository.findAll()
+    public List<Reservation> getFutureReservationByParkingSpotId(Long id) {
+        return reservationRepository.findAll()
                 .stream()
                 .filter(reservation -> Objects.equals(reservation.getParkingSpot().getId(), id))
                 .filter(reservation -> reservation.getStartDate().isAfter(OffsetDateTime.now()))

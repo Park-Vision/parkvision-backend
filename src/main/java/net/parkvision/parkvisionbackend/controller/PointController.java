@@ -16,13 +16,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/points")
 public class PointController {
-    private final PointService _pointService;
+    private final PointService pointService;
 
     private final ModelMapper modelMapper;
 
     @Autowired
     public PointController(PointService pointService, ModelMapper modelMapper) {
-        _pointService = pointService;
+        this.pointService = pointService;
         this.modelMapper = modelMapper;
     }
 
@@ -38,7 +38,7 @@ public class PointController {
 
     @GetMapping
     public ResponseEntity<List<PointDTO>> getAllPoints() {
-        List<PointDTO> points = _pointService.getAllPoints().stream().map(
+        List<PointDTO> points = pointService.getAllPoints().stream().map(
                 this::convertToDto
         ).collect(Collectors.toList());
         return ResponseEntity.ok(points);
@@ -46,24 +46,20 @@ public class PointController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PointDTO> getPointById(@PathVariable Long id) {
-        Optional<Point> point = _pointService.getPointById(id);
-        if (point.isPresent()) {
-            return ResponseEntity.ok(convertToDto(point.get()));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<Point> point = pointService.getPointById(id);
+        return point.map(value -> ResponseEntity.ok(convertToDto(value))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public ResponseEntity<PointDTO> createPoint(@RequestBody PointDTO pointDto) {
-        Point createdPoint = _pointService.createPoint(convertToEntity(pointDto));
+        Point createdPoint = pointService.createPoint(convertToEntity(pointDto));
         return ResponseEntity.ok(convertToDto(createdPoint));
     }
 
     @PutMapping
     public ResponseEntity<PointDTO> updatePoint(@RequestBody PointDTO pointDto) {
         try {
-            Point updatedPoint = _pointService.updatePoint(convertToEntity(pointDto));
+            Point updatedPoint = pointService.updatePoint(convertToEntity(pointDto));
             return ResponseEntity.ok(convertToDto(updatedPoint));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
@@ -72,7 +68,7 @@ public class PointController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePoint(@PathVariable Long id) {
-        _pointService.deletePoint(id);
+        pointService.deletePoint(id);
         return ResponseEntity.noContent().build();
     }
 }

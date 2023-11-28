@@ -7,6 +7,8 @@ import net.parkvision.parkvisionbackend.model.Payment;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.PaymentRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,32 +20,32 @@ import java.util.Optional;
 
 @Service
 public class PaymentService {
-    private final PaymentRepository _paymentRepository;
-    private final UserRepository _userRepository;
+    private final PaymentRepository paymentRepository;
+    private final UserRepository userRepository;
 
     @Value("${stripe.key.publishable}")
     private String stripeKey;
 
     @Autowired
     public PaymentService(PaymentRepository paymentRepository, UserRepository userRepository) {
-        this._paymentRepository = paymentRepository;
-        this._userRepository = userRepository;
+        this.paymentRepository = paymentRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Payment> getAllPayments() {
-        return _paymentRepository.findAll();
+        return paymentRepository.findAll();
     }
 
     public Optional<Payment> getPaymentById(Long id) {
-        return _paymentRepository.findById(id);
+        return paymentRepository.findById(id);
     }
 
     public Payment createPayment(Payment payment) {
-        if (!_userRepository.existsById(payment.getUser().getId())) {
+        if (!userRepository.existsById(payment.getUser().getId())) {
             throw new IllegalArgumentException("User with ID " + payment.getUser().getId() + " does not exist.");
         }
         Stripe.apiKey = stripeKey;
-        User user = _userRepository.getReferenceById(payment.getUser().getId());
+        User user = userRepository.getReferenceById(payment.getUser().getId());
 
         Map<String, Object> card = new HashMap<>();
         card.put("number", payment.getCardNumber());
@@ -53,30 +55,30 @@ public class PaymentService {
 
         Map<String, Object> params = new HashMap<>();
         params.put("card", card);
+        payment.setUser(user);
 
         try {
             Token token = Token.create(params);
             if (token != null && token.getId() != null) {
                 payment.setToken(token.getId());
-                payment.setUser(user);
             }
-            _paymentRepository.save(payment);
-            return payment;
         } catch (StripeException exception) {
-            throw new RuntimeException(exception.getMessage());
+            payment.setToken(null);
+            Logger logger = LoggerFactory.getLogger(this.getClass());
+            logger.error(exception.getMessage());
         }
+        paymentRepository.save(payment);
+        return payment;
     }
 
     public Payment updatePayment(Payment payment) {
-        if (!_paymentRepository.existsById(payment.getId())) {
+        if (!paymentRepository.existsById(payment.getId())) {
             throw new IllegalArgumentException("Payment with ID " + payment.getId() + " does not exist.");
         }
-        return _paymentRepository.save(payment);
+        return paymentRepository.save(payment);
     }
 
     public void deletePayment(Long id) {
-        _paymentRepository.deleteById(id);
+        paymentRepository.deleteById(id);
     }
-
-
 }

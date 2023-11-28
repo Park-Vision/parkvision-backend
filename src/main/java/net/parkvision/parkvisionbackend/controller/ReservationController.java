@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/reservations")
 public class ReservationController {
-    private final ReservationService _reservationService;
+    private final ReservationService reservationService;
 
-    private final ParkingSpotService _parkingSpotService;
-    private final ParkingService _parkingService;
+    private final ParkingSpotService parkingSpotService;
+    private final ParkingService parkingService;
     private final EmailSenderService emailSenderService;
     private final ModelMapper modelMapper;
     @Value("${park-vision.hour-rule}")
@@ -35,11 +35,11 @@ public class ReservationController {
                                  EmailSenderService emailSenderService,
                                  ModelMapper modelMapper,
                                  ParkingSpotService parkingSpotService, ParkingService parkingService) {
-        _reservationService = reservationService;
+        this.reservationService = reservationService;
         this.modelMapper = modelMapper;
         this.emailSenderService = emailSenderService;
-        _parkingSpotService = parkingSpotService;
-        _parkingService = parkingService;
+        this.parkingSpotService = parkingSpotService;
+        this.parkingService = parkingService;
     }
 
     private ReservationDTO convertToDto(Reservation reservation) {
@@ -60,7 +60,7 @@ public class ReservationController {
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @GetMapping
     public ResponseEntity<List<ReservationDTO>> getAllReservations() {
-        List<ReservationDTO> reservations = _reservationService.getAllReservations().stream().map(
+        List<ReservationDTO> reservations = reservationService.getAllReservations().stream().map(
                 this::convertToDto
         ).collect(Collectors.toList());
         return ResponseEntity.ok(reservations);
@@ -69,7 +69,7 @@ public class ReservationController {
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<ReservationDTO> getReservationById(@PathVariable Long id) {
-        Optional<Reservation> reservation = _reservationService.getReservationById(id);
+        Optional<Reservation> reservation = reservationService.getReservationById(id);
         return reservation.map(value -> ResponseEntity.ok(convertToDto(value))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -79,9 +79,9 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
         Optional<ParkingSpot> parkingSpot =
-                _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
+                parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
         if (parkingSpot.isPresent()) {
-            Reservation createdReservation = _reservationService.createReservation(convertToEntity(reservationDto));
+            Reservation createdReservation = reservationService.createReservation(convertToEntity(reservationDto));
             return ResponseEntity.ok(convertToDto(createdReservation));
         }
         return ResponseEntity.badRequest().build();
@@ -95,7 +95,7 @@ public class ReservationController {
             return ResponseEntity.badRequest().build();
         }
         if (user.getRole().equals(Role.USER)) {
-            Optional<Reservation> reservation = _reservationService.getReservationById(reservationDto.getId());
+            Optional<Reservation> reservation = reservationService.getReservationById(reservationDto.getId());
 
             if (reservation.isPresent() && !reservation.get().getUser().getId().equals(user.getId())) {
                 return ResponseEntity.badRequest().build();
@@ -103,9 +103,9 @@ public class ReservationController {
         }
         try {
 
-            Reservation updatedReservation = _reservationService.updateReservation(convertToEntity(reservationDto));
+            Reservation updatedReservation = reservationService.updateReservation(convertToEntity(reservationDto));
             Optional<ParkingSpot> parkingSpot =
-                    _parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
+                    parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
             if (parkingSpot.isEmpty()) {
                 return ResponseEntity.badRequest().build();
             }
@@ -117,7 +117,7 @@ public class ReservationController {
                             updatedReservation.getUser().getLastname(),
                             updatedReservation.getUser().getEmail(),
                             "Reservation update confirmation",
-                            "Here is the confirmation of the reservation update you made in our system. ",
+                            "Here is the confirmation of the reservation update in our system. ",
                             parkingSpot.get().getParking(),
                             updatedReservation, "ParkVision reservation update confirmation");
                 } catch (Exception e) {
@@ -135,7 +135,7 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteReservation(@PathVariable Long id) {
         User user = RequestContext.getUserFromRequest();
-        Optional<Reservation> reservation = _reservationService.getReservationById(id);
+        Optional<Reservation> reservation = reservationService.getReservationById(id);
 
 
         if (user == null) {
@@ -145,9 +145,7 @@ public class ReservationController {
 
 
         if (reservation.isPresent() && user.getRole().equals(Role.PARKING_MANAGER)) {
-            ParkingModerator parkingManager = (ParkingModerator) user;
-
-
+            ParkingManager parkingManager = (ParkingManager) user;
 
             if (!reservation.get().getParkingSpot().getParking().getId().equals(parkingManager.getParking().getId())) {
                 return ResponseEntity.badRequest().body("Parking manager does not have permission to delete this " +
@@ -159,16 +157,20 @@ public class ReservationController {
             }
 
             if (reservation.get().getUser().getId().equals(user.getId())) {
-                _reservationService.deleteReservation(id);
+                reservationService.deleteReservation(id);
             } else {
-                _reservationService.cancelReservation(id);
+                if (reservation.get().getStartDate().isBefore(now.plusHours(hourRule))) {
+                    reservationService.cancelReservationWithoutRefund(id);
+                } else {
+                    reservationService.cancelReservation(id);
+                }
                 try {
                     emailSenderService.sendHtmlEmailReservation(
                             reservation.get().getUser().getFirstname(),
                             reservation.get().getUser().getLastname(),
                             reservation.get().getUser().getEmail(),
                             "Reservation cancellation confirmation",
-                            "Here is the confirmation of the reservation cancellation you made in our system. ",
+                            "Parking Manager canceled your reservation. ",
                             reservation.get().getParkingSpot().getParking(),
                             reservation.get(), "ParkVision reservation cancellation confirmation");
                 } catch (Exception e) {
@@ -185,12 +187,12 @@ public class ReservationController {
                 return ResponseEntity.badRequest().body("Cannot cancel reservation less than " + hourRule + " hours before start.");
             }
 
-            Reservation canceledReservation = _reservationService.cancelReservation(id);
+            Reservation canceledReservation = reservationService.cancelReservation(id);
             if (canceledReservation == null) {
                 return ResponseEntity.badRequest().body("Failed to cancel the reservation.");
             }
             Optional<ParkingSpot> parkingSpot =
-                    _parkingSpotService.getParkingSpotById(canceledReservation.getParkingSpot().getId());
+                    parkingSpotService.getParkingSpotById(canceledReservation.getParkingSpot().getId());
             if (parkingSpot.isEmpty()) {
                 return ResponseEntity.badRequest().body("Failed to retrieve parking spot information.");
             }
@@ -221,7 +223,7 @@ public class ReservationController {
             return ResponseEntity.badRequest().build();
         }
 
-        Map<String, List<Reservation>> clientReservations = _reservationService.getSortedReservationsByClient(client);
+        Map<String, List<Reservation>> clientReservations = reservationService.getSortedReservationsByClient(client);
 
         Map<String, List<ReservationDTO>> clientReservationsResponse = new HashMap<>();
 
@@ -239,12 +241,12 @@ public class ReservationController {
     public ResponseEntity<List<ReservationDTO>> getAllReservationsByParking(@PathVariable Long id) {
 
         User user = RequestContext.getUserFromRequest();
-        Optional<Parking> parking = _parkingService.getParkingById(id);
+        Optional<Parking> parking = parkingService.getParkingById(id);
         if (user != null && user.getRole().equals(Role.PARKING_MANAGER)) {
             if (parking.isPresent()){
-                ParkingModerator parkingModerator = (ParkingModerator) user;
-                if((parkingModerator.getParking().getId().equals(parking.get().getId()))){
-                    List<ReservationDTO> reservations = _reservationService.getAllReservationsByParking(id).stream().map(
+                ParkingManager parkingManager = (ParkingManager) user;
+                if((parkingManager.getParking().getId().equals(parking.get().getId()))){
+                    List<ReservationDTO> reservations = reservationService.getAllReservationsByParkingId(id).stream().map(
                             this::convertToDto
                     ).collect(Collectors.toList());
                     return ResponseEntity.ok(reservations);

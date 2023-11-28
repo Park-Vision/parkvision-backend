@@ -1,7 +1,6 @@
 package net.parkvision.parkvisionbackend.dto;
 
 import lombok.Data;
-
 import java.time.*;
 
 @Data

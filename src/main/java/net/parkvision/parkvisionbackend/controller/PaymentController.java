@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/payments")
 public class PaymentController {
 
-    private final PaymentService _paymentService;
+    private final PaymentService paymentService;
     private final ModelMapper modelMapper;
 
     @Autowired
     public PaymentController(PaymentService paymentService, ModelMapper modelMapper) {
-        _paymentService = paymentService;
+        this.paymentService = paymentService;
         this.modelMapper = modelMapper;
     }
 
@@ -36,35 +36,33 @@ public class PaymentController {
 
     @GetMapping
     public List<PaymentDTO> getAllPayments() {
-        return _paymentService.getAllPayments().stream().map(
+        return paymentService.getAllPayments().stream().map(
                 this::convertToDto
         ).collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PaymentDTO> getPaymentById(@PathVariable Long id) {
-        Optional<Payment> payment = _paymentService.getPaymentById(id);
+        Optional<Payment> payment = paymentService.getPaymentById(id);
         return payment.map(value -> ResponseEntity.ok(convertToDto(value))).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<PaymentDTO> createPayment(@RequestBody PaymentDTO paymentDTO) {
-        Payment createdPayment = _paymentService.createPayment(convertToEntity(paymentDTO));
+        Payment createdPayment = paymentService.createPayment(convertToEntity(paymentDTO));
         return ResponseEntity.ok(convertToDto(createdPayment));
     }
 
     @PutMapping
     public ResponseEntity<PaymentDTO> updatePayment(@RequestBody PaymentDTO paymentDTO) {
-        Payment updatedPayment = _paymentService.updatePayment(convertToEntity(paymentDTO));
+        Payment updatedPayment = paymentService.updatePayment(convertToEntity(paymentDTO));
         return ResponseEntity.ok(convertToDto(updatedPayment));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
-        _paymentService.deletePayment(id);
+        paymentService.deletePayment(id);
         return ResponseEntity.noContent().build();
     }
-
-
 }

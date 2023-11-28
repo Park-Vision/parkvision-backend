@@ -28,23 +28,23 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/parkingspots")
 public class ParkingSpotController {
 
-    private final ParkingSpotService _parkingSpotService;
+    private final ParkingSpotService parkingSpotService;
     private final ModelMapper modelMapper;
-    private final ParkingService _parkingService;
-    private final PointController _pointController;
-    private final PointService _pointService;
-    private final DroneService _droneService;
+    private final ParkingService parkingService;
+    private final PointController pointController;
+    private final PointService pointService;
+    private final DroneService droneService;
 
     @Autowired
     public ParkingSpotController(ParkingSpotService parkingSpotService, ModelMapper modelMapper,
                                  ParkingService parkingService, PointController pointController,
                                  PointService pointService, DroneService droneService) {
-        _parkingSpotService = parkingSpotService;
+        this.parkingSpotService = parkingSpotService;
         this.modelMapper = modelMapper;
-        _parkingService = parkingService;
-        _pointController = pointController;
-        _pointService = pointService;
-        _droneService = droneService;
+        this.parkingService = parkingService;
+        this.pointController = pointController;
+        this.pointService = pointService;
+        this.droneService = droneService;
     }
 
     public ParkingSpotDTO convertToDto(ParkingSpot parkingSpot) {
@@ -52,7 +52,7 @@ public class ParkingSpotController {
         parkingSpotDTO.setParkingDTO(modelMapper.map(parkingSpot.getParking(), ParkingDTO.class));
         if (!parkingSpot.getPoints().isEmpty()) {
             parkingSpotDTO.setPointsDTO(parkingSpot.getPoints().stream().map(
-                    _pointController::convertToDto
+                    pointController::convertToDto
             ).collect(Collectors.toList()));
         }
         return parkingSpotDTO;
@@ -65,7 +65,7 @@ public class ParkingSpotController {
     @GetMapping
     public ResponseEntity<List<ParkingSpotDTO>> getAllParkingSpots() {
         List<ParkingSpotDTO> parkingSpots
-                = _parkingSpotService.getAllParkingSpotsWithPoints().stream().map(
+                = parkingSpotService.getAllParkingSpotsWithPoints().stream().map(
                 this::convertToDto
         ).collect(Collectors.toList());
         return ResponseEntity.ok(parkingSpots);
@@ -73,19 +73,19 @@ public class ParkingSpotController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ParkingSpotDTO> getParkingSpotById(@PathVariable Long id) {
-        Optional<ParkingSpot> parkingSpot = _parkingSpotService.getParkingSpotById(id);
+        Optional<ParkingSpot> parkingSpot = parkingSpotService.getParkingSpotById(id);
         if (parkingSpot.isPresent()) {
-            parkingSpot.get().setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.get().getId()));
+            parkingSpot.get().setPoints(pointService.getPointsByParkingSpotId(parkingSpot.get().getId()));
             return ResponseEntity.ok(convertToDto(parkingSpot.get()));
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
+
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ParkingSpotDTO> createParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
-        ParkingSpot createdParkingSpot = _parkingSpotService.createParkingSpot(convertToEntity(parkingSpotDto));
+        ParkingSpot createdParkingSpot = parkingSpotService.createParkingSpot(convertToEntity(parkingSpotDto));
         return ResponseEntity.ok(convertToDto(createdParkingSpot));
     }
 
@@ -93,7 +93,7 @@ public class ParkingSpotController {
     @PutMapping
     public ResponseEntity<ParkingSpotDTO> updateParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
         try {
-            ParkingSpot updatedParkingSpot = _parkingSpotService.updateParkingSpot(convertToEntity(parkingSpotDto));
+            ParkingSpot updatedParkingSpot = parkingSpotService.updateParkingSpot(convertToEntity(parkingSpotDto));
             return ResponseEntity.ok(convertToDto(updatedParkingSpot));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
@@ -104,7 +104,7 @@ public class ParkingSpotController {
     @DeleteMapping("/soft/{id}")
     public ResponseEntity<Void> softDeleteParkingSpot(@PathVariable Long id) {
         try {
-            _parkingSpotService.softDeleteParkingSpot(id);
+            parkingSpotService.softDeleteParkingSpot(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(409).build();
@@ -114,7 +114,7 @@ public class ParkingSpotController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @DeleteMapping("/hard/{id}")
     public ResponseEntity<Void> hardDeleteParkingSpot(@PathVariable Long id) {
-        _parkingSpotService.hardDeleteParkingSpot(id);
+        parkingSpotService.hardDeleteParkingSpot(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -122,79 +122,78 @@ public class ParkingSpotController {
     public ResponseEntity<List<ParkingSpotDTO>> getFreeSpotsByParkingId(@PathVariable Long id,
                                                                         @RequestParam OffsetDateTime startDate,
                                                                         @RequestParam OffsetDateTime endDate) {
-        Optional<Parking> parking = _parkingService.getParkingById(id);
+        Optional<Parking> parking = parkingService.getParkingById(id);
         if (parking.isPresent()) {
             startDate = startDate.withOffsetSameInstant(parking.get().getTimeZone());
             endDate = endDate.withOffsetSameInstant(parking.get().getTimeZone());
             List<ParkingSpotDTO> freeParkingSpots
-                    = _parkingSpotService.getFreeSpots(parking.get(),
+                    = parkingSpotService.getFreeSpots(parking.get(),
                     startDate,
                     endDate
             ).stream().map(parkingSpot -> {
-                        parkingSpot.setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.getId()));
+                        parkingSpot.setPoints(pointService.getPointsByParkingSpotId(parkingSpot.getId()));
                         return this.convertToDto(parkingSpot);
                     }
             ).collect(Collectors.toList());
             return ResponseEntity.ok(freeParkingSpots);
-        } else {
-            return ResponseEntity.notFound().build();
         }
-    }
+        return ResponseEntity.notFound().build();
 
+    }
 
     @GetMapping("/parking/{id}")
     public ResponseEntity<List<ParkingSpotDTO>> getSpotsByParkingId(@PathVariable Long id) {
-        Optional<Parking> parking = _parkingService.getParkingById(id);
+        Optional<Parking> parking = parkingService.getParkingById(id);
         if (parking.isPresent()) {
             List<ParkingSpotDTO> parkingSpots
-                    = _parkingSpotService.getParkingSpotsWithPoints(parking.get()).stream().map(parkingSpot -> {
-                        parkingSpot.setPoints(_pointService.getPointsByParkingSpotId(parkingSpot.getId()));
+                    = parkingSpotService.getParkingSpotsWithPoints(parking.get()).stream().map(parkingSpot -> {
+                        parkingSpot.setPoints(pointService.getPointsByParkingSpotId(parkingSpot.getId()));
                         return this.convertToDto(parkingSpot);
                     }
             ).collect(Collectors.toList());
             return ResponseEntity.ok(parkingSpots);
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
+
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping("/parking/{id}/model/create")
     public ResponseEntity<List<ParkingSpotDTO>> createParkingModel(@PathVariable Long id,
                                                                    @RequestBody List<ParkingSpotDTO> parkingSpotDTOList) {
-        Optional<Parking> parking = _parkingService.getParkingById(id);
+        Optional<Parking> parking = parkingService.getParkingById(id);
         if (parking.isPresent()) {
-            List<ParkingSpotDTO> parkingSpots = _parkingSpotService.createParkingSpots(
+            List<ParkingSpotDTO> parkingSpots = parkingSpotService.createParkingSpots(
                     parkingSpotDTOList.stream().map(this::convertToEntity).collect(Collectors.toList())
             ).stream().map(this::convertToDto).collect(Collectors.toList());
             return ResponseEntity.ok(parkingSpots);
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
+
     }
 
     @GetMapping("/parking/{id}/free-time")
     public ResponseEntity<Map<Long, Map<String, OffsetDateTime>>> getSpotsFreeTimeByParkingId(@PathVariable Long id,
-                                                                                             @RequestParam OffsetDateTime startDate) {
-        Optional<Parking> parking = _parkingService.getParkingById(id);
+                                                                                              @RequestParam OffsetDateTime startDate) {
+        Optional<Parking> parking = parkingService.getParkingById(id);
         if (parking.isPresent()) {
             startDate = startDate.withOffsetSameInstant(parking.get().getTimeZone());
             Map<Long, Map<String, OffsetDateTime>> parkingSpotsWithFreeTime
-                    = _parkingSpotService.getSpotsFreeTime(parking.get(), startDate);
+                    = parkingSpotService.getSpotsFreeTime(parking.get(), startDate);
             return ResponseEntity.ok(parkingSpotsWithFreeTime);
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
+
     }
 
     public List<ParkingSpotCoordinatesDTO> getSpotCoordinatesByDroneId(Long id) {
-        Optional<Drone> drone = _droneService.getDroneById(id);
+        Optional<Drone> drone = droneService.getDroneById(id);
         if (drone.isPresent()) {
             List<ParkingSpotCoordinatesDTO> parkingSpotCoordinatesList = new ArrayList<>();
 
-            List<ParkingSpot> parkingSpots = _parkingSpotService.getParkingSpots(drone.get());
+            List<ParkingSpot> parkingSpots = parkingSpotService.getParkingSpots(drone.get());
             for (ParkingSpot parkingSpot : parkingSpots) {
-                List<Point> points = _pointService.getPointsByParkingSpotId(parkingSpot.getId());
+                List<Point> points = pointService.getPointsByParkingSpotId(parkingSpot.getId());
                 if (!points.isEmpty()) {
                     ParkingSpotCoordinatesDTO parkingSpotCoordinatesDTO = getParkingSpotCoordinatesDTO(parkingSpot,
                             points);
@@ -225,5 +224,22 @@ public class ParkingSpotController {
         parkingSpotCoordinatesDTO.setCenterLongitude(centerLongitude);
         parkingSpotCoordinatesDTO.setCenterLatitude(centerLatitude);
         return parkingSpotCoordinatesDTO;
+    }
+
+
+    @GetMapping("{id}/free-time/{reservationId}")
+    public ResponseEntity<Boolean> checkIfParkingSpotIsFree(@PathVariable Long id,
+                                                            @PathVariable Long reservationId,
+                                                            @RequestParam OffsetDateTime startDate,
+                                                            @RequestParam OffsetDateTime endDate) {
+        Optional<ParkingSpot> parkingSpot = parkingSpotService.getParkingSpotById(id);
+        if (parkingSpot.isPresent()) {
+            startDate = startDate.withOffsetSameInstant(parkingSpot.get().getParking().getTimeZone());
+            endDate = endDate.withOffsetSameInstant(parkingSpot.get().getParking().getTimeZone());
+            Boolean isFree = parkingSpotService.checkIfParkingSpotIsFree(parkingSpot.get(), startDate, endDate, reservationId);
+            return ResponseEntity.ok(isFree);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

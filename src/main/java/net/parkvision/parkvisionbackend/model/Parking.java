@@ -35,13 +35,13 @@ public class Parking {
     private ZoneOffset timeZone;
     private String currency;
 
-    @OneToMany
-    private List<ParkingModerator> parkingModerator;
+    @OneToMany(mappedBy = "parking", cascade = CascadeType.REMOVE)
+    private List<ParkingManager> parkingManagers;
 
-    @OneToMany
+    @OneToMany(mappedBy = "parking", cascade = CascadeType.REMOVE)
     private List<ParkingSpot> parkingSpots;
-    @OneToMany
+    @OneToMany(mappedBy = "parking", cascade = CascadeType.REMOVE)
     private List<DroneMission> droneMissions;
-    @OneToMany
+    @OneToMany(mappedBy = "parking", cascade = CascadeType.REMOVE)
     private List<Drone> drones;
 }
