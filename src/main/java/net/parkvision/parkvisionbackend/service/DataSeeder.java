@@ -44,6 +44,7 @@ public class DataSeeder {
         Parking parking1 = new Parking();
         Parking parking2 = new Parking();
         Parking parking3 = new Parking();
+        Parking parking4 = new Parking();
 
         long parkingCount = parkingRepository.count();
 
@@ -96,8 +97,25 @@ public class DataSeeder {
             parking3.setLatitude(51.108915212046774);
             parking3.setLongitude(17.05562300818793);
             parking3.setTimeZone(ZoneOffset.of("-2"));
-            parking2.setCurrency("PLN");
+            parking3.setCurrency("PLN");
             parkingRepository.save(parking3);
+
+            parking4.setName("Parking Wrońskiego");
+            parking4.setCity("Wrocław");
+            parking4.setStreet("Wrońskiego 1");
+            parking4.setZipCode("50-376");
+            parking4.setDescription("Parking Wrońskiego to parking Politechniki Wrocławskiej dla studentów i " +
+                    "pracowników" +
+                    " Politechniki Wrocławskiej. Posiada 50 miejsc parkingowych, w tym 2 miejsca dla osób " +
+                    "niepełnosprawnych.");
+            parking4.setStartTime(OffsetTime.of(6, 30, 0, 0, ZoneOffset.of("-2")));
+            parking4.setEndTime(OffsetTime.of(19, 0, 0, 0, ZoneOffset.of("-2")));
+            parking4.setCostRate(2.0);
+            parking4.setLatitude(51.108915212046774);
+            parking4.setLongitude(17.05562300818793);
+            parking4.setTimeZone(ZoneOffset.of("-2"));
+            parking4.setCurrency("PLN");
+            parkingRepository.save(parking4);
 
 
             System.out.println("Data seeded.");
@@ -133,7 +151,7 @@ public class DataSeeder {
 
         long adminCount = adminRepository.count();
 
-        if (adminCount == 0){
+        if (adminCount == 0) {
             System.out.println("SeedAdminData()");
 
             User user = new User();
@@ -197,7 +215,7 @@ public class DataSeeder {
             parkingManager4.setLastname("ParkingModerator");
             parkingManager4.setEmail("string2");
             parkingManager4.setPassword(new BCryptPasswordEncoder().encode("string"));
-            parkingManager4.setParking(parkingRepository.getReferenceById(4L));
+            //parkingManager4.setParking(parkingRepository.getReferenceById(4L));
             parkingManager4.setRole(Role.PARKING_MANAGER);
             parkingManagerRepository.save(parkingManager4);
 

@@ -6,7 +6,7 @@ import net.parkvision.parkvisionbackend.dto.DroneDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.kafka.KafkaTopicConfig;
 import net.parkvision.parkvisionbackend.model.Drone;
-import net.parkvision.parkvisionbackend.model.ParkingModerator;
+import net.parkvision.parkvisionbackend.model.ParkingManager;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.DroneRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
@@ -49,9 +49,9 @@ public class DroneAndMissionTest {
     @Test
     public void createDrone() throws Exception {
 
-        Optional<User> parkingModerator = userRepository.findByEmail("string");
+        Optional<User> parkingManager = userRepository.findByEmail("string");
 
-        if (parkingModerator.isPresent()) {
+        if (parkingManager.isPresent()) {
             DroneDTO droneDTO = new DroneDTO();
 
             ParkingDTO parkingDTO = new ParkingDTO();
@@ -61,13 +61,13 @@ public class DroneAndMissionTest {
             droneDTO.setModel("DJ3");
             droneDTO.setSerialNumber("87324637286432874");
 
-            ParkingModerator parkingModeratorReal = (ParkingModerator) parkingModerator.get();
+            ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
             MvcResult result = mockMvc.perform(post("/api/drones")
-                            .with(user(parkingModeratorReal))
+                            .with(user(parkingManagerReal))
                             .content(asJsonString(droneDTO))
                             .contentType(MediaType.APPLICATION_JSON)).andDo(print())
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.parkingDTO.id").value(parkingModeratorReal.getParking().getId()))
+                    .andExpect(jsonPath("$.parkingDTO.id").value(parkingManagerReal.getParking().getId()))
                     .andExpect(jsonPath("$.name").value(droneDTO.getName()))
                     .andExpect(jsonPath("$.model").value(droneDTO.getModel()))
                     .andExpect(jsonPath("$.serialNumber").value(droneDTO.getSerialNumber()))
@@ -81,7 +81,7 @@ public class DroneAndMissionTest {
             Optional<Drone> byName = droneRepository.findByName(droneDTO.getName());
 
             assertTrue(byName.isPresent());
-            assertEquals(byName.get().getParking().getName(), parkingModeratorReal.getParking().getName());
+            assertEquals(byName.get().getParking().getName(), parkingManagerReal.getParking().getName());
         }
 
     }
@@ -89,9 +89,9 @@ public class DroneAndMissionTest {
     @Test
     public void createDroneBadParking() throws Exception {
 
-        Optional<User> parkingModerator = userRepository.findByEmail("string");
+        Optional<User> parkingManager = userRepository.findByEmail("string");
 
-        if (parkingModerator.isPresent()) {
+        if (parkingManager.isPresent()) {
             DroneDTO droneDTO = new DroneDTO();
 
             ParkingDTO parkingDTO = new ParkingDTO();
@@ -101,9 +101,9 @@ public class DroneAndMissionTest {
             droneDTO.setModel("DJ3");
             droneDTO.setSerialNumber("87324637286432874");
 
-            ParkingModerator parkingModeratorReal = (ParkingModerator) parkingModerator.get();
+            ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
             mockMvc.perform(post("/api/drones")
-                            .with(user(parkingModeratorReal))
+                            .with(user(parkingManagerReal))
                             .content(asJsonString(droneDTO))
                             .contentType(MediaType.APPLICATION_JSON)).andDo(print())
                     .andExpect(status().isBadRequest());
@@ -118,15 +118,15 @@ public class DroneAndMissionTest {
 //    @Test
 //    public void commandStart() throws Exception {
 //
-//        Optional<User> parkingModerator = userRepository.findByEmail("string");
+//        Optional<User> parkingManager = userRepository.findByEmail("string");
 //
-//        if (parkingModerator.isPresent()) {
+//        if (parkingManager.isPresent()) {
 //
-//            ParkingModerator parkingModeratorReal = (ParkingModerator) parkingModerator.get();
+//            parkingManager parkingManagerReal = (parkingManager) parkingManager.get();
 //            mockMvc.perform(post("/api/drones")
 //                            .param("id", String.valueOf(3))
 //                            .param("command", "start")
-//                            .with(user(parkingModeratorReal))
+//                            .with(user(parkingManagerReal))
 //                            .contentType(MediaType.APPLICATION_JSON)).andDo(print())
 //                    .andExpect(status().isOk());
 //

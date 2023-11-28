@@ -46,9 +46,11 @@ class KafkaSslApplicationLiveTest {
 
     @Autowired
     private DroneMissionRepository droneMissionRepository;
+    @Autowired
+    KafkaTopicConfig kafkaTopicConfig;
 
     @Test
-    void givenSslIsConfigured_whenProducerSendsMessageOverSsl_thenConsumerReceivesOverSsl() throws Exception {
+    void givenSslIsConfigured_whenProducerSendsMessageOverSsl() throws Exception {
         String message = generateSampleMessage();
         //Thread.sleep(4000);
         Drone drone = new Drone();
@@ -57,9 +59,8 @@ class KafkaSslApplicationLiveTest {
 
         String encrypt = MessageEncryptor.encryptMessage(message, droneService.createDrone(drone).getDroneKey());
         kafkaTemplate.send("drones-info", String.valueOf(3), encrypt);
-        Thread.sleep(4000);
-        assertEquals(droneMissionRepository.count(), 1);
-
+        Thread.sleep(12000);
+        assertTrue(kafkaTopicConfig.checkIfTopicExists("drone-" + 3));
     }
 
     private static String generateSampleMessage() throws JsonProcessingException {

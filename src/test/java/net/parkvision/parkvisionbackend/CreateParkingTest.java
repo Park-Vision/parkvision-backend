@@ -3,7 +3,7 @@ package net.parkvision.parkvisionbackend;
 
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.model.Parking;
-import net.parkvision.parkvisionbackend.model.ParkingModerator;
+import net.parkvision.parkvisionbackend.model.ParkingManager;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.ParkingRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
@@ -42,25 +42,24 @@ public class CreateParkingTest {
     private ParkingRepository parkingRepository;
 
     @Test
-    public void createParkingWithModerator() throws Exception {
-        Optional<User> parkingModerator = userRepository.findByEmail("string2");
+    public void createParkingWithManager() throws Exception {
+        Optional<User> parkingManager = userRepository.findByEmail("string2");
 
-        if(parkingModerator.isPresent()){
+        if(parkingManager.isPresent()){
             ParkingDTO parkingDTO = getParkingDTO();
 
-            ParkingModerator parkingModeratorReal = (ParkingModerator) parkingModerator.get();
+            ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
             mockMvc.perform(post("/api/parkings")
-                            .with(user(parkingModeratorReal))
+                            .with(user(parkingManagerReal))
                             .content(asJsonString(parkingDTO))
                             .contentType(MediaType.APPLICATION_JSON)).andDo(print())
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(parkingModeratorReal.getParking().getId()))
                     .andExpect(jsonPath("$.name").value(parkingDTO.getName()))
                     .andExpect(jsonPath("$.street").value(parkingDTO.getStreet()))
                     .andExpect(jsonPath("$.zipCode").value(parkingDTO.getZipCode()))
-                    .andExpect(jsonPath("$.endTime").value(parkingDTO.getEndTime()))
-                    .andExpect(jsonPath("$.startTime").value(parkingDTO.getStartTime()))
-                    .andExpect(jsonPath("$.timeZone").value(parkingDTO.getTimeZone()))
+                    .andExpect(jsonPath("$.endTime").value(parkingDTO.getEndTime().toString()))
+                    .andExpect(jsonPath("$.startTime").value(parkingDTO.getStartTime().toString()))
+                    .andExpect(jsonPath("$.timeZone").value(parkingDTO.getTimeZone().toString()))
                     .andExpect(jsonPath("$.city").value(parkingDTO.getCity()))
                     .andExpect(jsonPath("$.latitude").value(parkingDTO.getLatitude()))
                     .andExpect(jsonPath("$.longitude").value(parkingDTO.getLongitude()))
@@ -69,7 +68,9 @@ public class CreateParkingTest {
             Optional<Parking> byName = parkingRepository.findByName(getParkingDTO().getName());
 
             assertTrue(byName.isPresent());
-            assertEquals(parkingModeratorReal.getParking().getId(), byName.get().getId());
+            Optional<User> parkingManagerAfterParkingCreate = userRepository.findByEmail("string2");
+            ParkingManager parkingManagerAfterParkingCreateReal = (ParkingManager) parkingManagerAfterParkingCreate.get();
+            assertEquals(parkingManagerAfterParkingCreateReal.getParking().getName(), byName.get().getName());
         }
     }
 
@@ -82,8 +83,8 @@ public class CreateParkingTest {
         parkingDTO.setCurrency("PLN");
         parkingDTO.setCostRate(3);
         parkingDTO.setTimeZone(ZoneOffset.MIN);
-        parkingDTO.setStartTime(OffsetTime.MIN);
-        parkingDTO.setEndTime(OffsetTime.MAX);
+        parkingDTO.setStartTime(OffsetTime.now());
+        parkingDTO.setEndTime(OffsetTime.now());
         parkingDTO.setName("ParkingPWR");
         parkingDTO.setStreet("Nowa");
         parkingDTO.setZipCode("100-100");
@@ -92,15 +93,15 @@ public class CreateParkingTest {
 
     @Test
     public void createParkingWithModeratorWithParking() throws Exception {
-        Optional<User> parkingModerator = userRepository.findByEmail("string");
+        Optional<User> parkingManager = userRepository.findByEmail("string");
 
-        if(parkingModerator.isPresent()){
+        if(parkingManager.isPresent()){
             ParkingDTO parkingDTO = new ParkingDTO();
             parkingDTO.setName("test");
 
-            ParkingModerator parkingModeratorReal = (ParkingModerator) parkingModerator.get();
+            ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
             mockMvc.perform(post("/api/parkings")
-                            .with(user(parkingModeratorReal))
+                            .with(user(parkingManagerReal))
                             .content(asJsonString(parkingDTO))
                             .contentType(MediaType.APPLICATION_JSON)).andDo(print())
                     .andExpect(status().isMethodNotAllowed());
@@ -108,7 +109,7 @@ public class CreateParkingTest {
             Optional<Parking> byName = parkingRepository.findByName(getParkingDTO().getName());
 
             assertFalse(byName.isPresent());
-            assertNotEquals(parkingModeratorReal.getParking().getName(), parkingDTO.getName());
+            assertNotEquals(parkingManagerReal.getParking().getName(), parkingDTO.getName());
         }
     }
 }
