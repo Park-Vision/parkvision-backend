@@ -20,7 +20,7 @@ public class ParkingSpot {
     private String spotNumber;
     private boolean active;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parkingSpot")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parkingSpot", fetch = FetchType.EAGER)
     private List<Point> points;
 
     @OneToMany(mappedBy = "parkingSpot", cascade = CascadeType.REMOVE)

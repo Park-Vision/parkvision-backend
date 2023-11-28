@@ -8,6 +8,7 @@ import net.parkvision.parkvisionbackend.kafka.KafkaTopicConfig;
 import net.parkvision.parkvisionbackend.model.Drone;
 import net.parkvision.parkvisionbackend.model.ParkingManager;
 import net.parkvision.parkvisionbackend.model.User;
+import net.parkvision.parkvisionbackend.repository.DroneMissionRepository;
 import net.parkvision.parkvisionbackend.repository.DroneRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,9 @@ public class DroneAndMissionTest {
 
     @Autowired
     private DroneRepository droneRepository;
+
+    @Autowired
+    private DroneMissionRepository droneMissionRepository;
 
     @Autowired
     KafkaTopicConfig kafkaTopicConfig;
@@ -115,22 +119,22 @@ public class DroneAndMissionTest {
         }
     }
 
-//    @Test
-//    public void commandStart() throws Exception {
-//
-//        Optional<User> parkingManager = userRepository.findByEmail("string");
-//
-//        if (parkingManager.isPresent()) {
-//
-//            parkingManager parkingManagerReal = (parkingManager) parkingManager.get();
-//            mockMvc.perform(post("/api/drones")
-//                            .param("id", String.valueOf(3))
-//                            .param("command", "start")
-//                            .with(user(parkingManagerReal))
-//                            .contentType(MediaType.APPLICATION_JSON)).andDo(print())
-//                    .andExpect(status().isOk());
-//
-//        }
-//    }
+    @Test
+    public void commandStart() throws Exception {
+
+        Optional<User> parkingManager = userRepository.findByEmail("string");
+
+        if (parkingManager.isPresent()) {
+
+            ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
+            mockMvc.perform(post("/api/drones/3/start")
+                            .with(user(parkingManagerReal))
+                            .contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                    .andExpect(status().isOk());
+
+            Thread.sleep(30000);
+            assertEquals(droneMissionRepository.count(), 1);
+        }
+    }
 
 }
