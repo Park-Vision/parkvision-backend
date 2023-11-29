@@ -83,7 +83,7 @@ public class UserController {
         return ResponseEntity.ok(managers);
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
+    @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER', 'ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
