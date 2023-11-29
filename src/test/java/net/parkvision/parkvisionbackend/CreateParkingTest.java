@@ -93,7 +93,7 @@ public class CreateParkingTest {
 
     @Test
     public void createParkingWithModeratorWithParking() throws Exception {
-        Optional<User> parkingManager = userRepository.findByEmail("string");
+        Optional<User> parkingManager = userRepository.findByEmail("string@wp.pl");
 
         if(parkingManager.isPresent()){
             ParkingDTO parkingDTO = new ParkingDTO();

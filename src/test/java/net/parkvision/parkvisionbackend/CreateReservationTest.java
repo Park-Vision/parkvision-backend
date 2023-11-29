@@ -5,7 +5,6 @@ import net.parkvision.parkvisionbackend.controller.ParkingSpotController;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
 import net.parkvision.parkvisionbackend.dto.ReservationDTO;
 import net.parkvision.parkvisionbackend.dto.UserDTO;
-import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.Reservation;
 import net.parkvision.parkvisionbackend.model.User;
 import net.parkvision.parkvisionbackend.repository.ReservationRepository;

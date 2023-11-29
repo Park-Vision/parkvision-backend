@@ -51,9 +51,9 @@ public class DroneAndMissionTest {
     KafkaTopicConfig kafkaTopicConfig;
 
     @Test
-    public void createDrone() throws Exception {
+    public void createDroneAndStartMission() throws Exception {
 
-        Optional<User> parkingManager = userRepository.findByEmail("string");
+        Optional<User> parkingManager = userRepository.findByEmail("string@wp.pl");
 
         if (parkingManager.isPresent()) {
             DroneDTO droneDTO = new DroneDTO();
@@ -86,6 +86,16 @@ public class DroneAndMissionTest {
 
             assertTrue(byName.isPresent());
             assertEquals(byName.get().getParking().getName(), parkingManagerReal.getParking().getName());
+
+
+            mockMvc.perform(post("/api/drones/3/start")
+                            .with(user(parkingManagerReal))
+                            .contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                    .andExpect(status().isOk());
+
+            Thread.sleep(60000);
+            assertEquals(droneMissionRepository.count(), 1);
+
         }
 
     }
@@ -93,7 +103,7 @@ public class DroneAndMissionTest {
     @Test
     public void createDroneBadParking() throws Exception {
 
-        Optional<User> parkingManager = userRepository.findByEmail("string");
+        Optional<User> parkingManager = userRepository.findByEmail("string@wp.pl");
 
         if (parkingManager.isPresent()) {
             DroneDTO droneDTO = new DroneDTO();
@@ -115,25 +125,6 @@ public class DroneAndMissionTest {
             Optional<Drone> byName = droneRepository.findByName(droneDTO.getName());
 
             assertFalse(byName.isPresent());
-
-        }
-    }
-
-    @Test
-    public void commandStart() throws Exception {
-
-        Optional<User> parkingManager = userRepository.findByEmail("string");
-
-        if (parkingManager.isPresent()) {
-
-            ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
-            mockMvc.perform(post("/api/drones/3/start")
-                            .with(user(parkingManagerReal))
-                            .contentType(MediaType.APPLICATION_JSON)).andDo(print())
-                    .andExpect(status().isOk());
-
-            Thread.sleep(30000);
-            assertEquals(droneMissionRepository.count(), 1);
         }
     }
 
