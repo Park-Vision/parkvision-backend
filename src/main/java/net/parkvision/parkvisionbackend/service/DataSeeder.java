@@ -314,6 +314,12 @@ public class DataSeeder {
             point8.setLongitude(16.99034544418599);
             point8.setParkingSpot(parkingSpot2);
             pointRepository.save(point8);
+
+            Point point9 = new Point();
+            point9.setLatitude(51.1185928473759);
+            point9.setLongitude(16.99034544418599);
+            point9.setParkingSpot(parkingSpot2);
+            pointRepository.save(point9);
         } else {
             System.out.println("Data already exists.");
         }

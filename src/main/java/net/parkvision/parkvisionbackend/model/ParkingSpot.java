@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class ParkingSpot {
     private String spotNumber;
     private boolean active;
 
+    @Size(min = 4, max = 4, message = "ParkingSpot must have 4 points")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parkingSpot")
     private List<Point> points;
 
@@ -27,4 +29,11 @@ public class ParkingSpot {
     private List<Reservation> reservations;
     @ManyToOne
     private Parking parking; // Many-to-one relationship
+
+
+    public void setPoints(List<Point> points) {
+        if(points.size() != 4)
+            throw new IllegalArgumentException("ParkingSpot must have 4 points");
+        this.points = points;
+    }
 }
