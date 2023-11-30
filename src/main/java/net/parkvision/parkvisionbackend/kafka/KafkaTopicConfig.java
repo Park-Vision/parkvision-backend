@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.kafka;
 
 import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.DescribeTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.config.TopicConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,17 @@ public class KafkaTopicConfig {
         topicConfig.put(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(24 * 60 * 60 * 1000)); // 24 hours retention
 
         NewTopic newTopic = new NewTopic(topicName, 1, (short) 1).configs(topicConfig);
-
         try (AdminClient adminClient = AdminClient.create(kafkaAdmin.getConfigurationProperties())) {
             adminClient.createTopics(Collections.singletonList(newTopic)).all().get();
+        }
+    }
+
+    public boolean checkIfTopicExists(String topicName) {
+
+        try (AdminClient adminClient = AdminClient.create(kafkaAdmin.getConfigurationProperties())) {
+            DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(Collections.singleton(topicName));
+
+            return describeTopicsResult.topicNameValues().containsKey(topicName);
         }
     }
 

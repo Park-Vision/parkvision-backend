@@ -41,6 +41,7 @@ public class KafkaConsumerConfig {
         props.put("ssl.key.password", keystorePassword);
         props.put("ssl.protocol", "TLSv1.2");
         props.put("security.protocol", "SSL");
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

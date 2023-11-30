@@ -80,11 +80,16 @@ public class ReservationController {
     public ResponseEntity<ReservationDTO> createReservation(@RequestBody ReservationDTO reservationDto) throws ReservationConflictException {
         Optional<ParkingSpot> parkingSpot =
                 parkingSpotService.getParkingSpotById(reservationDto.getParkingSpotDTO().getId());
-        if (parkingSpot.isPresent()) {
-            Reservation createdReservation = reservationService.createReservation(convertToEntity(reservationDto));
-            return ResponseEntity.ok(convertToDto(createdReservation));
+        try {
+            if (parkingSpot.isPresent()) {
+                Reservation createdReservation = reservationService.createReservation(convertToEntity(reservationDto));
+                return ResponseEntity.ok(convertToDto(createdReservation));
+            }
+        } catch (Exception exception) {
+            System.out.println(exception.getMessage());
         }
         return ResponseEntity.badRequest().build();
+
     }
 
     @PreAuthorize("hasAnyRole('USER', 'PARKING_MANAGER')")
@@ -184,7 +189,8 @@ public class ReservationController {
             }
 
             if (reservation.get().getStartDate().isBefore(now.plusHours(hourRule))) {
-                return ResponseEntity.badRequest().body("Cannot cancel reservation less than " + hourRule + " hours before start.");
+                return ResponseEntity.badRequest().body("Cannot cancel reservation less than " + hourRule + " hours " +
+                        "before start.");
             }
 
             Reservation canceledReservation = reservationService.cancelReservation(id);
@@ -243,19 +249,18 @@ public class ReservationController {
         User user = RequestContext.getUserFromRequest();
         Optional<Parking> parking = parkingService.getParkingById(id);
         if (user != null && user.getRole().equals(Role.PARKING_MANAGER)) {
-            if (parking.isPresent()){
+            if (parking.isPresent()) {
                 ParkingManager parkingManager = (ParkingManager) user;
-                if((parkingManager.getParking().getId().equals(parking.get().getId()))){
-                    List<ReservationDTO> reservations = reservationService.getAllReservationsByParkingId(id).stream().map(
-                            this::convertToDto
-                    ).collect(Collectors.toList());
+                if ((parkingManager.getParking().getId().equals(parking.get().getId()))) {
+                    List<ReservationDTO> reservations =
+                            reservationService.getAllReservationsByParkingId(id).stream().map(
+                                    this::convertToDto
+                            ).collect(Collectors.toList());
                     return ResponseEntity.ok(reservations);
-                }
-                else{
+                } else {
                     return ResponseEntity.status(401).build();
                 }
-            }
-            else{
+            } else {
                 return ResponseEntity.notFound().build();
             }
         } else {

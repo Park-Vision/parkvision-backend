@@ -48,10 +48,11 @@ public class ParkingSpotService {
             throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not " +
                     "exist.");
         }
-        if (!parkingSpot.getPoints().isEmpty()) {
-            for (int i = 0; i < parkingSpot.getPoints().size(); i++) {
-                parkingSpot.getPoints().get(i).setParkingSpot(parkingSpot);
-            }
+        if (parkingSpot.getPoints().size() != 4) {
+            throw new IllegalArgumentException("Bad amount of points. Should be 4.");
+        }
+        for (int i = 0; i < parkingSpot.getPoints().size(); i++) {
+            parkingSpot.getPoints().get(i).setParkingSpot(parkingSpot);
         }
         return parkingSpotRepository.save(parkingSpot);
     }
@@ -83,7 +84,7 @@ public class ParkingSpotService {
     public void softDeleteParkingSpot(Long id) {
         parkingSpotRepository.findById(id).ifPresent(parkingSpot -> {
             List<Reservation> futureReservations = reservationService.getFutureReservationByParkingSpotId(id);
-            if(!futureReservations.isEmpty()){
+            if (!futureReservations.isEmpty()) {
                 throw new IllegalArgumentException("ParkingSpot with ID " + id + " has future reservations.");
             }
             parkingSpot.setActive(false);
@@ -130,7 +131,7 @@ public class ParkingSpotService {
         List<ParkingSpot> parkingSpotsWithPoints = new ArrayList<>();
         for (ParkingSpot parkingSpot : parkingSpots) {
             List<Point> points = pointService.getPointsByParkingSpotId(parkingSpot.getId());
-            if(!points.isEmpty()) {
+            if (!points.isEmpty()) {
                 parkingSpotsWithPoints.add(parkingSpot);
             }
         }
@@ -171,7 +172,8 @@ public class ParkingSpotService {
                 !pointService.getPointsByParkingSpotId(parkingSpot.getId()).isEmpty() && parkingSpot.isActive()).toList());
     }
 
-    public Boolean checkIfParkingSpotIsFree(ParkingSpot parkingSpot, OffsetDateTime startDate, OffsetDateTime endDate, Long reservationId) {
+    public Boolean checkIfParkingSpotIsFree(ParkingSpot parkingSpot, OffsetDateTime startDate, OffsetDateTime endDate
+            , Long reservationId) {
         List<Reservation> reservations = reservationService.getAllReservationsByParkingSpotId(parkingSpot.getId());
         Reservation tempReservation = new Reservation();
         tempReservation.setStartDate(startDate);
@@ -186,12 +188,13 @@ public class ParkingSpotService {
             }
             if (
                     reservationService.isDateRangeOverlap(reservation, tempReservation)
-                    || (!reservationService.isParking24h(parkingSpot.getParking())
+                            || (!reservationService.isParking24h(parkingSpot.getParking())
                             && !reservationService.isWithinParkingHours(
-                                    tempReservation.getStartDate(),
-                                    tempReservation.getEndDate(),
-                                    parkingSpot.getParking()))
-                    || !reservationService.checkTime(tempReservation.getStartDate(), tempReservation.getEndDate())) {
+                            tempReservation.getStartDate(),
+                            tempReservation.getEndDate(),
+                            parkingSpot.getParking()))
+                            || !reservationService.checkTime(tempReservation.getStartDate(),
+                            tempReservation.getEndDate())) {
                 return false;
             }
         }
