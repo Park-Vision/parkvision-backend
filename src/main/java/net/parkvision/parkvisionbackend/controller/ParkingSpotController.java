@@ -3,14 +3,8 @@ package net.parkvision.parkvisionbackend.controller;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotCoordinatesDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
-import net.parkvision.parkvisionbackend.model.Drone;
-import net.parkvision.parkvisionbackend.model.Parking;
-import net.parkvision.parkvisionbackend.model.ParkingSpot;
-import net.parkvision.parkvisionbackend.model.Point;
-import net.parkvision.parkvisionbackend.service.DroneService;
-import net.parkvision.parkvisionbackend.service.ParkingService;
-import net.parkvision.parkvisionbackend.service.ParkingSpotService;
-import net.parkvision.parkvisionbackend.service.PointService;
+import net.parkvision.parkvisionbackend.model.*;
+import net.parkvision.parkvisionbackend.service.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -85,8 +79,22 @@ public class ParkingSpotController {
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
     public ResponseEntity<ParkingSpotDTO> createParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
-        ParkingSpot createdParkingSpot = parkingSpotService.createParkingSpot(convertToEntity(parkingSpotDto));
-        return ResponseEntity.ok(convertToDto(createdParkingSpot));
+        User user = RequestContext.getUserFromRequest();
+        ParkingManager parkingManager = (ParkingManager) user;
+        ParkingSpot parkingSpot = convertToEntity(parkingSpotDto);
+        assert parkingManager != null;
+        try {
+            if (parkingManager.getParking().getId().equals(parkingSpot.getParking().getId())) {
+                ParkingSpot createdParkingSpot = parkingSpotService.createParkingSpot(parkingSpot);
+
+                return ResponseEntity.ok(convertToDto(createdParkingSpot));
+            }
+        } catch (Exception exception) {
+            System.out.println(exception.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.notFound().build();
+
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
@@ -236,7 +244,8 @@ public class ParkingSpotController {
         if (parkingSpot.isPresent()) {
             startDate = startDate.withOffsetSameInstant(parkingSpot.get().getParking().getTimeZone());
             endDate = endDate.withOffsetSameInstant(parkingSpot.get().getParking().getTimeZone());
-            Boolean isFree = parkingSpotService.checkIfParkingSpotIsFree(parkingSpot.get(), startDate, endDate, reservationId);
+            Boolean isFree = parkingSpotService.checkIfParkingSpotIsFree(parkingSpot.get(), startDate, endDate,
+                    reservationId);
             return ResponseEntity.ok(isFree);
         } else {
             return ResponseEntity.notFound().build();

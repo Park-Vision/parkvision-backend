@@ -2,6 +2,8 @@ package net.parkvision.parkvisionbackend;
 
 
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
+import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
+import net.parkvision.parkvisionbackend.dto.PointDTO;
 import net.parkvision.parkvisionbackend.model.Parking;
 import net.parkvision.parkvisionbackend.model.ParkingManager;
 import net.parkvision.parkvisionbackend.model.User;
@@ -17,6 +19,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.OffsetTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static net.parkvision.parkvisionbackend.controller.ParkingSpotControllerTest.asJsonString;
@@ -45,7 +49,7 @@ public class CreateParkingTest {
     public void createParkingWithManager() throws Exception {
         Optional<User> parkingManager = userRepository.findByEmail("string2");
 
-        if(parkingManager.isPresent()){
+        if (parkingManager.isPresent()) {
             ParkingDTO parkingDTO = getParkingDTO();
 
             ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
@@ -69,7 +73,8 @@ public class CreateParkingTest {
 
             assertTrue(byName.isPresent());
             Optional<User> parkingManagerAfterParkingCreate = userRepository.findByEmail("string2");
-            ParkingManager parkingManagerAfterParkingCreateReal = (ParkingManager) parkingManagerAfterParkingCreate.get();
+            ParkingManager parkingManagerAfterParkingCreateReal =
+                    (ParkingManager) parkingManagerAfterParkingCreate.get();
             assertEquals(parkingManagerAfterParkingCreateReal.getParking().getName(), byName.get().getName());
         }
     }
@@ -92,10 +97,10 @@ public class CreateParkingTest {
     }
 
     @Test
-    public void createParkingWithModeratorWithParking() throws Exception {
+    public void createParkingWithManagerWithParking() throws Exception {
         Optional<User> parkingManager = userRepository.findByEmail("string@wp.pl");
 
-        if(parkingManager.isPresent()){
+        if (parkingManager.isPresent()) {
             ParkingDTO parkingDTO = new ParkingDTO();
             parkingDTO.setName("test");
 
@@ -111,5 +116,45 @@ public class CreateParkingTest {
             assertFalse(byName.isPresent());
             assertNotEquals(parkingManagerReal.getParking().getName(), parkingDTO.getName());
         }
+    }
+
+    @Test
+    public void createParkingModel_CreatesParkingSpotWithPoints() throws Exception {
+
+        Optional<User> parkingManager = userRepository.findByEmail("string@wp.pl");
+
+        ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
+        ParkingSpotDTO parkingSpotDTO = new ParkingSpotDTO();
+
+        ParkingDTO parkingDTO = new ParkingDTO();
+        parkingDTO.setId(3L);
+        parkingSpotDTO.setParkingDTO(parkingDTO);
+        List<PointDTO> pointDTOList = new ArrayList<>();
+        PointDTO pointDTO = new PointDTO();
+        pointDTO.setLongitude(10);
+        pointDTO.setLatitude(11);
+        pointDTOList.add(pointDTO);
+        pointDTOList.add(pointDTO);
+        pointDTOList.add(pointDTO);
+        pointDTOList.add(pointDTO);
+        parkingSpotDTO.setPointsDTO(new ArrayList<>());
+        parkingSpotDTO.setActive(false);
+        parkingSpotDTO.setSpotNumber("1d");
+
+        mockMvc.perform(post("/api/parkingspots")
+                        .with(user(parkingManagerReal))
+                        .content(asJsonString(parkingSpotDTO))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        parkingSpotDTO.setPointsDTO(pointDTOList);
+        mockMvc.perform(post("/api/parkingspots")
+                        .with(user(parkingManagerReal))
+                        .content(asJsonString(parkingSpotDTO))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.active").value(false))
+                .andExpect(jsonPath("$.spotNumber").value("1d"))
+                .andExpect(jsonPath("$.parkingDTO.id").value(3L));
     }
 }

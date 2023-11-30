@@ -6,7 +6,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
 import net.parkvision.parkvisionbackend.model.Parking;
+import net.parkvision.parkvisionbackend.model.ParkingManager;
 import net.parkvision.parkvisionbackend.model.ParkingSpot;
+import net.parkvision.parkvisionbackend.model.User;
+import net.parkvision.parkvisionbackend.repository.UserRepository;
 import net.parkvision.parkvisionbackend.service.ParkingService;
 import net.parkvision.parkvisionbackend.service.ParkingSpotService;
 import org.junit.jupiter.api.Test;
@@ -27,6 +30,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -47,6 +51,8 @@ public class ParkingSpotControllerTest {
     @MockBean
     private ParkingService parkingService;
 
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     @WithMockUser(username = "testUser")
@@ -67,15 +73,20 @@ public class ParkingSpotControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testUser", roles = {"PARKING_MANAGER"})
     public void createParkingSpot_CreatesNewParkingSpot() throws Exception {
+        Optional<User> parkingManager = userRepository.findByEmail("string@wp.pl");
+
+        ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
         ParkingSpotDTO parkingSpotDTO = new ParkingSpotDTO();
         parkingSpotDTO.setActive(false);
-        parkingSpotDTO.setParkingDTO(new ParkingDTO());
+        ParkingDTO parkingDTO = new ParkingDTO();
+        parkingDTO.setId(3L);
+        parkingSpotDTO.setParkingDTO(parkingDTO);
         parkingSpotDTO.setPointsDTO(new ArrayList<>());
         when(parkingSpotService.createParkingSpot(any())).thenReturn(parkingSpotController.convertToEntity(parkingSpotDTO));
 
         mockMvc.perform(post("/api/parkingspots")
+                        .with(user(parkingManagerReal))
                         .content(asJsonString(parkingSpotDTO))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

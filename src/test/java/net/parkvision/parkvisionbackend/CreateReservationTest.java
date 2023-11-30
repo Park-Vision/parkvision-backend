@@ -48,6 +48,7 @@ public class CreateReservationTest {
     private ParkingSpotController parkingSpotController;
     @Autowired
     private ParkingSpotService parkingSpotService;
+
     @Test
     public void createReservationTest() throws Exception {
         Optional<User> client = userRepository.findByEmail("anna@onet.pl");
@@ -77,18 +78,47 @@ public class CreateReservationTest {
         Integer idResponse = JsonPath.read(jsonResponse, "$.id");
         String startDateResponse = JsonPath.read(jsonResponse, "$.startDate");
         String endDateResponse = JsonPath.read(jsonResponse, "$.endDate");
-        assertEquals(reservationDTO.getStartDate().toString().replace("0", ""), startDateResponse.replace("0",""));
-        assertEquals(reservationDTO.getEndDate().toString().replace("0", ""), endDateResponse.replace("0",""));
+        assertEquals(reservationDTO.getStartDate().toString().replace("0", ""), startDateResponse.replace("0", ""));
+        assertEquals(reservationDTO.getEndDate().toString().replace("0", ""), endDateResponse.replace("0", ""));
         Optional<Reservation> byId = reservationRepository.findById(Long.valueOf(idResponse));
         assertTrue(byId.isPresent());
         assertEquals(byId.get().getParkingSpot().getId(), 1L);
         assertEquals(byId.get().getUser().getId(), client.get().getId());
     }
 
+    @Test
+    public void createReservationTestBadTime() throws Exception {
+        Optional<User> client = userRepository.findByEmail("anna@onet.pl");
+        ReservationDTO reservationDTO = getReservationDTOBad();
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(client.get().getId());
+        reservationDTO.setUserDTO(userDTO);
+        ParkingSpotDTO parkingSpotDTO =
+                parkingSpotController.convertToDto(parkingSpotService.getParkingSpotById(1L).get());
+
+        reservationDTO.setParkingSpotDTO(parkingSpotDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/reservations")
+                        .with(user(client.get()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(reservationDTO)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
     private ReservationDTO getReservationDTO() {
         ReservationDTO reservationDTO = new ReservationDTO();
         reservationDTO.setStartDate(OffsetDateTime.now(ZoneOffset.of("+1")).plusDays(1).withHour(11));
         reservationDTO.setEndDate(OffsetDateTime.now(ZoneOffset.of("+1")).plusDays(1).withHour(12));
+        reservationDTO.setRegistrationNumber("ABC123");
+        reservationDTO.setAmount(20.0);
+        return reservationDTO;
+    }
+
+    private ReservationDTO getReservationDTOBad() {
+        ReservationDTO reservationDTO = new ReservationDTO();
+        reservationDTO.setStartDate(OffsetDateTime.now(ZoneOffset.of("+1")).minusDays(2).withHour(11));
+        reservationDTO.setEndDate(OffsetDateTime.now(ZoneOffset.of("+1")).minusDays(2).withHour(12));
         reservationDTO.setRegistrationNumber("ABC123");
         reservationDTO.setAmount(20.0);
         return reservationDTO;
