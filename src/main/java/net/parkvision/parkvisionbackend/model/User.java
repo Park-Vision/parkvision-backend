@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,11 +24,19 @@ public class User implements UserDetails {
     private Long id;
     @Column(unique = true)
     private String email;
+
+    @NotNull(message = "Password is required")
     private String password;
+
+    @NotNull(message = "Firstname is required")
     private String firstname;
+
+    @NotNull(message = "Lastname is required")
     private String lastname;
+
     private String passwordResetToken;
 
+    @NotNull(message = "Role is required")
     @Enumerated(EnumType.STRING)
     private Role role;
 

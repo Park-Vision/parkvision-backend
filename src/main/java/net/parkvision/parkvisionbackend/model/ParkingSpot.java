@@ -1,6 +1,8 @@
 package net.parkvision.parkvisionbackend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,14 +19,21 @@ public class ParkingSpot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotNull(message = "Spot number is required")
     private String spotNumber;
+
+    @NotNull(message = "Active is required")
     private boolean active;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parkingSpot", fetch = FetchType.EAGER)
+    @Size(max = 4, message = "Parking spot must have maximum 4 points")
     private List<Point> points;
 
     @OneToMany(mappedBy = "parkingSpot", cascade = CascadeType.REMOVE)
     private List<Reservation> reservations;
+
     @ManyToOne
-    private Parking parking; // Many-to-one relationship
+    @NotNull(message = "Parking is required")
+    private Parking parking;
 }
