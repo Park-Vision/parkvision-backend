@@ -1,5 +1,19 @@
 spring:
+  docker:
+    compose:
+      profiles:
+        active: "dev"
+      readiness:
+        tcp:
+          connect-timeout: 10s
+          read-timeout: 5s
+      skip:
+        in-tests: false
+      enabled: true
+      file: compose-dev.yml
   kafka:
+    consumer:
+      auto-offset-reset: earliest
     properties:
       security.protocol: "SSL"
     bootstrap-servers: localhost:29092
