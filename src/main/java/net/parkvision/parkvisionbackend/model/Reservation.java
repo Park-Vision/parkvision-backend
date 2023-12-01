@@ -1,6 +1,7 @@
 package net.parkvision.parkvisionbackend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,8 +28,10 @@ public class Reservation {
     private String registrationNumber;
     private double amount;
     @ManyToOne
+    @NotNull(message = "User is required")
     private User user;
     @ManyToOne
+    @NotNull(message = "Parking spot is required")
     private ParkingSpot parkingSpot;
     @OneToMany(mappedBy = "reservation")
     private List<Payment> payment;

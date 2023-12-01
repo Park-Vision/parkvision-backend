@@ -86,9 +86,9 @@ public class ReservationService {
 
     public boolean checkTime(OffsetDateTime start, OffsetDateTime end) {
         OffsetDateTime currentDateTime = OffsetDateTime.now();
-        OffsetDateTime adjustedStart = currentDateTime.withOffsetSameInstant(start.getOffset()).minusMinutes(15);
+        OffsetDateTime adjustedStart = currentDateTime.minusMinutes(15);
 
-        boolean isAfterAdjustedStart = start.isAfter(adjustedStart);
+        boolean isAfterAdjustedStart = adjustedStart.isBefore(start);
         boolean isBeforeEnd = start.isBefore(end);
 
         return isAfterAdjustedStart && isBeforeEnd;
