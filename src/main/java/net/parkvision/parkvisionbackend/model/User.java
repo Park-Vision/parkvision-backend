@@ -36,6 +36,7 @@ public class User implements UserDetails {
 
     private String passwordResetToken;
 
+    @NotNull(message = "Role is required")
     @Enumerated(EnumType.STRING)
     private Role role;
 

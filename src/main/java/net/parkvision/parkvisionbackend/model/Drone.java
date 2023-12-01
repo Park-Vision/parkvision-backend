@@ -27,6 +27,7 @@ public class Drone {
     @NotNull(message = "Serial number is required")
     private String serialNumber;
 
+    @NotNull(message = "Drone key is required")
     private String droneKey;
     @ManyToOne
     @NotNull(message = "Parking is required")
