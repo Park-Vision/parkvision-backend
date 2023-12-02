@@ -2,6 +2,7 @@ package net.parkvision.parkvisionbackend;
 
 
 import com.jayway.jsonpath.JsonPath;
+import net.parkvision.parkvisionbackend.config.MessageEncryptor;
 import net.parkvision.parkvisionbackend.dto.DroneDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.kafka.KafkaTopicConfig;
@@ -12,6 +13,8 @@ import net.parkvision.parkvisionbackend.repository.DroneMissionRepository;
 import net.parkvision.parkvisionbackend.repository.DroneRepository;
 import net.parkvision.parkvisionbackend.repository.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -64,40 +67,39 @@ public class DroneAndMissionTest {
             droneDTO.setName("DroneDJ3");
             droneDTO.setModel("DJ3");
             droneDTO.setSerialNumber("87324637286432874");
+            try (MockedStatic<MessageEncryptor> utilities = Mockito.mockStatic(MessageEncryptor.class)) {
+                utilities.when(MessageEncryptor::generateKey).thenReturn("kluczSzymona");
+                ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
+                MvcResult result = mockMvc.perform(post("/api/drones")
+                                .with(user(parkingManagerReal))
+                                .content(asJsonString(droneDTO))
+                                .contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.parkingDTO.id").value(parkingManagerReal.getParking().getId()))
+                        .andExpect(jsonPath("$.name").value(droneDTO.getName()))
+                        .andExpect(jsonPath("$.model").value(droneDTO.getModel()))
+                        .andExpect(jsonPath("$.serialNumber").value(droneDTO.getSerialNumber()))
+                        .andReturn();
 
-            ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
-            MvcResult result = mockMvc.perform(post("/api/drones")
-                            .with(user(parkingManagerReal))
-                            .content(asJsonString(droneDTO))
-                            .contentType(MediaType.APPLICATION_JSON)).andDo(print())
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.parkingDTO.id").value(parkingManagerReal.getParking().getId()))
-                    .andExpect(jsonPath("$.name").value(droneDTO.getName()))
-                    .andExpect(jsonPath("$.model").value(droneDTO.getModel()))
-                    .andExpect(jsonPath("$.serialNumber").value(droneDTO.getSerialNumber()))
-                    .andReturn();
+                String jsonResponse = result.getResponse().getContentAsString();
+                Integer idValue = JsonPath.read(jsonResponse, "$.id");
 
-            String jsonResponse = result.getResponse().getContentAsString();
-            Integer idValue = JsonPath.read(jsonResponse, "$.id");
+                assertTrue(kafkaTopicConfig.checkIfTopicExists("drone-" + idValue));
+                Optional<Drone> byName = droneRepository.findByName(droneDTO.getName());
 
-            assertTrue(kafkaTopicConfig.checkIfTopicExists("drone-" + idValue));
-
-            Optional<Drone> byName = droneRepository.findByName(droneDTO.getName());
-
-            assertTrue(byName.isPresent());
-            assertEquals(byName.get().getParking().getName(), parkingManagerReal.getParking().getName());
+                assertTrue(byName.isPresent());
+                assertEquals(byName.get().getParking().getName(), parkingManagerReal.getParking().getName());
 
 
-            mockMvc.perform(post("/api/drones/3/start")
-                            .with(user(parkingManagerReal))
-                            .contentType(MediaType.APPLICATION_JSON)).andDo(print())
-                    .andExpect(status().isOk());
+                mockMvc.perform(post("/api/drones/3/start")
+                                .with(user(parkingManagerReal))
+                                .contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                        .andExpect(status().isOk());
 
-            Thread.sleep(60000);
-            assertEquals(droneMissionRepository.count(), 1);
-
+                Thread.sleep(60000);
+                assertEquals(droneMissionRepository.count(), 1);
+            }
         }
-
     }
 
     @Test
