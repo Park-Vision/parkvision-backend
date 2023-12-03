@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface StripeChargeRepository extends JpaRepository<StripeCharge, Long> {
-    Optional<StripeCharge> findByReservationId(Long id);
+    Optional<StripeCharge> findByPaymentId(Long id);
 
 }

@@ -33,6 +33,6 @@ public class Reservation {
     @ManyToOne
     @NotNull(message = "Parking spot is required")
     private ParkingSpot parkingSpot;
-    @OneToMany(mappedBy = "reservation")
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.REMOVE)
     private List<Payment> payment;
 }

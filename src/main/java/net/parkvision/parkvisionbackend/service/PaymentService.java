@@ -41,11 +41,7 @@ public class PaymentService {
     }
 
     public Payment createPayment(Payment payment) {
-        if (!userRepository.existsById(payment.getUser().getId())) {
-            throw new IllegalArgumentException("User with ID " + payment.getUser().getId() + " does not exist.");
-        }
         Stripe.apiKey = stripeKey;
-        User user = userRepository.getReferenceById(payment.getUser().getId());
 
         Map<String, Object> card = new HashMap<>();
         card.put("number", payment.getCardNumber());
@@ -55,7 +51,6 @@ public class PaymentService {
 
         Map<String, Object> params = new HashMap<>();
         params.put("card", card);
-        payment.setUser(user);
 
         try {
             Token token = Token.create(params);

@@ -17,9 +17,6 @@ public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    @NotNull
-    private User user;
 
     @NotNull(message = "Card number is required")
     @Size(min = 12, max = 19, message = "Card number must be 16 digits")
@@ -41,4 +38,7 @@ public class Payment {
 
     @ManyToOne
     private Reservation reservation;
+
+    @OneToOne(mappedBy = "payment", cascade = CascadeType.REMOVE)
+    private StripeCharge stripeCharge;
 }

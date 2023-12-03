@@ -12,6 +12,4 @@ import java.util.List;
 public class Client extends User {
     @OneToMany(mappedBy = "client")
     private List<Car> cars;
-    @OneToMany(mappedBy = "user")
-    private List<Reservation> reservations;
 }
