@@ -36,7 +36,7 @@ public class Payment {
 
     private String token;
 
-    @ManyToOne
+    @OneToOne
     private Reservation reservation;
 
     @OneToOne(mappedBy = "payment", cascade = CascadeType.REMOVE)
