@@ -66,8 +66,11 @@ public class ParkingSpotService {
             throw new IllegalArgumentException("Parking with ID " + parkingSpot.getParking().getId() + " does not " +
                     "exist.");
         }
-        parkingSpot.setPoints(parkingSpot.getPoints());
+//        parkingSpot.setPoints(parkingSpot.getPoints());
 
+        if (parkingSpot.getPoints().size() != 4) {
+            throw new IllegalArgumentException("Bad amount of points. Should be 4.");
+        }
         for (int i = 0; i < parkingSpot.getPoints().size(); i++) {
             parkingSpot.getPoints().get(i).setParkingSpot(parkingSpot);
             pointService.updatePoint(parkingSpot.getPoints().get(i));
@@ -92,6 +95,7 @@ public class ParkingSpotService {
             for (Point point : points) {
                 pointService.deletePoint(point.getId());
             }
+            parkingSpotRepository.flush();
             parkingSpotRepository.save(parkingSpot);
         });
     }
