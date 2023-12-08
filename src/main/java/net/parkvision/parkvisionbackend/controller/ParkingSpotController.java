@@ -82,9 +82,8 @@ public class ParkingSpotController {
         User user = RequestContext.getUserFromRequest();
         ParkingManager parkingManager = (ParkingManager) user;
         ParkingSpot parkingSpot = convertToEntity(parkingSpotDto);
-        assert parkingManager != null;
         try {
-            if (parkingManager.getParking().getId().equals(parkingSpot.getParking().getId())) {
+            if (parkingManager != null && parkingManager.getParking().getId().equals(parkingSpot.getParking().getId())) {
                 ParkingSpot createdParkingSpot = parkingSpotService.createParkingSpot(parkingSpot);
 
                 return ResponseEntity.ok(convertToDto(createdParkingSpot));
@@ -94,18 +93,22 @@ public class ParkingSpotController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.notFound().build();
-
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<ParkingSpotDTO> updateParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
+        User user = RequestContext.getUserFromRequest();
+        ParkingManager parkingManager = (ParkingManager) user;
         try {
-            ParkingSpot updatedParkingSpot = parkingSpotService.updateParkingSpot(convertToEntity(parkingSpotDto));
-            return ResponseEntity.ok(convertToDto(updatedParkingSpot));
+            if (parkingManager != null && parkingManager.getParking().getId().equals(parkingSpotDto.getParkingDTO().getId())) {
+                ParkingSpot updatedParkingSpot = parkingSpotService.updateParkingSpot(convertToEntity(parkingSpotDto));
+                return ResponseEntity.ok(convertToDto(updatedParkingSpot));
+            }
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
     }
 
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
