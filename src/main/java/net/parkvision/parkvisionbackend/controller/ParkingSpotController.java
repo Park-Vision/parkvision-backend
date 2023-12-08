@@ -83,9 +83,9 @@ public class ParkingSpotController {
         ParkingManager parkingManager = (ParkingManager) user;
         ParkingSpot parkingSpot = convertToEntity(parkingSpotDto);
         try {
-            if (parkingManager != null && parkingManager.getParking().getId().equals(parkingSpot.getParking().getId())) {
+            if (parkingManager != null
+                    && parkingManager.getParking().getId().equals(parkingSpot.getParking().getId())) {
                 ParkingSpot createdParkingSpot = parkingSpotService.createParkingSpot(parkingSpot);
-
                 return ResponseEntity.ok(convertToDto(createdParkingSpot));
             }
         } catch (Exception exception) {
@@ -101,7 +101,8 @@ public class ParkingSpotController {
         User user = RequestContext.getUserFromRequest();
         ParkingManager parkingManager = (ParkingManager) user;
         try {
-            if (parkingManager != null && parkingManager.getParking().getId().equals(parkingSpotDto.getParkingDTO().getId())) {
+            if (parkingManager != null
+                    && parkingManager.getParking().getId().equals(parkingSpotDto.getParkingDTO().getId())) {
                 ParkingSpot updatedParkingSpot = parkingSpotService.updateParkingSpot(convertToEntity(parkingSpotDto));
                 return ResponseEntity.ok(convertToDto(updatedParkingSpot));
             }
