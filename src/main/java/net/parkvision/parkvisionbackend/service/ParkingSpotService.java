@@ -95,7 +95,6 @@ public class ParkingSpotService {
             for (Point point : points) {
                 pointService.deletePoint(point.getId());
             }
-            parkingSpotRepository.flush();
             parkingSpotRepository.save(parkingSpot);
         });
     }
