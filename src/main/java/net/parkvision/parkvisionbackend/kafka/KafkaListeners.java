@@ -44,20 +44,19 @@ public class KafkaListeners {
     @KafkaListener(topics = "drones-info", groupId = "parkVision")
     public void infoFromDrones(String message, @Header(KafkaHeaders.RECEIVED_KEY) Integer droneId) {
         Optional<Drone> drone = droneService.getDroneById(Long.valueOf(droneId));
-        if (drone.isPresent()) {
-            System.out.println("Received Message from Drone " + droneId + ": " + message);
+        if (false) {
             try {
-                //message = MessageEncryptor.decryptMessage(message, drone.get().getDroneKey());
-                //System.out.println(message);
+                message = MessageEncryptor.decryptMessage(message, drone.get().getDroneKey());
+                System.out.println(message);
                 Map result = new ObjectMapper().readValue(message, HashMap.class);
 
                 if (result.containsKey("status")) {
                     checkJson(message);
-                    System.out.println("creating mission");
                     createDroneMission(drone.get(), result);
                 }
+                String finalMessage = message;
                 drone.ifPresent(value -> template.convertAndSend("/topic/drones/" + value.getId(),
-                        message));
+                        finalMessage));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -65,8 +64,8 @@ public class KafkaListeners {
     }
 
     private void checkJson(String message) throws JsonProcessingException {
-        InputStream schemaAsStream = KafkaListeners.class.getClassLoader().getResourceAsStream("json-schema/drones" +
-                "-info.json");
+        InputStream schemaAsStream = KafkaListeners.class.getClassLoader()
+                .getResourceAsStream("json-schema/drones-info.json");
         JsonSchema schema = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7).getSchema(schemaAsStream);
 
         ObjectMapper om = new ObjectMapper();

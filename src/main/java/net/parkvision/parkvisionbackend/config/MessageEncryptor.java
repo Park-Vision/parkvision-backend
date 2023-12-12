@@ -18,7 +18,7 @@ public class MessageEncryptor {
 
     public static String generateKey() {
         try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM);
             keyGenerator.init(128);
             SecretKey secretKey = keyGenerator.generateKey();
 

@@ -41,10 +41,10 @@ public class SecurityConfiguration {
                         "/websocket"
                 ).permitAll()
                 .and().authorizeHttpRequests()
-                .requestMatchers(HttpMethod.GET, "/api/parkings/**", "api/parkingspots/parking/**", "api/parkingspots" +
-                        "/drone/**", "/ws/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "api/users/resetPassword", "api/users/setPasswordFromReset").permitAll()
-//                .requestMatchers( "/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/parkings/**", "api/parkingspots/parking/**",
+                        "api/parkingspots/drone/**", "/ws/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "api/users/resetPassword", "api/users/setPasswordFromReset")
+                .permitAll()
                 .anyRequest().authenticated()
                 .and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
