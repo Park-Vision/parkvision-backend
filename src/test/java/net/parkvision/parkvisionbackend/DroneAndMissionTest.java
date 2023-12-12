@@ -68,7 +68,7 @@ public class DroneAndMissionTest {
             droneDTO.setModel("DJ3");
             droneDTO.setSerialNumber("87324637286432874");
             try (MockedStatic<MessageEncryptor> utilities = Mockito.mockStatic(MessageEncryptor.class)) {
-                utilities.when(MessageEncryptor::generateKey).thenReturn("kluczSzymona");
+                utilities.when(MessageEncryptor::generateKey).thenReturn("0Yk6XInH5GvWDJooOcHAuQ==");
                 ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
                 MvcResult result = mockMvc.perform(post("/api/drones")
                                 .with(user(parkingManagerReal))

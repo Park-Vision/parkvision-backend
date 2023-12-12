@@ -44,7 +44,7 @@ public class KafkaListeners {
     @KafkaListener(topics = "drones-info", groupId = "parkVision")
     public void infoFromDrones(String message, @Header(KafkaHeaders.RECEIVED_KEY) Integer droneId) {
         Optional<Drone> drone = droneService.getDroneById(Long.valueOf(droneId));
-        if (false) {
+        if (drone.isPresent()) {
             try {
                 message = MessageEncryptor.decryptMessage(message, drone.get().getDroneKey());
                 System.out.println(message);
