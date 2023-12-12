@@ -18,7 +18,6 @@ public class StripeCharge {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
     @NotNull(message = "Amount is required")
     private Double amount;
 
@@ -32,9 +31,7 @@ public class StripeCharge {
     private String message;
 
     private String chargeId;
-    @ManyToOne
+    @OneToOne
     @NotNull(message = "Payment is required")
     private Payment payment;
-    @ManyToOne
-    private Reservation reservation;
 }

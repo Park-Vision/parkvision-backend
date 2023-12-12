@@ -54,9 +54,9 @@ public class StripeChargeController {
     @PostMapping
     public ResponseEntity<StripeChargeDTO> createStripeCharge(@RequestBody StripeChargeDTO stripeChargeDTO) {
         User user = RequestContext.getUserFromRequest();
-        StripeCharge createdStripeCharge = stripeChargeService.createStripeCharge(convertToEntity(stripeChargeDTO));
+        StripeCharge createdStripeCharge = stripeChargeService.createStripeCharge(convertToEntity(stripeChargeDTO), stripeChargeDTO.getReservation().getId());
         Optional<Reservation> reservation =
-                reservationService.getReservationById(createdStripeCharge.getReservation().getId());
+                reservationService.getReservationById(stripeChargeDTO.getReservation().getId());
         if (reservation.isPresent()) {
             if (user == null) {
                 return ResponseEntity.badRequest().build();
@@ -83,7 +83,7 @@ public class StripeChargeController {
                                 reservation.get(),
                                 "ParkVision payment confirmation");
                     } else {
-                        createdStripeCharge.setReservation(null);
+                        createdStripeCharge.getPayment().setReservation(null);
                         emailSenderService.sendHtmlEmailPayment(
                                 user.getFirstname(),
                                 user.getLastname(),

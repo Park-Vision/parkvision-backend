@@ -187,13 +187,11 @@ public class ReservationService {
         if (stripeCharge.isPresent()) {
             StripeCharge refundedCharge = stripeChargeService.refundCharge(stripeCharge.get().getId());
             if (refundedCharge.getSuccess()) {
-                refundedCharge.setReservation(null);
-                StripeCharge updatedCharge = stripeChargeService.updateStripeCharge(refundedCharge);
-                if (updatedCharge.getReservation() == null) {
-                    Reservation canceledReservation = reservationRepository.getReferenceById(id);
-                    deleteReservation(id);
-                    return canceledReservation;
-                }
+                refundedCharge.getPayment().setReservation(null);
+                Reservation canceledReservation = reservationRepository.getReferenceById(id);
+                deleteReservation(id);
+                return canceledReservation;
+
             }
         }
         return null;
@@ -202,7 +200,6 @@ public class ReservationService {
     public void cancelReservationWithoutRefund(Long id) {
         Optional<StripeCharge> stripeCharge = stripeChargeService.getStripeChargeByReservationId(id);
         if(stripeCharge.isPresent()){
-            stripeCharge.get().setReservation(null);
                 reservationRepository.getReferenceById(id);
                 deleteReservation(id);
         }

@@ -46,22 +46,25 @@ public class StripeChargeService {
     }
 
     public Optional<StripeCharge> getStripeChargeByReservationId(Long id) {
-        return stripeChargeRepository.findByReservationId(id);
+        //get payment by reservation id
+        Optional<Payment> payment = paymentRepository.findByReservationId(id);
+
+        return stripeChargeRepository.findByPaymentId(payment.get().getId());
     }
 
-    public StripeCharge createStripeCharge(StripeCharge stripeCharge) {
+    public StripeCharge createStripeCharge(StripeCharge stripeCharge, Long reservationId) {
         Stripe.apiKey = stripeKey;
         if (!paymentRepository.existsById(stripeCharge.getPayment().getId())) {
             throw new IllegalArgumentException("Payment with ID " + stripeCharge.getPayment().getId() + " does not " +
                     "exist.");
         }
-        if (!reservationRepository.existsById(stripeCharge.getReservation().getId())) {
-            throw new IllegalArgumentException("Reservation with ID " + stripeCharge.getReservation().getId() + " " +
+        if (!reservationRepository.existsById(reservationId)) {
+            throw new IllegalArgumentException("Reservation with ID " + reservationId + " " +
                     "does not exist.");
         }
         stripeCharge.setSuccess(false);
         Payment payment = paymentRepository.getReferenceById(stripeCharge.getPayment().getId());
-        Reservation reservation = reservationRepository.getReferenceById(stripeCharge.getReservation().getId());
+        Reservation reservation = reservationRepository.getReferenceById(reservationId);
         stripeCharge.setPayment(payment);
 
         Map<String, Object> chargeParams = new HashMap<>();
@@ -72,7 +75,7 @@ public class StripeChargeService {
         Map<String, Object> metaData = new HashMap<>();
         metaData.put("id", stripeCharge.getPayment().getToken());
         chargeParams.put("metadata", metaData);
-        stripeCharge.setReservation(reservation);
+        payment.setReservation(reservation);
 
         try {
             Charge charge = Charge.create(chargeParams);
