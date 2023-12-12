@@ -1,5 +1,8 @@
 package net.parkvision.parkvisionbackend.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import net.parkvision.parkvisionbackend.dto.ParkingDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotCoordinatesDTO;
 import net.parkvision.parkvisionbackend.dto.ParkingSpotDTO;
@@ -56,6 +59,14 @@ public class ParkingSpotController {
         return modelMapper.map(parkingSpotDTO, ParkingSpot.class);
     }
 
+    @Operation(
+            summary = "Get all parking spots",
+            description = "Get all parking spots",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Parking spots found"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized")
+            }
+    )
     @GetMapping
     public ResponseEntity<List<ParkingSpotDTO>> getAllParkingSpots() {
         List<ParkingSpotDTO> parkingSpots
@@ -76,9 +87,22 @@ public class ParkingSpotController {
 
     }
 
+    @Operation(
+            summary = "Create parking spot",
+            description = "Create parking spot",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Parking spot created"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "404", description = "Parking not found")
+            }
+    )
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PostMapping
-    public ResponseEntity<ParkingSpotDTO> createParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {
+    public ResponseEntity<ParkingSpotDTO> createParkingSpot(
+            @Schema(description = "Parking spot to create",
+            implementation = ParkingSpotDTO.class
+    )
+            @RequestBody ParkingSpotDTO parkingSpotDto) {
         User user = RequestContext.getUserFromRequest();
         ParkingManager parkingManager = (ParkingManager) user;
         ParkingSpot parkingSpot = convertToEntity(parkingSpotDto);
@@ -95,6 +119,15 @@ public class ParkingSpotController {
         return ResponseEntity.notFound().build();
     }
 
+    @Operation(
+            summary = "Update parking spot",
+            description = "Update parking spot",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Parking spot updated"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "404", description = "Parking spot not found")
+            }
+    )
     @PreAuthorize("hasAnyRole('PARKING_MANAGER')")
     @PutMapping
     public ResponseEntity<ParkingSpotDTO> updateParkingSpot(@RequestBody ParkingSpotDTO parkingSpotDto) {

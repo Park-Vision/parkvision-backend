@@ -54,6 +54,9 @@ public class ParkingSpotService {
         for (int i = 0; i < parkingSpot.getPoints().size(); i++) {
             parkingSpot.getPoints().get(i).setParkingSpot(parkingSpot);
         }
+        ParkingSpot savedParkingSpot = parkingSpotRepository.save(parkingSpot);
+        Parking parking = parkingRepository.findById(parkingSpot.getParking().getId()).get();
+        savedParkingSpot.setSpotNumber(parking.getName() + "-" + savedParkingSpot.getId());
         return parkingSpotRepository.save(parkingSpot);
     }
 
