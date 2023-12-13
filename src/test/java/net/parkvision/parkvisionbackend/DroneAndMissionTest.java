@@ -67,9 +67,10 @@ public class DroneAndMissionTest {
             droneDTO.setName("DroneDJ3");
             droneDTO.setModel("DJ3");
             droneDTO.setSerialNumber("87324637286432874");
+
+            ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
             try (MockedStatic<MessageEncryptor> utilities = Mockito.mockStatic(MessageEncryptor.class)) {
                 utilities.when(MessageEncryptor::generateKey).thenReturn("0Yk6XInH5GvWDJooOcHAuQ==");
-                ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
                 MvcResult result = mockMvc.perform(post("/api/drones")
                                 .with(user(parkingManagerReal))
                                 .content(asJsonString(droneDTO))
@@ -90,15 +91,14 @@ public class DroneAndMissionTest {
                 assertTrue(byName.isPresent());
                 assertEquals(byName.get().getParking().getName(), parkingManagerReal.getParking().getName());
 
-
-                mockMvc.perform(post("/api/drones/3/start")
-                                .with(user(parkingManagerReal))
-                                .contentType(MediaType.APPLICATION_JSON)).andDo(print())
-                        .andExpect(status().isOk());
-
-                Thread.sleep(60000);
-                assertEquals(droneMissionRepository.count(), 1);
             }
+            mockMvc.perform(post("/api/drones/3/start")
+                            .with(user(parkingManagerReal))
+                            .contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                    .andExpect(status().isOk());
+
+            Thread.sleep(60000);
+            assertEquals(droneMissionRepository.count(), 1);
         }
     }
 
