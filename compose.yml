@@ -14,8 +14,6 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-  #    ports:
-  #      - "2181:2181"
   kafka:
     image: wurstmeister/kafka
     ports:
@@ -27,10 +25,9 @@ services:
       KAFKA_LISTENERS: 'ISSL://:29092,OSSL://:19092,PLAINTEXT://:9092'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'ISSL:SSL,OSSL:SSL,PLAINTEXT:PLAINTEXT'
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_SSL_ENABLED_PROTOCOLS: 'TLSv1.2,TLSv1.3,TLSv1.1'
-      KAFKA_SSL_PROTOCOL: 'TLSv1.1'
+      KAFKA_SSL_PROTOCOL: 'TLSv1.2'
       KAFKA_SSL_KEYSTORE_LOCATION: '/certs/kafka.server.keystore.jks'
       KAFKA_SSL_KEYSTORE_PASSWORD: 'maciek'
       KAFKA_SSL_CLIENT_AUTH: 'required'
@@ -38,7 +35,6 @@ services:
       KAFKA_SSL_TRUSTSTORE_LOCATION: '/certs/kafka.server.truststore.jks'
       KAFKA_SSL_TRUSTSTORE_PASSWORD: 'maciek'
       KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
-      #KAFKA_SECURITY_INTER_BROKER_PROTOCOL: 'SSL'
     volumes:
       - ./ssl2:/certs
     depends_on:
@@ -66,11 +62,6 @@ services:
   mission-manager:
     image: mission-manager
     network_mode: "host"
-    container_name: mission-manager
-    ports:
-      - "14550:14550/udp"
-      - "9092:9092"
-
   sitl:
     image: wnt3rmute/ardupilot-sitl
     network_mode: "host"

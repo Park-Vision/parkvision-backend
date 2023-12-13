@@ -67,12 +67,11 @@ public class DroneController {
                         map.put("command", command);
                         map.put("cords", parkingSpotCoordinatesDTOList);
                         ObjectMapper objectMapper = new ObjectMapper();
-
                         String json = objectMapper.writeValueAsString(map);
                         System.out.println(json);
-                        //encrypt = MessageEncryptor.encryptMessage(json, drone.get().getDroneKey());
-                        //System.out.println(encrypt);
-                        kafkaTemplate.send("drone-" + id, json);
+                        encrypt = MessageEncryptor.encryptMessage(json, drone.get().getDroneKey());
+                        System.out.println(encrypt);
+                        kafkaTemplate.send("drone-" + id, encrypt);
                     }
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
@@ -151,7 +150,6 @@ public class DroneController {
             kafkaTopicConfig.createNewTopic("drone-" + createdDrone.getId());
         } catch (Exception ignored) {
         }
-
         return ResponseEntity.ok(convertToDTO(createdDrone));
     }
 
