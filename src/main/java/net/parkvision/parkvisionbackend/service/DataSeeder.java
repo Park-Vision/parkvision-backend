@@ -307,7 +307,7 @@ public class DataSeeder {
                     "76", "77", "78", "79", "80", "81", "82", "83", "84", "85",
                     "86", "87", "88", "89", "90", "91", "92", "93", "94",
                     "96", "97", "98", "99", "100", "101", "102", "103", "104", "105",
-                    "106", "107", "108", "109"
+                    "106", "108", "109"
             };
 
             for (String spotNumber : spotNumbers) {
@@ -831,47 +831,47 @@ public class DataSeeder {
             spotNumber = parking3.getName() + "-" +parkingSpotId;
             savePoints(latitudes, longitudes, pointIds, spotNumber);
 
-            latitudes = new double[]{51.108855, 51.10883, 51.108847, 51.10887};
-            longitudes = new double[]{17.055863, 17.055816, 17.055795, 17.055837};
-            pointIds = new long[]{438L, 439L, 440L, 437L};
-            parkingSpotId = 110L;
-            spotNumber = parking4.getName() + "-" +parkingSpotId;
-            savePoints(latitudes, longitudes, pointIds, spotNumber);
-
-            latitudes = new double[]{51.108844, 51.108815, 51.108829, 51.108853};
-            longitudes = new double[]{17.055883, 17.055838, 17.055819, 17.055864};
-            pointIds = new long[]{442L, 443L,444L, 441L};
-            parkingSpotId = 111L;
-            spotNumber = parking4.getName() + "-" +parkingSpotId;
-            savePoints(latitudes, longitudes, pointIds, spotNumber);
-
-            latitudes = new double[]{51.108872, 51.108848, 51.108859, 51.108885};
-            longitudes = new double[]{17.055834, 17.055789, 17.055774, 17.05581};
-            pointIds = new long[]{446L, 448L, 447L, 445L};
-            parkingSpotId = 112L;
-            spotNumber = parking4.getName() + "-" +parkingSpotId;
-            savePoints(latitudes, longitudes, pointIds, spotNumber);
-
-            latitudes = new double[]{51.108784, 51.108755, 51.108773, 51.108797};
-            longitudes = new double[]{17.055773, 17.055722, 17.055704, 17.055753};
-            pointIds = new long[]{450L, 452L, 451L, 449L};
-            parkingSpotId = 113L;
-            spotNumber = parking4.getName() + "-" +parkingSpotId;
-            savePoints(latitudes, longitudes, pointIds, spotNumber);
-
-            latitudes = new double[]{51.108811, 51.10879, 51.108777, 51.108798};
-            longitudes = new double[]{17.055728, 17.055681, 17.055699, 17.055742};
-            pointIds = new long[]{454L, 456L, 455L, 453L};
-            parkingSpotId = 114L;
-            spotNumber = parking4.getName() + "-" +parkingSpotId;
-            savePoints(latitudes, longitudes, pointIds, spotNumber);
-
-            latitudes = new double[]{51.108925, 51.108948, 51.108935, 51.10891};
-            longitudes = new double[]{17.055781, 17.05583, 17.055852, 17.055807};
-            pointIds = new long[]{457L, 458L, 459L, 460L};
-            parkingSpotId = 115L;
-            spotNumber = parking4.getName() + "-" +parkingSpotId;
-            savePoints(latitudes, longitudes, pointIds, spotNumber);
+//            latitudes = new double[]{51.108855, 51.10883, 51.108847, 51.10887};
+//            longitudes = new double[]{17.055863, 17.055816, 17.055795, 17.055837};
+//            pointIds = new long[]{438L, 439L, 440L, 437L};
+//            parkingSpotId = 110L;
+//            spotNumber = parking4.getName() + "-" +parkingSpotId;
+//            savePoints(latitudes, longitudes, pointIds, spotNumber);
+//
+//            latitudes = new double[]{51.108844, 51.108815, 51.108829, 51.108853};
+//            longitudes = new double[]{17.055883, 17.055838, 17.055819, 17.055864};
+//            pointIds = new long[]{442L, 443L,444L, 441L};
+//            parkingSpotId = 111L;
+//            spotNumber = parking4.getName() + "-" +parkingSpotId;
+//            savePoints(latitudes, longitudes, pointIds, spotNumber);
+//
+//            latitudes = new double[]{51.108872, 51.108848, 51.108859, 51.108885};
+//            longitudes = new double[]{17.055834, 17.055789, 17.055774, 17.05581};
+//            pointIds = new long[]{446L, 448L, 447L, 445L};
+//            parkingSpotId = 112L;
+//            spotNumber = parking4.getName() + "-" +parkingSpotId;
+//            savePoints(latitudes, longitudes, pointIds, spotNumber);
+//
+//            latitudes = new double[]{51.108784, 51.108755, 51.108773, 51.108797};
+//            longitudes = new double[]{17.055773, 17.055722, 17.055704, 17.055753};
+//            pointIds = new long[]{450L, 452L, 451L, 449L};
+//            parkingSpotId = 113L;
+//            spotNumber = parking4.getName() + "-" +parkingSpotId;
+//            savePoints(latitudes, longitudes, pointIds, spotNumber);
+//
+//            latitudes = new double[]{51.108811, 51.10879, 51.108777, 51.108798};
+//            longitudes = new double[]{17.055728, 17.055681, 17.055699, 17.055742};
+//            pointIds = new long[]{454L, 456L, 455L, 453L};
+//            parkingSpotId = 114L;
+//            spotNumber = parking4.getName() + "-" +parkingSpotId;
+//            savePoints(latitudes, longitudes, pointIds, spotNumber);
+//
+//            latitudes = new double[]{51.108925, 51.108948, 51.108935, 51.10891};
+//            longitudes = new double[]{17.055781, 17.05583, 17.055852, 17.055807};
+//            pointIds = new long[]{457L, 458L, 459L, 460L};
+//            parkingSpotId = 115L;
+//            spotNumber = parking4.getName() + "-" +parkingSpotId;
+//            savePoints(latitudes, longitudes, pointIds, spotNumber);
 
 
         } else {

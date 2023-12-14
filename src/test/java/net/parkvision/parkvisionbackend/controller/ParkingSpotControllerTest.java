@@ -148,6 +148,26 @@ public class ParkingSpotControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "testUser")
+    public void getSpotsByParkingId_ReturnsParkingSpots() throws Exception {
+        Long parkingId = 1L;
+        Parking parking = new Parking();
+
+        ParkingSpot parkingSpot = new ParkingSpot();
+        parkingSpot.setParking(parking);
+        parkingSpot.setPoints(new ArrayList<>());
+        parkingSpot.setActive(false);
+
+
+        when(parkingService.getParkingById(parkingId)).thenReturn(Optional.of(parking));
+        when(parkingSpotService.getParkingSpotsWithPoints(parking)).thenReturn(Collections.singletonList(parkingSpot));
+
+        mockMvc.perform(get("/api/parkingspots/parking/{id}", parkingId).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].active").value(false));
+    }
+
+    @Test
     @WithMockUser(username = "testUser", roles = {"PARKING_MANAGER"})
     public void createParkingModel_CreatesParkingSpots() throws Exception {
         Long parkingId = 1L;

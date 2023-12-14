@@ -153,7 +153,7 @@ public class CreateParkingTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false))
-                .andExpect(jsonPath("$.spotNumber").value("Parking Wrońskiego-66"))
+                .andExpect(jsonPath("$.spotNumber").value("Parking Wrońskiego-65"))
                 .andExpect(jsonPath("$.parkingDTO.id").value(4L));
     }
 }
