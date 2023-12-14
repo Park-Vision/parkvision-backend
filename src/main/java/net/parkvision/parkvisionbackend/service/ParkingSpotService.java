@@ -86,20 +86,21 @@ public class ParkingSpotService {
         return parkingSpotRepository.save(parkingSpot);
     }
 
-    @Transactional
     public void softDeleteParkingSpot(Long id) {
-        parkingSpotRepository.findById(id).ifPresent(parkingSpot -> {
-            List<Reservation> futureReservations = reservationService.getFutureReservationByParkingSpotId(id);
-            if (!futureReservations.isEmpty()) {
-                throw new IllegalArgumentException("ParkingSpot with ID " + id + " has future reservations.");
-            }
-            parkingSpot.setActive(false);
-            List<Point> points = pointService.getPointsByParkingSpotId(id);
-            for (Point point : points) {
-                pointService.deletePoint(point.getId());
-            }
-            parkingSpotRepository.save(parkingSpot);
-        });
+        ParkingSpot parkingSpot = parkingSpotRepository.findById(id).get();
+        List<Reservation> futureReservations = reservationService.getFutureReservationByParkingSpotId(id);
+        if (!futureReservations.isEmpty()) {
+            throw new IllegalArgumentException("ParkingSpot with ID " + id + " has future reservations.");
+        }
+        parkingSpot.setActive(false);
+
+        List<Point> points = parkingSpot.getPoints();
+        for (Point point : points) {
+            point.setParkingSpot(null);
+            pointService.deletePoint(point.getId());
+        }
+        parkingSpot.setPoints(null);
+        parkingSpotRepository.save(parkingSpot);
     }
 
     public void hardDeleteParkingSpot(Long id) {

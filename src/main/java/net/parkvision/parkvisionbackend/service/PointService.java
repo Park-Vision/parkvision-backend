@@ -60,7 +60,6 @@ public class PointService {
         return pointRepository.save(point);
     }
 
-    @Transactional
     public void deletePoint(Long id) {
         pointRepository.deleteById(id);
     }
