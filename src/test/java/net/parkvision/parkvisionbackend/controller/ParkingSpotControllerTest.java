@@ -111,6 +111,7 @@ public class ParkingSpotControllerTest {
     @Test
     @WithMockUser(username = "testUser")
     public void updateParkingSpot_UpdateParkingSpotFailed() throws Exception {
+
         ParkingSpotDTO parkingSpotDTO = new ParkingSpotDTO();
         parkingSpotDTO.setActive(false);
         parkingSpotDTO.setParkingDTO(new ParkingDTO());
@@ -124,15 +125,21 @@ public class ParkingSpotControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testUser", roles = {"PARKING_MANAGER"})
     public void updateParkingSpot_UpdateParkingSpot() throws Exception {
+
+        Optional<User> parkingManager = userRepository.findByEmail("string@wp.pl");
+
+        ParkingManager parkingManagerReal = (ParkingManager) parkingManager.get();
         ParkingSpotDTO parkingSpotDTO = new ParkingSpotDTO();
         parkingSpotDTO.setActive(true);
-        parkingSpotDTO.setParkingDTO(new ParkingDTO());
+        ParkingDTO parkingDTO = new ParkingDTO();
+        parkingDTO.setId(3L);
+        parkingSpotDTO.setParkingDTO(parkingDTO);
         parkingSpotDTO.setPointsDTO(new ArrayList<>());
         when(parkingSpotService.updateParkingSpot(any())).thenReturn(parkingSpotController.convertToEntity(parkingSpotDTO));
 
         mockMvc.perform(put("/api/parkingspots")
+                        .with(user(parkingManagerReal))
                         .content(asJsonString(parkingSpotDTO))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

@@ -139,7 +139,6 @@ public class CreateParkingTest {
         pointDTOList.add(pointDTO);
         parkingSpotDTO.setPointsDTO(new ArrayList<>());
         parkingSpotDTO.setActive(false);
-        parkingSpotDTO.setSpotNumber("1d");
 
         mockMvc.perform(post("/api/parkingspots")
                         .with(user(parkingManagerReal))
@@ -154,7 +153,7 @@ public class CreateParkingTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false))
-                .andExpect(jsonPath("$.spotNumber").value("1d"))
+                .andExpect(jsonPath("$.spotNumber").value("Parking Polinka-72"))
                 .andExpect(jsonPath("$.parkingDTO.id").value(3L));
     }
 }
