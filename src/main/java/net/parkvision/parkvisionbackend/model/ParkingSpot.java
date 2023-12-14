@@ -26,7 +26,7 @@ public class ParkingSpot {
     @NotNull(message = "Active is required")
     private boolean active;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parkingSpot")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parkingSpot", fetch = FetchType.EAGER)
     @Size(max = 4, message = "Parking spot must have maximum 4 points")
     private List<Point> points;
 

@@ -185,6 +185,19 @@ public class ParkingSpotService {
         tempReservation.setStartDate(startDate);
         tempReservation.setEndDate(endDate);
         tempReservation.setParkingSpot(parkingSpot);
+
+        boolean isNot24hParking = !reservationService.isParking24h(parkingSpot.getParking());
+        boolean isNotWithinParkingHours = !reservationService.isWithinParkingHours(
+                tempReservation.getStartDate(),
+                tempReservation.getEndDate(),
+                parkingSpot.getParking());
+        boolean isTimeInvalid = !reservationService.checkTime(tempReservation.getStartDate(),
+                tempReservation.getEndDate());
+
+        if ((isNot24hParking && isNotWithinParkingHours) || isTimeInvalid) {
+            return false;
+        }
+
         if (reservations.isEmpty()) {
             return true;
         }
@@ -192,15 +205,9 @@ public class ParkingSpotService {
             if (reservation.getId().equals(reservationId)) {
                 continue;
             }
-            if (
-                    reservationService.isDateRangeOverlap(reservation, tempReservation)
-                            || (!reservationService.isParking24h(parkingSpot.getParking())
-                            && !reservationService.isWithinParkingHours(
-                            tempReservation.getStartDate(),
-                            tempReservation.getEndDate(),
-                            parkingSpot.getParking()))
-                            || !reservationService.checkTime(tempReservation.getStartDate(),
-                            tempReservation.getEndDate())) {
+
+            boolean isOverlap = reservationService.isDateRangeOverlap(reservation, tempReservation);
+            if(isOverlap) {
                 return false;
             }
         }
