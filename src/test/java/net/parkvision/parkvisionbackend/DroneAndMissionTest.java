@@ -62,7 +62,7 @@ public class DroneAndMissionTest {
             DroneDTO droneDTO = new DroneDTO();
 
             ParkingDTO parkingDTO = new ParkingDTO();
-            parkingDTO.setId(3L);
+            parkingDTO.setId(4L);
             droneDTO.setParkingDTO(parkingDTO);
             droneDTO.setName("DroneDJ3");
             droneDTO.setModel("DJ3");

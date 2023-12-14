@@ -127,7 +127,7 @@ public class CreateParkingTest {
         ParkingSpotDTO parkingSpotDTO = new ParkingSpotDTO();
 
         ParkingDTO parkingDTO = new ParkingDTO();
-        parkingDTO.setId(3L);
+        parkingDTO.setId(4L);
         parkingSpotDTO.setParkingDTO(parkingDTO);
         List<PointDTO> pointDTOList = new ArrayList<>();
         PointDTO pointDTO = new PointDTO();
@@ -153,7 +153,7 @@ public class CreateParkingTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false))
-                .andExpect(jsonPath("$.spotNumber").value("Parking Polinka-72"))
-                .andExpect(jsonPath("$.parkingDTO.id").value(3L));
+                .andExpect(jsonPath("$.spotNumber").value("Parking Wrońskiego-66"))
+                .andExpect(jsonPath("$.parkingDTO.id").value(4L));
     }
 }

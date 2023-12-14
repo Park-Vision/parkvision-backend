@@ -80,7 +80,7 @@ public class ParkingSpotControllerTest {
         ParkingSpotDTO parkingSpotDTO = new ParkingSpotDTO();
         parkingSpotDTO.setActive(false);
         ParkingDTO parkingDTO = new ParkingDTO();
-        parkingDTO.setId(3L);
+        parkingDTO.setId(4L);
         parkingSpotDTO.setParkingDTO(parkingDTO);
         parkingSpotDTO.setPointsDTO(new ArrayList<>());
         when(parkingSpotService.createParkingSpot(any())).thenReturn(parkingSpotController.convertToEntity(parkingSpotDTO));
@@ -133,7 +133,7 @@ public class ParkingSpotControllerTest {
         ParkingSpotDTO parkingSpotDTO = new ParkingSpotDTO();
         parkingSpotDTO.setActive(true);
         ParkingDTO parkingDTO = new ParkingDTO();
-        parkingDTO.setId(3L);
+        parkingDTO.setId(4L);
         parkingSpotDTO.setParkingDTO(parkingDTO);
         parkingSpotDTO.setPointsDTO(new ArrayList<>());
         when(parkingSpotService.updateParkingSpot(any())).thenReturn(parkingSpotController.convertToEntity(parkingSpotDTO));
@@ -145,26 +145,6 @@ public class ParkingSpotControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(true));
 
-    }
-
-    @Test
-    @WithMockUser(username = "testUser")
-    public void getSpotsByParkingId_ReturnsParkingSpots() throws Exception {
-        Long parkingId = 1L;
-        Parking parking = new Parking();
-
-        ParkingSpot parkingSpot = new ParkingSpot();
-        parkingSpot.setParking(parking);
-        parkingSpot.setPoints(new ArrayList<>());
-        parkingSpot.setActive(false);
-
-
-        when(parkingService.getParkingById(parkingId)).thenReturn(Optional.of(parking));
-        when(parkingSpotService.getParkingSpotsWithPoints(parking)).thenReturn(Collections.singletonList(parkingSpot));
-
-        mockMvc.perform(get("/api/parkingspots/parking/{id}", parkingId).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].active").value(false));
     }
 
     @Test

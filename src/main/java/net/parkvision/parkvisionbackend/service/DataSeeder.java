@@ -212,7 +212,7 @@ public class DataSeeder {
             parkingManager3.setLastname("ParkingManager");
             parkingManager3.setEmail("string@wp.pl");
             parkingManager3.setPassword(new BCryptPasswordEncoder().encode("String1!"));
-            parkingManager3.setParking(parkingRepository.getReferenceById(3L));
+            parkingManager3.setParking(parkingRepository.getReferenceById(4L));
             parkingManager3.setRole(Role.PARKING_MANAGER);
             parkingManagerRepository.save(parkingManager3);
 
@@ -325,15 +325,15 @@ public class DataSeeder {
                     "110", "111", "112", "113", "114", "115"
             };
 
-            for (String spotNumber : spotNumbers) {
-                ParkingSpot parkingSpot = new ParkingSpot();
-                parkingSpot.setActive(true);
-                parkingSpot.setId(Long.parseLong(spotNumber));
-                parkingSpot.setSpotNumber(parking4.getName() + "-" +spotNumber);
-                parkingSpot.setParking(parking4);
-
-                parkingSpotRepository.save(parkingSpot);
-            }
+//            for (String spotNumber : spotNumbers) {
+//                ParkingSpot parkingSpot = new ParkingSpot();
+//                parkingSpot.setActive(true);
+//                parkingSpot.setId(Long.parseLong(spotNumber));
+//                parkingSpot.setSpotNumber(parking4.getName() + "-" +spotNumber);
+//                parkingSpot.setParking(parking4);
+//
+//                parkingSpotRepository.save(parkingSpot);
+//            }
 
         } else {
             System.out.println("Data already exists.");
