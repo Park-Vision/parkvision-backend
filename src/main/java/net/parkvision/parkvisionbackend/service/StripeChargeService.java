@@ -48,7 +48,9 @@ public class StripeChargeService {
     public Optional<StripeCharge> getStripeChargeByReservationId(Long id) {
         //get payment by reservation id
         Optional<Payment> payment = paymentRepository.findByReservationId(id);
-
+        if (payment.isEmpty()) {
+            return Optional.empty();
+        }
         return stripeChargeRepository.findByPaymentId(payment.get().getId());
     }
 
