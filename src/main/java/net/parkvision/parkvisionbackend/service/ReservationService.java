@@ -179,6 +179,10 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
+        Optional<StripeCharge> stripeCharge = stripeChargeService.getStripeChargeByReservationId(id);
+        if (stripeCharge.isPresent()) {
+            stripeChargeService.deleteStripeCharge(stripeCharge.get().getId());
+        }
         reservationRepository.deleteById(id);
     }
 
