@@ -178,11 +178,15 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    public void deleteReservation(Long id) {
+    public void deleteReservationWithCharge(Long id) {
         Optional<StripeCharge> stripeCharge = stripeChargeService.getStripeChargeByReservationId(id);
         if (stripeCharge.isPresent()) {
             stripeChargeService.deleteStripeCharge(stripeCharge.get().getId());
         }
+        reservationRepository.deleteById(id);
+    }
+
+    public void deleteReservation(Long id) {
         reservationRepository.deleteById(id);
     }
 

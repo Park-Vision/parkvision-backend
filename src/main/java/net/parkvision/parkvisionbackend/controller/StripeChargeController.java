@@ -93,7 +93,7 @@ public class StripeChargeController {
                                 createdStripeCharge,
                                 reservation.get(),
                                 "ParkVision payment declined");
-                        reservationService.deleteReservation(reservation.get().getId());
+                        reservationService.deleteReservationWithCharge(reservation.get().getId());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
